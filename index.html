@@ -7,128 +7,163 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: sticky filter bar on top, KPI strip, auto insight line, then 12-col grid of charts and ranked tables. */
+/* Layout: sticky toolbar, 4 big KPI tiles, one insight line, then daily chart, breakdowns, Top 10 tables, collapsible deep-dive. Pastel tokens. */
 :root{
-  --bg:#f2f4f8; --surface:#ffffff; --ink:#131923; --ink2:#4f5a6b; --ink3:#8590a2; --line:#e2e7ef; --soft:#f6f8fb;
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  color-scheme:light;
+  --bg:#f5f6fb; --surface:#ffffff; --ink:#2a3042; --ink2:#5d6579; --ink3:#9097a8; --line:#e9ebf3; --soft:#f1f3f9;
+  --s1:#7fa8e6; --s2:#f0a994; --s3:#86cfb1; --s4:#f1cd7e;
+  --good-bg:#eaf2fd; --bad-bg:#fdeee9; --bad-ink:#b65a42;
   --font:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
-  --shadow:0 1px 2px rgba(16,24,40,.05);
+  --shadow:0 1px 2px rgba(42,48,66,.04),0 6px 20px rgba(42,48,66,.05);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0e1218; --surface:#161b23; --ink:#f1f4f9; --ink2:#b3bccb; --ink3:#7b8596; --line:#262d39; --soft:#1b212b;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --shadow:none; color-scheme:dark}}
+  color-scheme:dark;
+  --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
+  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --shadow:none}}
 :root[data-theme="dark"]{
-  --bg:#0e1218; --surface:#161b23; --ink:#f1f4f9; --ink2:#b3bccb; --ink3:#7b8596; --line:#262d39; --soft:#1b212b;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --shadow:none; color-scheme:dark}
+  color-scheme:dark;
+  --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
+  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --shadow:none}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5;margin:0}
-.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:0 40px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
 .num{font-variant-numeric:tabular-nums}
-.mono{font-family:var(--mono);font-size:12.5px}
+.mono{font-family:var(--mono);font-size:13px}
 button,select,input{font:inherit;color:inherit}
-button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,.row:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,.row:focus-visible,[data-store]:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
 
-/* filter bar */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line)}
-.bar-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-h1{font-size:19px;font-weight:700;margin:0;letter-spacing:-.01em}
-.asof{color:var(--ink3);font-size:12px}
-.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end}
-.f{display:flex;flex-direction:column;gap:4px;min-width:0}
-.f>label,.f>.lbl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);font-weight:500}
+/* toolbar */
+.bar{background:var(--bg);padding-block:16px 12px}
+.bar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
+.asof{color:var(--ink3);font-size:12.5px}
+.filters{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;background:var(--surface);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow)}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f>label,.f>.lbl{font-size:12px;color:var(--ink3);font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;cursor:pointer;font-size:13px;color:var(--ink2);line-height:1.4}
-.chip:hover{border-color:var(--ink3)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip{border:none;background:var(--soft);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--ink2);line-height:1.4}
+.chip:hover{background:var(--line)}
+.chip[aria-pressed="true"]{background:var(--s1);color:#fff;font-weight:600}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#12151c}}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#12151c}
 .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-.ctl{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 9px;min-height:32px}
+.chip[aria-pressed="true"] .dot{box-shadow:0 0 0 1.5px rgba(255,255,255,.8)}
+.ctl{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;min-height:34px}
 select.ctl{max-width:100%}
-.reset{background:none;border:none;color:var(--s1);cursor:pointer;padding:6px 4px;font-weight:500}
+.reset{background:none;border:none;color:var(--ink2);cursor:pointer;padding:6px 4px;font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .dates{display:flex;gap:6px;align-items:center}
 
-/* sections */
-.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:16px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow);min-width:0}
-.kpi .k{font-size:12px;color:var(--ink2)}
-.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
-.kpi .s{font-size:12px;color:var(--ink3);margin-top:2px}
-.kpi .mk{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
-.insight{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--ink2);font-size:14px;box-shadow:var(--shadow)}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:6px}
+.kpi{background:var(--surface);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.kpi.good{background:var(--good-bg)}.kpi.bad{background:var(--bad-bg)}
+.kpi .k{font-size:13px;color:var(--ink2)}
+.kpi .v{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-top:4px}
+.kpi .s{font-size:13px;color:var(--ink2);margin-top:2px}
+.insight{margin-top:14px;padding:2px 4px;color:var(--ink2);font-size:14.5px}
 .insight b{color:var(--ink);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin-top:12px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow);min-width:0}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-top:14px}
+.card{background:var(--surface);border-radius:14px;padding:20px;box-shadow:var(--shadow);min-width:0}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
-.hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-h2{font-size:15px;font-weight:600;margin:0}
-.sub{font-size:12px;color:var(--ink3);margin-top:2px}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.tabs{display:flex;gap:4px;background:var(--soft);padding:3px;border-radius:8px}
-.tab{border:none;background:none;padding:4px 10px;border-radius:6px;cursor:pointer;color:var(--ink2);font-size:13px}
-.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+h2{font-size:16px;font-weight:600;margin:0}
+.sub{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.tabs{display:flex;gap:2px;background:var(--soft);padding:3px;border-radius:10px}
+.tab{border:none;background:none;padding:5px 12px;border-radius:8px;cursor:pointer;color:var(--ink2);font-size:13px}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(42,48,66,.12)}
 
-/* horizontal bars */
-.hb{display:grid;gap:8px}
-.hrow{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:10px;align-items:center;font-size:13px;min-width:0}
-.hrow .nm{min-width:0;overflow-wrap:anywhere}
-.hrow .nm small{display:block;color:var(--ink3);font-size:11.5px}
-.trk{height:14px;background:var(--soft);border-radius:4px;position:relative;overflow:hidden}
-.fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;min-width:2px}
-.hrow .val{text-align:right;white-space:nowrap}
-.hrow .val small{color:var(--ink3);margin-left:4px}
+/* bars */
+.hb{display:grid;gap:12px}
+.hrow{display:grid;grid-template-columns:minmax(90px,36%) 1fr auto;gap:12px;align-items:center;font-size:14px;min-width:0}
+.hrow .nm{min-width:0;overflow-wrap:anywhere;line-height:1.35}
+.hrow .nm small{display:block;color:var(--ink3);font-size:12px}
+.trk{height:12px;background:var(--soft);border-radius:999px;position:relative;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;min-width:4px;overflow:hidden;display:flex;gap:2px}
+.fill i{display:block;min-width:0}
+.hrow .val{text-align:right;white-space:nowrap;font-weight:600}
+.hrow .val small{color:var(--ink3);margin-left:6px;font-weight:400;font-size:12px}
+[data-store]:hover .nm{text-decoration:underline;text-underline-offset:3px}
 
-/* tables */
-.tbl{width:100%}
-.row{display:grid;grid-template-columns:28px minmax(0,1.1fr) minmax(70px,1.3fr) 64px 100px 20px;gap:10px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:6px}
+/* date input */
+.dinp{position:relative;display:flex;align-items:center}
+.dinp .ctl{width:128px;padding-right:34px;font-variant-numeric:tabular-nums}
+.dinp .cal{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--ink3);padding:4px;border-radius:6px;display:flex}
+.dinp .cal:hover{color:var(--ink);background:var(--soft)}
+.dinp .hid{position:absolute;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.ctl.bad{border-color:var(--s2)}
+/* donut */
+.donut{display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px;align-items:center}
+.donut svg{display:block;width:100%;max-width:190px;height:auto;margin:0 auto}
+.dl{display:grid;gap:10px}
+.dl .it{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px}
+.dl .it i{width:12px;height:12px;border-radius:50%}
+.dl .it small{display:block;color:var(--ink3);font-size:12px;line-height:1.3}
+.dl .it .val{text-align:right;font-weight:600;white-space:nowrap}
+.dl .it .val small{display:inline;font-weight:400;margin-left:4px}
+/* ranked lists */
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;background:var(--soft);color:var(--ink2);white-space:nowrap;text-align:center}
+.badge.hi{background:var(--bad-bg);color:var(--bad-ink);font-weight:600}
+.row.st{grid-template-columns:24px minmax(0,1.5fr) minmax(50px,1fr) 44px 92px;padding-block:11px}
+.row.st .nm{min-width:0;line-height:1.35;overflow-wrap:anywhere}
+.row.st .nm small{display:block;color:var(--ink3);font-size:12px;font-family:var(--mono)}
+.row .trk{height:10px}
+/* top items */
+.row{display:grid;grid-template-columns:24px 96px minmax(0,1fr) 44px 92px 16px;gap:12px;align-items:center;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
 .row:hover{background:var(--soft)}
-.row.head{cursor:default;font-size:11px;color:var(--ink3);letter-spacing:.04em;text-transform:uppercase;padding-block:4px;border-bottom:1px solid var(--line)}
-.row.head:hover{background:none}
-.rk{color:var(--ink3);font-size:12px;text-align:center}
+.rk{color:var(--ink3);font-size:13px;text-align:center}
 .r{text-align:right}
-.st{display:flex;height:10px;gap:2px}
-.st i{display:block;border-radius:2px;min-width:0}
 .chev{color:var(--ink3);transition:transform .15s}
 .row[aria-expanded="true"] .chev{transform:rotate(90deg)}
-.sku-wrap{margin:2px 0 10px 38px;border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:300px}
-.sku{width:100%;border-collapse:collapse;min-width:520px;font-size:12.5px}
-.sku th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:500;color:var(--ink3);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:6px 10px}
-.sku td{padding:6px 10px;border-top:1px solid var(--line)}
+.pct{font-size:12.5px;color:var(--ink2);text-align:right;white-space:nowrap}
+.sku-wrap{margin:6px 0 12px 36px;background:var(--soft);border-radius:10px;overflow:auto;max-height:300px}
+.sku{width:100%;border-collapse:collapse;min-width:520px;font-size:13px}
+.sku th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:500;color:var(--ink3);font-size:12px;padding:8px 12px}
+.sku td{padding:7px 12px;border-top:1px solid var(--line)}
 .sku th.r,.sku td.r{text-align:right}
-.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;border:1px solid var(--line);color:var(--ink2);white-space:nowrap}
-.pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--c,var(--ink3))}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;background:var(--surface);color:var(--ink2);white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--c,var(--ink3))}
 .empty{color:var(--ink3);padding:24px 0;text-align:center}
 
-/* heatmap */
+/* deep dive */
+details.more{margin-top:14px}
+details.more>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface);border-radius:999px;box-shadow:var(--shadow);color:var(--ink2);font-size:14px;font-weight:500}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"+";font-size:16px;line-height:1}
+details.more[open]>summary::after{content:"–"}
+details.more[open]>summary{margin-bottom:0}
 .hm-scroll{overflow-x:auto}
-.hm{display:grid;gap:3px;min-width:560px}
-.hm .c{height:24px;border-radius:4px;background:var(--soft)}
-.hm .h{font-size:10.5px;color:var(--ink3);text-align:center;align-self:end}
-.hm .d{font-size:12px;color:var(--ink2);align-self:center;padding-right:6px}
-.ramp{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);margin-top:10px}
-.ramp i{display:block;width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--s1) 12%,var(--surface)),var(--s1))}
+.hm{display:grid;gap:4px;min-width:560px}
+.hm .c{height:26px;border-radius:6px;background:var(--soft)}
+.hm .h{font-size:11px;color:var(--ink3);text-align:center;align-self:end}
+.hm .d{font-size:12.5px;color:var(--ink2);align-self:center;padding-right:6px}
+.ramp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);margin-top:12px}
+.ramp i{display:block;width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--s1) 15%,var(--surface)),var(--s1))}
 
-#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:7px 10px;border-radius:8px;font-size:12.5px;line-height:1.45;max-width:260px;opacity:0;transition:opacity .08s}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;max-width:260px;opacity:0;transition:opacity .08s;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 svg text{font-family:var(--font)}
-.foot{margin-top:18px;color:var(--ink3);font-size:12px;line-height:1.6}
+.foot{margin-top:22px;color:var(--ink3);font-size:12.5px;line-height:1.7}
 
-@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
-@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi .v{font-size:24px}
-  .row{grid-template-columns:22px minmax(0,1fr) 54px 18px}.row .barcol,.row .stcol{display:none}
+/* loading / gate */
+.gate{max-width:560px;margin:56px auto 0}
+.gate h2{font-size:18px;margin-bottom:4px}
+.btn{background:var(--s1);color:#fff;border:none;border-radius:10px;padding:8px 18px;cursor:pointer;font-weight:600}
+.btn.ghost{background:var(--surface);color:var(--ink2);border:1px solid var(--line);font-weight:500;padding:5px 14px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:wait}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--ink2);margin-top:10px;cursor:pointer}
+.drop.over{border-color:var(--s1);background:var(--soft)}
+.msg{margin-top:8px;font-size:14px;color:var(--ink2)}
+.msg.err{color:#d2705a}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+@media (max-width:560px){.donut{grid-template-columns:1fr}.row.st{grid-template-columns:20px minmax(0,1fr) 40px 80px}.row.st .trk{display:none}.kpi .v{font-size:28px}.card{padding:16px}
+  .row:not(.st){grid-template-columns:20px 80px minmax(0,1fr) 36px 14px}.row:not(.st) .badge{display:none}
   .sku-wrap{margin-left:0}.hrow{grid-template-columns:minmax(80px,40%) 1fr auto}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.gate{max-width:640px;margin:48px auto 0}
-.gate h2{font-size:18px;margin-bottom:4px}
-.gate p{color:var(--ink2);margin:6px 0}
-.gate .ctl{width:100%}
-.gate .btn,.btn{background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600}
-.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);font-weight:500;padding:5px 12px}
-.btn[disabled]{opacity:.5;cursor:wait}
-.drop{border:1.5px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--ink2);margin-top:10px;cursor:pointer}
-.drop.over{border-color:var(--s1);background:var(--soft)}
-.msg{margin-top:10px;font-size:13px;color:var(--ink2)}
-.msg.err{color:var(--s2)}
-.gate ol{color:var(--ink2);padding-left:20px;margin:8px 0}
-.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -153,15 +188,15 @@ svg text{font-family:var(--font)}
     <div class="filters">
       <div class="f"><span class="lbl">ช่วงเวลา</span>
         <div class="dates">
-          <input class="ctl" type="date" id="dFrom" aria-label="ตั้งแต่วันที่">
+          <div class="dinp"><input class="ctl" type="text" id="dFrom" inputmode="numeric" maxlength="10" placeholder="dd/MM/yyyy" autocomplete="off" aria-label="ตั้งแต่วันที่ (dd/MM/yyyy)"><button class="cal" type="button" data-pick="pFrom" aria-label="เลือกวันที่จากปฏิทิน"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4"/></svg></button><input class="hid" type="date" id="pFrom" tabindex="-1" aria-hidden="true"></div>
           <span style="color:var(--ink3)">–</span>
-          <input class="ctl" type="date" id="dTo" aria-label="ถึงวันที่">
+          <div class="dinp"><input class="ctl" type="text" id="dTo" inputmode="numeric" maxlength="10" placeholder="dd/MM/yyyy" autocomplete="off" aria-label="ถึงวันที่ (dd/MM/yyyy)"><button class="cal" type="button" data-pick="pTo" aria-label="เลือกวันที่จากปฏิทิน"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4"/></svg></button><input class="hid" type="date" id="pTo" tabindex="-1" aria-hidden="true"></div>
         </div>
       </div>
-      <div class="f"><span class="lbl">ช่วงเร็ว</span><div class="chips" id="presets"></div></div>
+      <div class="f"><span class="lbl">เลือกเร็ว</span><div class="chips" id="presets"></div></div>
+      <div class="f"><label for="store">CustID_Corner</label><select class="ctl" id="store"></select></div>
       <div class="f"><span class="lbl">ประเภทการค้นหา</span><div class="chips" id="typeChips"></div></div>
       <div class="f"><span class="lbl">ผลลัพธ์</span><div class="chips" id="statChips"></div></div>
-      <div class="f" style="flex:1 1 220px;max-width:340px"><label for="store">CustID_Corner</label><select class="ctl" id="store"></select></div>
       <button class="reset" id="reset" type="button">ล้างตัวกรอง</button>
     </div>
   </div>
@@ -177,16 +212,16 @@ svg text{font-family:var(--font)}
     </section>
 
     <section class="card c6">
-      <div class="hd"><div><h2>รูปแบบการค้นหา</h2><div class="sub">SearchType · จำนวนรายการที่ค้นหา</div></div></div>
-      <div class="hb" id="typeBars"></div>
+      <div class="hd"><div><h2>รูปแบบการค้นหา</h2><div class="sub">ลูกค้าค้นหาด้วยรหัสแบบไหน</div></div></div>
+      <div class="donut" id="typeDonut"></div>
     </section>
     <section class="card c6">
-      <div class="hd"><div><h2>ผลลัพธ์การค้นหา</h2><div class="sub">Status · จำนวนรายการที่ค้นหา</div></div></div>
+      <div class="hd"><div><h2>ผลลัพธ์การค้นหา</h2><div class="sub">สถานะที่ระบบตอบกลับ</div></div></div>
       <div class="hb" id="statBars"></div>
     </section>
 
     <section class="card c7">
-      <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">Item = 6 หลักแรกของรหัส · คลิกแถวเพื่อดู SKU / Size / Color</div></div>
+      <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">แท่ง = จำนวนครั้งที่ถูกค้นหา · ป้ายส้ม = ไม่มี Stock ตั้งแต่ 50% · คลิกแถวเพื่อดู SKU / Size / Color</div></div>
         <div class="tabs" role="tablist" id="itemTabs">
           <button class="tab" role="tab" data-t="top" aria-selected="true">ถูกค้นหามากสุด</button>
           <button class="tab" role="tab" data-t="out" aria-selected="false">ไม่มี Stock บ่อยสุด</button>
@@ -194,20 +229,21 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 10 ร้านค้าที่ถามบ่อยสุด</h2><div class="sub">CustID_Corner · คลิกเพื่อกรองเฉพาะร้านนั้น</div></div></div>
-      <div class="hb" id="stores"></div>
-    </section>
-
-    <section class="card c8">
-      <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · จำนวนรายการที่ค้นหา</div></div></div>
-      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
-      <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
-    </section>
-    <section class="card c4">
-      <div class="hd"><div><h2>สัดส่วนตาม Corner</h2><div class="sub">จำนวนรายการ · % ที่ไม่มี Stock</div></div></div>
-      <div class="hb" id="corners"></div>
+      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · คลิกเพื่อกรองเฉพาะร้านนั้น</div></div></div>
+      <div class="tbl" id="stores"></div>
     </section>
   </div>
+
+  <details class="more">
+    <summary>เจาะลึกเพิ่มเติม · ช่วงเวลาที่ถามบ่อย</summary>
+    <div class="grid">
+      <section class="card c12">
+        <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง</div></div></div>
+        <div class="hm-scroll"><div class="hm" id="heat"></div></div>
+        <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
+      </section>
+    </div>
+  </details>
 
   <p class="foot">คำจำกัดความ: <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
   </div>
@@ -230,6 +266,12 @@ const fmt=n=>Math.round(n).toLocaleString('en-US');
 const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
 const inStock=r=>r.s!=='NotFound';
 const dayOf=r=>r.t.slice(0,10);
+const isoToDmy=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'';
+function dmyToIso(s){const m=(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!m)return '';
+  const d=+m[1],mo=+m[2],y=+m[3];const dt=new Date(Date.UTC(y,mo-1,d));
+  if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d)return '';
+  return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function maskDmy(el){let v=el.value.replace(/\D/g,'').slice(0,8);if(v.length>4)v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);else if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);el.value=v}
 const dLabel=d=>{const [y,m,dd]=d.split('-');return (+dd)+' '+MON[+m-1]};
 const dLong=d=>{const [y,m,dd]=d.split('-');return (+dd)+' '+MON[+m-1]+' '+y};
 const storeLabel=k=>NAMES[k]?k+' · '+NAMES[k]:k;
@@ -243,7 +285,7 @@ let PRESETS=[];
 function setupPresets(){const months=[...new Set(allDays.map(d=>d.slice(0,7)))];
 PRESETS=[['ทั้งหมด',MIN,MAX],['7 วันล่าสุด',addDays(MAX,-6),MAX],['30 วันล่าสุด',addDays(MAX,-29),MAX],...months.map(m=>{const [y,mm]=m.split('-');const last=new Date(Date.UTC(+y,+mm,0)).getUTCDate();return [MON[+mm-1]+' '+y,m+'-01',m+'-'+String(last).padStart(2,'0')]})]}
 function buildFilters(){
-  $('dFrom').min=$('dTo').min=MIN;$('dFrom').max=$('dTo').max=MAX;
+  $('pFrom').min=$('pTo').min=MIN;$('pFrom').max=$('pTo').max=MAX;
   $('presets').innerHTML=PRESETS.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p[0]}</button>`).join('');
   $('typeChips').innerHTML=TYPES.map(t=>`<button type="button" class="chip" data-type="${t[0]}" aria-pressed="false" title="${t[2]}"><span class="dot" style="background:var(${t[3]})"></span>${t[1]}</button>`).join('');
   $('statChips').innerHTML=STATS.map(t=>`<button type="button" class="chip" data-stat="${t[0]}" aria-pressed="false" title="${t[2]}"><span class="dot" style="background:var(${t[3]})"></span>${t[1]}</button>`).join('');
@@ -252,7 +294,7 @@ function buildFilters(){
   $('store').innerHTML='<option value="">ทั้งหมด ('+ks.length+' ร้าน)</option>'+ks.map(k=>`<option value="${esc(k)}">${esc(storeLabel(k))} (${cnt[k]})</option>`).join('');
 }
 function syncFilters(){
-  $('dFrom').value=S.from;$('dTo').value=S.to;$('store').value=S.store;
+  $('dFrom').value=isoToDmy(S.from);$('dTo').value=isoToDmy(S.to);$('pFrom').value=S.from;$('pTo').value=S.to;$('dFrom').classList.remove('bad');$('dTo').classList.remove('bad');$('store').value=S.store;
   document.querySelectorAll('[data-p]').forEach(b=>{const p=PRESETS[+b.dataset.p];b.setAttribute('aria-pressed',String(p[1]===S.from&&p[2]===S.to))});
   document.querySelectorAll('[data-type]').forEach(b=>b.setAttribute('aria-pressed',String(S.types.has(b.dataset.type))));
   document.querySelectorAll('[data-stat]').forEach(b=>b.setAttribute('aria-pressed',String(S.stats.has(b.dataset.stat))));
@@ -261,15 +303,20 @@ function bind(){
   $('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const p=PRESETS[+b.dataset.p];S.from=p[1];S.to=p[2];update()};
   $('typeChips').onclick=e=>{const b=e.target.closest('[data-type]');if(!b)return;const k=b.dataset.type;S.types.has(k)?S.types.delete(k):S.types.add(k);update()};
   $('statChips').onclick=e=>{const b=e.target.closest('[data-stat]');if(!b)return;const k=b.dataset.stat;S.stats.has(k)?S.stats.delete(k):S.stats.add(k);update()};
-  $('dFrom').onchange=e=>{S.from=e.target.value||MIN;if(S.from>S.to)S.to=S.from;update()};
-  $('dTo').onchange=e=>{S.to=e.target.value||MAX;if(S.to<S.from)S.from=S.to;update()};
+  const applyDate=(which,iso)=>{iso=iso<MIN?MIN:iso>MAX?MAX:iso;if(which==='from'){S.from=iso;if(S.from>S.to)S.to=S.from}else{S.to=iso;if(S.to<S.from)S.from=S.to}update()};
+  [['dFrom','from','pFrom'],['dTo','to','pTo']].forEach(([id,w,pid])=>{const el=$(id);
+    el.oninput=()=>{maskDmy(el);el.classList.remove('bad')};
+    el.onchange=()=>{const iso=dmyToIso(el.value);if(!iso){el.classList.add('bad');return}applyDate(w,iso)};
+    el.onkeydown=e=>{if(e.key==='Enter')el.onchange()};
+    $(pid).onchange=e=>{if(e.target.value)applyDate(w,e.target.value)}});
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const p=$(b.dataset.pick);try{p.showPicker()}catch(e){p.focus();p.click()}});
   $('store').onchange=e=>{S.store=e.target.value;update()};
   $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();S.store='';update()};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const r=e.target.closest('.row[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.row[data-it]')){e.preventDefault();e.target.click()}};
   $('stores').onclick=e=>{const r=e.target.closest('[data-store]');if(!r)return;S.store=r.dataset.store;update()};
-  $('stores').onkeydown=e=>{if(e.key==='Enter'&&e.target.matches('[data-store]'))e.target.click()};
+  $('stores').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-store]')){e.preventDefault();e.target.click()}};
 }
 
 /* ---------- tooltip ---------- */
@@ -288,27 +335,23 @@ function countBy(rows,f){const m=new Map();rows.forEach(r=>{const k=f(r);m.set(k
 
 /* ---------- renderers ---------- */
 function renderKpis(){
-  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.map(r=>r.k)).size, it=new Set(F.map(r=>r.it)).size;
+  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.map(r=>r.k)).size;
   const yes=F.filter(inStock).length, no=F.length-yes;
   const k=[
-    ['คำถาม',fmt(q),'ข้อความที่ส่งเข้ามา',''],
-    ['รายการที่ค้นหา',fmt(F.length),'เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
+    ['คำถามทั้งหมด',fmt(q),'ค้นหา '+fmt(F.length)+' รายการ · เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
     ['ร้านค้าที่ถาม',fmt(st),'CustID_Corner ไม่ซ้ำ',''],
-    ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการทั้งหมด','var(--s1)'],
-    ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการทั้งหมด','var(--s2)'],
-    ['Item ที่ถูกค้นหา',fmt(it),'รหัส 6 หลักไม่ซ้ำ','']];
-  $('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="k">${x[3]?`<span class="mk" style="background:${x[3]}"></span>`:''}${x[0]}</div><div class="v num">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
+    ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการที่ค้นหา','good'],
+    ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการที่ค้นหา','bad']];
+  $('kpis').innerHTML=k.map(x=>`<div class="kpi ${x[3]}"><div class="k">${x[0]}</div><div class="v num">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
 }
 function topOf(m,n=1){return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n)}
 function renderInsight(){
   if(!F.length){$('insight').innerHTML='ไม่พบข้อมูลตามตัวกรองที่เลือก ลองขยายช่วงเวลาหรือล้างตัวกรอง';return}
-  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.map(r=>r.k)).size, no=F.filter(r=>!inStock(r)).length;
+  const no=F.filter(r=>!inStock(r)).length;
   const items=countBy(F,r=>r.it), ti=topOf(items)[0];
   const tiRows=F.filter(r=>r.it===ti[0]), tiNo=tiRows.filter(r=>!inStock(r)).length;
-  const hr=topOf(countBy(F,r=>+r.t.slice(11,13)))[0];
-  const ts=topOf(countBy(F,r=>r.k))[0];
-  const dd=topOf(countBy(F,dayOf))[0];
-  $('insight').innerHTML=`ช่วง <b>${dLong(S.from)} – ${dLong(S.to)}</b> มี <b>${fmt(q)}</b> คำถามจาก <b>${fmt(st)}</b> ร้าน · ค้นหาแล้วไม่มี Stock <b>${pct(no,F.length)}%</b> · Item ที่ถูกถามมากสุดคือ <b class="mono">${esc(ti[0])}</b> (${fmt(ti[1])} ครั้ง ไม่มี Stock ${pct(tiNo,tiRows.length)}%) · ร้านที่ถามมากสุด <b>${esc(storeLabel(ts[0]))}</b> · ช่วงที่คึกคักสุดคือ <b>${String(hr[0]).padStart(2,'0')}:00–${String(hr[0]).padStart(2,'0')}:59 น.</b> · วันที่มีการถามมากสุด <b>${dLabel(dd[0])}</b> (${fmt(dd[1])} รายการ)`;
+  const hr=topOf(countBy(F,r=>+r.t.slice(11,13)))[0], h2=String(hr[0]).padStart(2,'0');
+  $('insight').innerHTML=`${dLabel(S.from)} – ${dLong(S.to)} · ไม่มี Stock <b>${pct(no,F.length)}%</b> · Item ที่ถูกถามมากสุด <b class="mono">${esc(ti[0])}</b> (${fmt(ti[1])} ครั้ง ไม่มี Stock ${pct(tiNo,tiRows.length)}%) · คึกคักสุดช่วง <b>${h2}:00 น.</b>`;
 }
 function niceMax(v){if(v<=5)return 5;const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
 function renderDaily(){
@@ -340,40 +383,49 @@ function renderDaily(){
   el.innerHTML=s+'</svg>';
 }
 function rr(x,y,w,h,r){r=Math.min(r,w/2,h);return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`}
-function hbars(list){ // [{nm,sub,v,color,tip,attrs,extra}]
+function hbars(list){ // [{nm,sub,v,y?,color,tip,attrs,extra}]  y = จำนวนที่มี Stock (แท่งแบ่งสองสี)
   const mx=Math.max(...list.map(l=>l.v),1);
-  return list.map(l=>`<div class="hrow" ${l.attrs||''} data-tip="${esc(l.tip||'')}"><div class="nm">${esc(l.nm)}${l.sub?`<small>${esc(l.sub)}</small>`:''}</div><div class="trk"><div class="fill" style="width:${l.v/mx*100}%;background:${l.color}"></div></div><div class="val num">${fmt(l.v)}<small>${l.extra||''}</small></div></div>`).join('');
+  return list.map(l=>{const bar=l.y!==undefined
+      ?`<div class="fill" style="width:${l.v/mx*100}%"><i style="flex:${l.y||0.0001};background:var(--s1)"></i><i style="flex:${(l.v-l.y)||0.0001};background:var(--s2)"></i></div>`
+      :`<div class="fill" style="width:${l.v/mx*100}%;background:${l.color}"></div>`;
+    return `<div class="hrow" ${l.attrs||''} data-tip="${esc(l.tip||'')}"><div class="nm">${esc(l.nm)}${l.sub?`<small>${esc(l.sub)}</small>`:''}</div><div class="trk">${bar}</div><div class="val num">${fmt(l.v)}<small>${l.extra||''}</small></div></div>`}).join('');
 }
 function renderBars(){
   const tot=F.length||1;
   const tc=countBy(F,r=>r.ty);
-  $('typeBars').innerHTML=hbars(TYPES.map(t=>({nm:t[1],sub:t[2],v:tc.get(t[0])||0,color:`var(${t[3]})`,extra:pct(tc.get(t[0])||0,tot)+'%',tip:`${t[1]}\n${tc.get(t[0])||0} รายการ (${pct(tc.get(t[0])||0,tot)}%)`})));
+  const R=70,C=2*Math.PI*R;let cum=0,segs='';
+  TYPES.forEach(x=>{const n=tc.get(x[0])||0;if(!n)return;const l=n/tot*100;const vis=Math.max(l-(l>=100?0:1.2),0.3);
+    segs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="var(${x[3]})" stroke-width="26" pathLength="100" stroke-dasharray="${vis} ${100-vis}" stroke-dashoffset="${-cum}" transform="rotate(-90 95 95)" data-tip="${esc(x[1]+'\n'+n+' รายการ ('+pct(n,tot)+'%)')}"/>`;cum+=l});
+  $('typeDonut').innerHTML=`<svg viewBox="0 0 190 190" role="img" aria-label="สัดส่วนรูปแบบการค้นหา"><circle cx="95" cy="95" r="${R}" fill="none" stroke="var(--soft)" stroke-width="26"/>${segs}<text x="95" y="92" text-anchor="middle" font-size="26" font-weight="700" fill="var(--ink)">${fmt(F.length)}</text><text x="95" y="112" text-anchor="middle" font-size="12" fill="var(--ink3)">รายการ</text></svg>
+    <div class="dl">${TYPES.map(x=>{const n=tc.get(x[0])||0;return `<div class="it"><i style="background:var(${x[3]})"></i><div>${x[1]}<small>${x[2]}</small></div><div class="val num">${fmt(n)}<small> · ${pct(n,tot)}%</small></div></div>`}).join('')}</div>`;
   const sc=countBy(F,r=>r.s);
   $('statBars').innerHTML=hbars(STATS.map(t=>({nm:t[1],sub:t[2],v:sc.get(t[0])||0,color:`var(${t[3]})`,extra:pct(sc.get(t[0])||0,tot)+'%',tip:`${t[1]}\n${sc.get(t[0])||0} รายการ (${pct(sc.get(t[0])||0,tot)}%)`})));
 }
 function renderItems(){
   const g=new Map();
   F.forEach(r=>{let o=g.get(r.it);if(!o){o={it:r.it,n:0,y:0,st:new Set(),rows:[]};g.set(r.it,o)}o.n++;inStock(r)&&o.y++;o.st.add(r.k);o.rows.push(r)});
-  let arr=[...g.values()];
-  if(S.tab==='out'){arr.forEach(o=>o.no=o.n-o.y);arr=arr.filter(o=>o.no>0).sort((a,b)=>b.no-a.no||b.n-a.n)}
+  let arr=[...g.values()];arr.forEach(o=>o.no=o.n-o.y);
+  if(S.tab==='out'){arr=arr.filter(o=>o.no>0).sort((a,b)=>b.no-a.no||b.n-a.n)}
   else arr.sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it));
   arr=arr.slice(0,10);
   if(!arr.length){$('items').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
   const mx=Math.max(...arr.map(o=>S.tab==='out'?o.no:o.n),1);
-  let h=`<div class="row head" style="cursor:default"><span></span><span>Item</span><span class="barcol">${S.tab==='out'?'ครั้งที่ไม่มี Stock':'ครั้งที่ค้นหา'}</span><span class="r">ร้าน</span><span class="stcol">มี / ไม่มี Stock</span><span></span></div>`;
+  let h='';
   arr.forEach((o,i)=>{
-    const v=S.tab==='out'?o.no:o.n,open=S.open.has(o.it),no=o.n-o.y;
+    const open=S.open.has(o.it);
+    const v=S.tab==='out'?o.no:o.n, hi=pct(o.no,o.n)>=50;
     h+=`<div class="row" role="button" tabindex="0" data-it="${o.it}" aria-expanded="${open}">
-      <span class="rk num">${i+1}</span><span class="mono" style="font-weight:500">${esc(o.it)}</span>
-      <span class="barcol" style="display:flex;align-items:center;gap:8px"><span class="trk" style="flex:1"><span class="fill" style="width:${v/mx*100}%;background:${S.tab==='out'?'var(--s2)':'var(--s1)'}"></span></span><span class="num" style="min-width:26px;text-align:right">${fmt(v)}</span></span>
-      <span class="r num">${o.st.size}</span>
-      <span class="stcol st" data-tip="${esc(o.it+'\nมี Stock '+o.y+' ('+pct(o.y,o.n)+'%)\nไม่มี Stock '+no+' ('+pct(no,o.n)+'%)')}"><i style="flex:${o.y||0.0001};background:var(--s1)"></i><i style="flex:${no||0.0001};background:var(--s2)"></i></span>
+      <span class="rk num">${i+1}</span><span class="mono" style="font-weight:600">${esc(o.it)}</span>
+      <span class="trk" data-tip="${esc(o.it+'\nค้นหา '+o.n+' ครั้ง\nมี Stock '+o.y+' ('+pct(o.y,o.n)+'%)\nไม่มี Stock '+o.no+' ('+pct(o.no,o.n)+'%)\nร้านที่ถาม '+o.st.size)}"><span class="fill" style="width:${v/mx*100}%;background:${S.tab==='out'?'var(--s2)':'var(--s1)'}"></span></span>
+      <span class="r num" style="font-weight:600">${fmt(v)}</span>
+      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(o.no,o.n)}%</span>
       <span class="chev">›</span></div>`;
     if(open){
-      const sk=new Map();o.rows.forEach(r=>{let x=sk.get(r.sku);if(!x){x={sku:r.sku,sz:r.sz,co:r.co,ty:r.ty,n:0,y:0,last:''};sk.set(r.sku,x)}x.n++;inStock(r)&&x.y++;if(r.t>x.last)x.last=r.t});
+      const sk=new Map();o.rows.forEach(r=>{let x=sk.get(r.sku);if(!x){x={sku:r.sku,sz:r.sz,co:r.co,n:0,y:0,last:''};sk.set(r.sku,x)}x.n++;inStock(r)&&x.y++;if(r.t>x.last)x.last=r.t});
       const list=[...sk.values()].sort((a,b)=>b.n-a.n||a.sku.localeCompare(b.sku));
+      const dash='<span style="color:var(--ink3)">—</span>';
       h+=`<div class="sku-wrap"><table class="sku"><thead><tr><th>SKU ที่ค้นหา</th><th>Size</th><th>Color</th><th class="r">ครั้ง</th><th>Stock</th><th>ล่าสุด</th></tr></thead><tbody>`+
-        list.slice(0,200).map(x=>{const no=x.n-x.y;return `<tr><td class="mono">${esc(x.sku)}</td><td>${x.sz||'<span style="color:var(--ink3)">—</span>'}</td><td>${x.co||'<span style="color:var(--ink3)">—</span>'}</td><td class="r num">${x.n}</td><td>${x.y?`<span class="pill" style="--c:var(--s1)">มี ${x.y}</span> `:''}${no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${no}</span>`:''}</td><td class="num" style="color:var(--ink2)">${dLabel(x.last.slice(0,10))} ${x.last.slice(11)}</td></tr>`}).join('')+`</tbody></table></div>`;
+        list.slice(0,200).map(x=>{const no=x.n-x.y;return `<tr><td class="mono">${esc(x.sku)}</td><td>${x.sz||dash}</td><td>${x.co||dash}</td><td class="r num">${x.n}</td><td>${x.y?`<span class="pill" style="--c:var(--s1)">มี ${x.y}</span> `:''}${no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${no}</span>`:''}</td><td class="num" style="color:var(--ink2)">${dLabel(x.last.slice(0,10))} ${x.last.slice(11)}</td></tr>`}).join('')+`</tbody></table></div>`;
     }
   });
   $('items').innerHTML=h;
@@ -382,15 +434,14 @@ function renderStores(){
   const g=new Map();F.forEach(r=>{let o=g.get(r.k);if(!o){o={k:r.k,n:0,y:0};g.set(r.k,o)}o.n++;inStock(r)&&o.y++});
   const arr=[...g.values()].sort((a,b)=>b.n-a.n).slice(0,10);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  $('stores').innerHTML=hbars(arr.map(o=>({nm:o.k,sub:NAMES[o.k]||'',v:o.n,color:'var(--s1)',extra:pct(o.n-o.y,o.n)+'% ไม่มี',tip:`${storeLabel(o.k)}\nค้นหา ${o.n} รายการ\nมี Stock ${o.y} · ไม่มี Stock ${o.n-o.y}`,attrs:`role="button" tabindex="0" data-store="${esc(o.k)}" style="cursor:pointer"`})));
-}
-function renderCorners(){
-  const g=new Map();F.forEach(r=>{const c=r.k==='(ไม่ระบุ)'?'ไม่ระบุ':(r.k.split('_').pop()||'ไม่ระบุ');let o=g.get(c);if(!o){o={c,n:0,y:0};g.set(c,o)}o.n++;inStock(r)&&o.y++});
-  const arr=[...g.values()].sort((a,b)=>b.n-a.n);
-  const top=arr.slice(0,7),rest=arr.slice(7);
-  if(rest.length)top.push({c:'อื่น ๆ ('+rest.length+')',n:rest.reduce((a,b)=>a+b.n,0),y:rest.reduce((a,b)=>a+b.y,0)});
-  if(!top.length){$('corners').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  $('corners').innerHTML=hbars(top.map(o=>({nm:o.c,v:o.n,color:'var(--s1)',extra:pct(o.n-o.y,o.n)+'% ไม่มี',tip:`Corner ${o.c}\n${o.n} รายการ\nไม่มี Stock ${o.n-o.y} (${pct(o.n-o.y,o.n)}%)`})));
+  const mx=Math.max(...arr.map(o=>o.n),1);
+  $('stores').innerHTML=arr.map((o,i)=>{const no=o.n-o.y,hi=pct(no,o.n)>=50;
+    return `<div class="row st" role="button" tabindex="0" data-store="${esc(o.k)}" data-tip="${esc(storeLabel(o.k)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
+      <span class="rk num">${i+1}</span>
+      <span class="nm">${esc(NAMES[o.k]||o.k)}${NAMES[o.k]?`<small>${esc(o.k)}</small>`:''}</span>
+      <span class="trk"><span class="fill" style="width:${o.n/mx*100}%;background:var(--s1)"></span></span>
+      <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
+      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('');
 }
 function renderHeat(){
   const cell=new Map();let mx=0,hmin=24,hmax=-1;
@@ -407,7 +458,7 @@ function renderHeat(){
 }
 function update(){
   F=filtered();syncFilters();
-  renderKpis();renderInsight();renderDaily();renderBars();renderItems();renderStores();renderCorners();renderHeat();
+  renderKpis();renderInsight();renderDaily();renderBars();renderItems();renderStores();renderHeat();
 }
 
 /* ---------- loading ---------- */
