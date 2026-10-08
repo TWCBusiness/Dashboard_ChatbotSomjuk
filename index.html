@@ -394,11 +394,11 @@ function countBy(rows,f){const m=new Map();rows.forEach(r=>{const k=f(r);m.set(k
 
 /* ---------- renderers ---------- */
 function renderKpis(){
-  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.k)).size;
+  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.id)).size;
   const yes=F.filter(inStock).length, no=F.length-yes;
   const k=[
-    ['คำถามทั้งหมด',fmt(q),'ค้นหา '+fmt(F.length)+' รายการ · เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
-    ['ร้านค้าที่ถาม',fmt(st),'CustID_Corner ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)',''],
+    ['คำถามทั้งหมด',fmt(q),'นับ RequestID ไม่ซ้ำ (1 ข้อความ = 1 คำถาม) · ค้นหา '+fmt(F.length)+' รายการ (นับทุกแถวในชีต) · เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
+    ['ร้านค้าที่ถาม',fmt(st),'CustID ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)',''],
     ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการที่ค้นหา','good'],
     ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการที่ค้นหา','bad']];
   $('kpis').innerHTML=k.map(x=>`<div class="kpi ${x[3]}"><div class="k">${x[0]}</div><div class="v num">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
