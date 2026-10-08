@@ -107,9 +107,10 @@ h2{font-size:16px;font-weight:600;margin:0}
 /* ranked lists */
 .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;background:var(--soft);color:var(--ink2);white-space:nowrap;text-align:center}
 .badge.hi{background:var(--bad-bg);color:var(--bad-ink);font-weight:600}
+.row.st{cursor:default}.row.st:hover{background:none}
 .row.st{grid-template-columns:24px minmax(0,1.5fr) minmax(50px,1fr) 44px 92px;padding-block:11px}
 .row.st .nm{min-width:0;line-height:1.35;overflow-wrap:anywhere}
-.row.st .nm small{display:block;color:var(--ink3);font-size:12px;font-family:var(--mono)}
+.row.st .nm b{font-weight:600}.row.st .nm small{display:block;color:var(--ink3);font-size:12px;font-family:var(--mono)}
 .row .trk{height:10px}
 /* top items */
 .row{display:grid;grid-template-columns:24px 96px minmax(0,1fr) 44px 92px 16px;gap:12px;align-items:center;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
@@ -129,15 +130,23 @@ h2{font-size:16px;font-weight:600;margin:0}
 .empty{color:var(--ink3);padding:24px 0;text-align:center}
 
 /* deep dive */
-details.more{margin-top:14px}
-details.more>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface);border-radius:999px;box-shadow:var(--shadow);color:var(--ink2);font-size:14px;font-weight:500}
-details.more>summary::-webkit-details-marker{display:none}
-details.more>summary::after{content:"+";font-size:16px;line-height:1}
-details.more[open]>summary::after{content:"–"}
-details.more[open]>summary{margin-bottom:0}
 .hm-scroll{overflow-x:auto}
 .hm{display:grid;gap:4px;min-width:560px}
 .hm .c{height:26px;border-radius:6px;background:var(--soft)}
+.hm .c[data-d]{cursor:pointer}
+.hm .c[data-d]:hover{outline:2px solid var(--ink3);outline-offset:-1px}
+.hm .c.sel{outline:2px solid var(--ink);outline-offset:1px}
+.hm .h[data-h],.hm .d[data-d]{cursor:pointer;border-radius:4px}
+.hm .h[data-h]:hover,.hm .d[data-d]:hover{background:var(--soft)}
+.hm .sel-l{font-weight:700;color:var(--ink)}
+.q-wrap{overflow:auto;max-height:440px;border-radius:10px;background:var(--soft)}
+.qt{width:100%;border-collapse:collapse;min-width:640px;font-size:13.5px}
+.qt th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:500;color:var(--ink3);font-size:12px;padding:9px 12px;z-index:1}
+.qt td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+.qt td.sk{font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere;color:var(--ink2)}
+.qt .st2 small{display:block;color:var(--ink3);font-family:var(--mono);font-size:12px}
+.xbtn{background:var(--soft);border:none;border-radius:999px;padding:4px 12px;cursor:pointer;color:var(--ink2);font-size:13px}
+.xbtn:hover{background:var(--line)}
 .hm .h{font-size:11px;color:var(--ink3);text-align:center;align-self:end}
 .hm .d{font-size:12.5px;color:var(--ink2);align-self:center;padding-right:6px}
 .ramp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);margin-top:12px}
@@ -220,6 +229,13 @@ svg text{font-family:var(--font)}
       <div class="hb" id="statBars"></div>
     </section>
 
+    <section class="card c12">
+      <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · คลิกช่องสี (หรือชื่อวัน/ชั่วโมง) เพื่อดูคำถามด้านล่าง</div></div></div>
+      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
+      <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
+    </section>
+    <section class="card c12" id="hmDetail" hidden></section>
+
     <section class="card c7">
       <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">แท่ง = จำนวนครั้งที่ถูกค้นหา · ป้ายส้ม = ไม่มี Stock ตั้งแต่ 50% · คลิกแถวเพื่อดู SKU / Size / Color</div></div>
         <div class="tabs" role="tablist" id="itemTabs">
@@ -229,21 +245,10 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · คลิกเพื่อกรองเฉพาะร้านนั้น</div></div></div>
+      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock</div></div></div>
       <div class="tbl" id="stores"></div>
     </section>
   </div>
-
-  <details class="more">
-    <summary>เจาะลึกเพิ่มเติม · ช่วงเวลาที่ถามบ่อย</summary>
-    <div class="grid">
-      <section class="card c12">
-        <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง</div></div></div>
-        <div class="hm-scroll"><div class="hm" id="heat"></div></div>
-        <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
-      </section>
-    </div>
-  </details>
 
   <p class="foot">คำจำกัดความ: <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
   </div>
@@ -254,6 +259,7 @@ svg text{font-family:var(--font)}
 let ROWS=[],NAMES={};
 const API_URL="https://script.google.com/macros/s/AKfycbwzLSpFo0Ln2zsdX6JaMoXqSR6vl6EAJbSx1UbBv6Y3eIvvriVl3o1vifAGl_vhrU58bA/exec"; // วาง Web App URL จาก Apps Script (ลงท้ายด้วย /exec) แล้วเว็บจะโหลดข้อมูลเองอัตโนมัติ
 const API_KEY=""; // ถ้าตั้ง KEY ใน Code.gs ให้ใส่ค่าเดียวกันที่นี่
+const STORE_MASTER={"10900068":"เซ็นทรัลลาดพร้าว","80000004":"สหไทยพลาซ่านครศรีฯ","5000N218":"เซ็นทรัลเฟสเชียงใหม่","55000007":"Shopนราไฮเปอร์มาร์ท","74000009":"Shop wacoal studio โลตัส สมุทรสาคร","16000006":"ไชยแสงสิงห์บุรี","84000005":"โรบินสัน-สุราษฎร์ธานี","92000002":"โรบินสันตรัง","86000015":"โอเชี่ยน ชุมพร","73210008":"เซ็นทรัลศาลายา","10240084":"The Mall บางกะปิ","9011H085":"เซ็นทรัลเฟสหาดใหญ่","73000017":"C นครปฐม","10150022":"เซ็นทรัลพระราม 2","33000046":"ซุ่นเฮงพลาซ่า","2000FT92":"โรบินสันชลบุรี","12130047":"ช้อปวาโก้ สตูดิโอ โลตัส รังสิต","2000F096":"โง้วจิ้นง้วน","41000034":"เซ็นทรัลอุดรธานี","76150001":"โรบินสันเพชรบุรี","11000015":"The Mll งามวงค์วาน","10200034":"ดิโอล์ดสยาม","45000020":"ร้อยเอ็ดพลาซ่า","18000003":"R สระบุรี","63000003":"Wacoa lstudio โลตัสตาก","20150010":"Terminal21 พัทยา","34000013":"โรบินสันอุบลฯ","11000054":"CPN Northville","6000P012":"ห้างเซ็นทรัลนครสวรรค์","11140001":"เซ็นทรัลเวสต์เกต","50000022":"บิ๊กซีเชียงใหม่1","71000003":"R กาญจนบุรี","10120001":"C พระราม3 ja","6500D015":"6500D015/BGW-004","80110001":"สหไทยทุ่งสง","84000013":"สุราษฎร์ธานีดีเวลลอปเม้นท์","2026FT86":"เซ็นทรัลพัทยา","94000002":"ไดอาน่า ปัตตานี","10160006":"The Mall บางแค","65000008":"โลตัส พิษณุโลก","11120001":"C แจ้งวัฒนะ","10500043":"Cenสีลมฯ","25000003":"โรบินสันปราจีนบุรี","340000013":"โรบินสันอุบลฯ2","4000C086":"เซ็นทรัลขอนแก่น","5000N191":"โรบินสันเชียงใหม่","10270034":"โลตัสศรีนครินทร์","13000011":"R อยุธยา2","80000016":"R โอเชี่ยน 2","10160100":"Shop วาโก้ซีคอนบางแค","72000006":"โรบินสันสุพรรณบุรี","20110002":"J-PARK ศรีราชา","71190020":"กนกกาญ UPC31","54000024":"แสงไทยแพร่","21000012":"CPN ระยอง","12130022":"R รังสิต","10330059":"ZEN","6000P001":"วิถีเทพ","11130019":"เซ็นทรัลเวสวิลล์","8311S003":"ROBINSON ถลาง","11400001":"เซ็นทรัล เวสท์เกต","49000006":"SKUWB9M36A3OT06A2","34000003":"สินทรัพย์ก้าวหน้า จ.อุบล","3000K63C":"The Mall โคราช","10220011":"C รามอินทรา Mai","12130018":"เซ็นทรัล-รังสิต","63110022":"R แม่สอด","20000001":"SHOP.CPNชลบุรี","10600089":"The Mall ท่าพระ","5100N003":"แจ่มฟ้าช้อปปิ้วมอลล์ ลูกค้าต้องการ","57000009":"โรบินสันเชียงราย","93000012":"ห้างโคลีเซี่ยมพัทลุง","12130049":"Shop ฟิวเจอร์-รังสิต","10120189":"His&Her outlet icc","10330035":"Siam Paragon","84000001":"โคลิเซียม สุราษ","10600022":"สยามทาคาชิมาย่า","2000FT99":"Ro -ไลฟ์สไตล์ชลบุรี","18000006":"ทวีกิจ สระบุรี","84320003":"เซ็นทรัลสมุย","45000005":"R ร้อยเอ็ด","64000002":"Shop Wacoal Big c สุโขทัย","52100008":"R ลำปาง","65000006":"โลตัส พิษณุโลก","70000014":"Rราชบุรี","74000026":"R.มหาชัย","70000018":"Shopโลตัสราชบุรี","10500050":"CT-บางรัก","63110002":"Rแม่สอด","9011H073":"R หาดใหญ่","84000":"โรบินสันสุราษฎร์ธานี","95000015":"โคลีเซียมยะลา","000N1919":"โรบินสันเชียงใหม่","10100020":"Yaowarat Space","4000C020":"แฟรี่พลาซ่า","47000016":"โรบินสันสกลนคร","15000025":"ภิญญา","5300D001":"อุตรดิตถ์ เทรดดิ้ง","6000P003":"V98","94000004":"ไดอาน่า ปัตตานี","50300004":"โลตัส คำเที่ยง เชียงใหม่","72000026":"โรบินสัน สุพรรณบุรี","13000023":"อัมพร อยุธยา","65000024":"showroom ท๊อปแลนด์-พิษณุโลก","6200P013":"R กำแพง"}; // CustID -> ชื่อร้าน (แก้ไข/เพิ่มได้ ค่านี้ชนะชื่อที่ดึงจากข้อความ)
 const DEFAULT_SHEET_ID="1yR13_-X14zyAlmVYK1Zm-r41LXPafHjeYTg_9-wree0"; // แก้เป็น Sheet ID ของคุณได้ที่นี่
 const DEFAULT_GID=""; // เว้นว่าง = ชีตแรก
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -274,10 +280,13 @@ function dmyToIso(s){const m=(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}
 function maskDmy(el){let v=el.value.replace(/\D/g,'').slice(0,8);if(v.length>4)v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);else if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);el.value=v}
 const dLabel=d=>{const [y,m,dd]=d.split('-');return (+dd)+' '+MON[+m-1]};
 const dLong=d=>{const [y,m,dd]=d.split('-');return (+dd)+' '+MON[+m-1]+' '+y};
-const storeLabel=k=>NAMES[k]?k+' · '+NAMES[k]:k;
+const custOf=k=>k.split('_')[0];
+const nameOf=k=>NAMES[custOf(k)]||'';
+const dispKey=k=>k.endsWith('_')?k+'-':k;
+const storeLabel=k=>nameOf(k)?dispKey(k)+' · '+nameOf(k):dispKey(k);
 
 let allDays=[],MIN="",MAX="";
-const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",open:new Set()};
+const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",open:new Set(),hm:null};
 
 /* ---------- filters UI ---------- */
 function addDays(d,n){const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10)}
@@ -311,12 +320,10 @@ function bind(){
     $(pid).onchange=e=>{if(e.target.value)applyDate(w,e.target.value)}});
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const p=$(b.dataset.pick);try{p.showPicker()}catch(e){p.focus();p.click()}});
   $('store').onchange=e=>{S.store=e.target.value;update()};
-  $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();S.store='';update()};
+  $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();S.store='';S.hm=null;update()};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const r=e.target.closest('.row[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.row[data-it]')){e.preventDefault();e.target.click()}};
-  $('stores').onclick=e=>{const r=e.target.closest('[data-store]');if(!r)return;S.store=r.dataset.store;update()};
-  $('stores').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-store]')){e.preventDefault();e.target.click()}};
 }
 
 /* ---------- tooltip ---------- */
@@ -335,11 +342,11 @@ function countBy(rows,f){const m=new Map();rows.forEach(r=>{const k=f(r);m.set(k
 
 /* ---------- renderers ---------- */
 function renderKpis(){
-  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.map(r=>r.k)).size;
+  const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.k)).size;
   const yes=F.filter(inStock).length, no=F.length-yes;
   const k=[
     ['คำถามทั้งหมด',fmt(q),'ค้นหา '+fmt(F.length)+' รายการ · เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
-    ['ร้านค้าที่ถาม',fmt(st),'CustID_Corner ไม่ซ้ำ',''],
+    ['ร้านค้าที่ถาม',fmt(st),'CustID_Corner ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)',''],
     ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการที่ค้นหา','good'],
     ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการที่ค้นหา','bad']];
   $('kpis').innerHTML=k.map(x=>`<div class="kpi ${x[3]}"><div class="k">${x[0]}</div><div class="v num">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
@@ -431,30 +438,57 @@ function renderItems(){
   $('items').innerHTML=h;
 }
 function renderStores(){
-  const g=new Map();F.forEach(r=>{let o=g.get(r.k);if(!o){o={k:r.k,n:0,y:0};g.set(r.k,o)}o.n++;inStock(r)&&o.y++});
+  const g=new Map();let unk=0;F.forEach(r=>{if(r.k==='(ไม่ระบุ)'){unk++;return}let o=g.get(r.k);if(!o){o={k:r.k,n:0,y:0};g.set(r.k,o)}o.n++;inStock(r)&&o.y++});
   const arr=[...g.values()].sort((a,b)=>b.n-a.n).slice(0,10);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
   const mx=Math.max(...arr.map(o=>o.n),1);
   $('stores').innerHTML=arr.map((o,i)=>{const no=o.n-o.y,hi=pct(no,o.n)>=50;
-    return `<div class="row st" role="button" tabindex="0" data-store="${esc(o.k)}" data-tip="${esc(storeLabel(o.k)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
+    return `<div class="row st" data-tip="${esc(storeLabel(o.k)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
       <span class="rk num">${i+1}</span>
-      <span class="nm">${esc(NAMES[o.k]||o.k)}${NAMES[o.k]?`<small>${esc(o.k)}</small>`:''}</span>
+      <span class="nm"><b>${esc(o.k==='(ไม่ระบุ)'?'ไม่ระบุร้านในข้อความ':(nameOf(o.k)||'ยังไม่มีชื่อร้าน'))}</b><small>${esc(o.k==='(ไม่ระบุ)'?'ไม่พบ CustID':dispKey(o.k))}</small></span>
       <span class="trk"><span class="fill" style="width:${o.n/mx*100}%;background:var(--s1)"></span></span>
       <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
-      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('');
+      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ข้อความไม่ระบุรหัสร้าน</div>`:'');
 }
+function hmSel(d,h){const s=S.hm;return !!s&&(s.d===null||s.d===d)&&(s.h===null||s.h===h)}
 function renderHeat(){
   const cell=new Map();let mx=0,hmin=24,hmax=-1;
   F.forEach(r=>{const dt=new Date(r.t.slice(0,10)+'T00:00:00Z');const d=(dt.getUTCDay()+6)%7,h=+r.t.slice(11,13);const k=d*24+h;const v=(cell.get(k)||0)+1;cell.set(k,v);mx=Math.max(mx,v);hmin=Math.min(hmin,h);hmax=Math.max(hmax,h)});
   const el=$('heat');
-  if(!F.length){el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
+  if(!F.length){el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>';renderHeatDetail();return}
   hmin=Math.min(hmin,8);hmax=Math.max(hmax,20);
   const hs=[];for(let h=hmin;h<=hmax;h++)hs.push(h);
   el.style.gridTemplateColumns=`64px repeat(${hs.length},minmax(0,1fr))`;
-  let h='<span></span>'+hs.map(x=>`<span class="h num">${x}</span>`).join('');
-  for(let d=0;d<7;d++){h+=`<span class="d">${DOW[d]}</span>`;hs.forEach(x=>{const v=cell.get(d*24+x)||0;
-    h+=v?`<span class="c" style="background:color-mix(in srgb,var(--s1) ${Math.round(12+88*v/mx)}%,var(--surface))" data-tip="${DOW[d]} ${String(x).padStart(2,'0')}:00–${String(x).padStart(2,'0')}:59\n${v} รายการ"></span>`:`<span class="c"></span>`})}
+  let h='<span></span>'+hs.map(x=>`<span class="h num ${S.hm&&S.hm.h===x&&S.hm.d===null?'sel-l':''}" data-h="${x}" role="button" tabindex="0">${x}</span>`).join('');
+  for(let d=0;d<7;d++){h+=`<span class="d ${S.hm&&S.hm.d===d&&S.hm.h===null?'sel-l':''}" data-d="${d}" role="button" tabindex="0">${DOW[d]}</span>`;hs.forEach(x=>{const v=cell.get(d*24+x)||0;
+    h+=v?`<span class="c ${hmSel(d,x)?'sel':''}" role="button" tabindex="0" data-d="${d}" data-h="${x}" style="background:color-mix(in srgb,var(--s1) ${Math.round(12+88*v/mx)}%,var(--surface))" data-tip="${DOW[d]} ${String(x).padStart(2,'0')}:00–${String(x).padStart(2,'0')}:59\n${v} รายการ · คลิกเพื่อดูคำถาม"></span>`:`<span class="c"></span>`})}
   el.innerHTML=h;
+  renderHeatDetail();
+}
+function renderHeatDetail(){
+  const box=$('hmDetail');const s=S.hm;
+  if(!s){box.hidden=true;box.innerHTML='';return}
+  const rows=F.filter(r=>{const dt=new Date(r.t.slice(0,10)+'T00:00:00Z');const d=(dt.getUTCDay()+6)%7,h=+r.t.slice(11,13);return (s.d===null||s.d===d)&&(s.h===null||s.h===h)});
+  const g=new Map();
+  rows.forEach(r=>{let o=g.get(r.rq);if(!o){o={rq:r.rq,t:r.t,k:r.k,skus:[],y:0,n:0};g.set(r.rq,o)}if(r.t<o.t)o.t=r.t;o.skus.push(r.term);inStock(r)?o.y++:o.n++});
+  const qs=[...g.values()].sort((a,b)=>b.t.localeCompare(a.t));
+  const hh=x=>String(x).padStart(2,'0');
+  const title=(s.d===null?'ทุกวัน':'วัน'+DOW[s.d])+' · '+(s.h===null?'ทุกชั่วโมง':hh(s.h)+':00–'+hh(s.h)+':59 น.');
+  const dmy=t=>isoToDmy(t.slice(0,10))+' '+t.slice(11);
+  const shown=qs.slice(0,300);
+  box.hidden=false;
+  box.innerHTML=`<div class="hd"><div><h2>คำถามช่วง ${title}</h2><div class="sub">${fmt(qs.length)} คำถาม · ${fmt(rows.length)} รายการที่ค้นหา · เรียงจากล่าสุด${qs.length>shown.length?' · แสดง '+shown.length+' คำถามแรก':''}</div></div><button class="xbtn" id="hmClose" type="button">ปิดตาราง</button></div>
+  <div class="q-wrap"><table class="qt"><thead><tr><th>วันที่ เวลา</th><th>ร้านค้า</th><th>รายการที่ค้นหา (SKU)</th><th>ผลลัพธ์</th></tr></thead><tbody>`+
+  (shown.length?shown.map(q=>`<tr><td class="num" style="white-space:nowrap">${dmy(q.t)}</td><td class="st2">${q.k==='(ไม่ระบุ)'?'<span style="color:var(--ink3)">ไม่ระบุร้าน</span>':`<b style="font-weight:600">${esc(nameOf(q.k)||'ยังไม่มีชื่อร้าน')}</b><small>${esc(dispKey(q.k))}</small>`}</td><td class="sk">${esc(q.skus.join(', '))}</td><td style="white-space:nowrap">${q.y?`<span class="pill" style="--c:var(--s1)">มี ${q.y}</span> `:''}${q.n?`<span class="pill" style="--c:var(--s2)">ไม่มี ${q.n}</span>`:''}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">ไม่มีคำถามในช่วงนี้ตามตัวกรองที่เลือก</td></tr>')+`</tbody></table></div>`;
+  $('hmClose').onclick=()=>{S.hm=null;renderHeat()};
+}
+function bindHeat(){
+  const pick=e=>{const c=e.target.closest('[data-d],[data-h]');if(!c||!$('heat').contains(c))return;
+    const d=c.dataset.d===undefined?null:+c.dataset.d,h=c.dataset.h===undefined?null:+c.dataset.h;
+    S.hm=(S.hm&&S.hm.d===d&&S.hm.h===h)?null:{d,h};renderHeat();
+    if(S.hm)$('hmDetail').scrollIntoView({behavior:'smooth',block:'nearest'})};
+  $('heat').onclick=pick;
+  $('heat').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(e)}};
 }
 function update(){
   F=filtered();syncFilters();
@@ -481,6 +515,28 @@ function parseDT(s){s=(s||'').trim();let m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](
   m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})/);
   if(m){const p=n=>String(n).padStart(2,'0');return `${m[3]}-${p(m[1])}-${p(m[2])} ${p(m[4])}:${m[5]}`}
   return ''}
+const NAME_BAD=/\bsku\b|^[WM][A-Z0-9]{5,}|สต[็๊]?อก|มีสินค้า|มีของ|ขอดู|ไซ[ส์ซ]|^มี|^@|^\d+$/i;
+function cleanName(n){return n.replace(/@\S+/g,'').replace(/[^\u0E00-\u0E7Fa-zA-Z0-9 .&\/\-+()]/g,'').replace(/^[\s:\-–]+/,'').replace(/\s+/g,' ').trim()}
+function lev1(a,b){if(Math.abs(a.length-b.length)>1)return false;
+  if(a.length===b.length){let d=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])d++;return d===1}
+  if(a.length<b.length)[a,b]=[b,a];for(let i=0;i<a.length;i++)if(a.slice(0,i)+a.slice(i+1)===b)return true;return false}
+// ดึง CustID / Corner / ชื่อร้าน จากข้อความต้นฉบับของลูกค้า (รูปแบบพิมพ์หลากหลาย)
+function extractStore(raw){
+  const ls=(raw||'').split('\n').map(l=>l.trim()).filter(Boolean);const out={cid:'',cn:'',name:''};
+  if(!ls.length)return out;const t=ls.join('\n');
+  const m1=ls[0].match(/(\d{6,10}|[0-9A-Za-z]{8})\s*[\/\-]\s*([0-9A-Za-z]{2,4})(?![0-9A-Za-z])/);
+  if(m1&&/\d/.test(m1[1])){out.cid=m1[1];out.cn=m1[2].toUpperCase()}
+  let name='';const m=t.match(/ชื่อร้าน\s*[:：]?\s*(.+)/);
+  if(m)name=cleanName(m[1]);
+  if(!name&&m1){const rest=cleanName(ls[0].slice(m1.index+m1[0].length));
+    if(rest)name=rest;else if(ls.length>1&&!/^[\d\s\/\-]+$/.test(ls[1]))name=cleanName(ls[1])}
+  if(!name){const m2=ls[0].match(/(\d{7,9}|[0-9A-Za-z]{8})\s+(?:BGW-?)?([0-9A-Za-z]{3})\s+(.+)/);
+    if(m2&&/\d/.test(m2[1])){out.cid=out.cid||m2[1];out.cn=out.cn||m2[2].toUpperCase();name=cleanName(m2[3])}}
+  if(!name){const m3=t.match(/รหัสร้านค้า\s*[:：]?\s*([0-9A-Za-z]+)/);
+    if(m3){out.cid=out.cid||m3[1];if(!/\d{5}/.test(ls[0]))name=cleanName(ls[0]);
+      const m4=t.match(/คอนเนอร์\s*[:：]?\s*(?:BGW-?)?([0-9A-Za-z]{2,4})/);if(m4)out.cn=out.cn||m4[1].toUpperCase()}}
+  if(name&&(NAME_BAD.test(name)||name.length>40||name.length<3))name='';
+  out.name=name;return out}
 function buildRows(table){
   const head=table[0].map(h=>h.trim().toLowerCase());
   const ix=n=>head.findIndex(h=>h===n||h.startsWith(n));
@@ -488,25 +544,26 @@ function buildRows(table){
   const miss=['dt','rq','term','ty','s'].filter(k=>I[k]<0);
   if(miss.length)throw new Error('ไม่พบคอลัมน์ที่ต้องใช้ในชีต: '+miss.join(', ')+' (ต้องมี DateTime, RequestID, SearchTerm, SearchType, Status)');
   const g=(r,i)=>i<0?'':(r[i]||'').trim();
-  const rows=[],nameCnt={};
+  const pre=[];
   for(let n=1;n<table.length;n++){const x=table[n];if(x.length<3)continue;
-    const t=parseDT(g(x,I.dt));if(!t)continue;
-    const raw=I.raw<0?'':(x[I.raw]||'');
-    let c=g(x,I.c),cn=g(x,I.cn).toUpperCase();
-    const m=raw.match(/^\s*(\w{6,10})\s*[\/\-]\s*(\w{2,4})/);
-    if(!c&&m)c=m[1];if(!cn&&m)cn=m[2].toUpperCase();
+    const tm=parseDT(g(x,I.dt));if(!tm)continue;
+    pre.push({n,x,tm,c:g(x,I.c),cn:g(x,I.cn).toUpperCase(),ex:extractStore(I.raw<0?'':(x[I.raw]||''))});
+  }
+  const known=new Set(pre.map(p=>p.c).filter(Boolean));
+  const rows=[],nameCnt={};
+  pre.forEach(p=>{const {x,n}=p;let c=p.c||p.ex.cid,cn=p.cn||p.ex.cn;
+    if(c&&!known.has(c)){const cand=[...known].filter(s=>lev1(c,s));if(cand.length===1)c=cand[0]} // แก้รหัสที่พิมพ์ผิด 1 ตัวอักษร
     if(/^\d{1,2}$/.test(cn))cn=cn.padStart(3,'0');
     const k=c?c+'_'+cn:'(ไม่ระบุ)';
-    if(m&&c){const ls=raw.split('\n').map(l=>l.trim()).filter(Boolean);const rest=ls[0].slice(m[0].length).trim();let nm=rest||(ls[1]||'');
-      if(/\bsku\b/i.test(nm)||/^[WM][A-Z0-9]{5,}/i.test(nm)||nm.length>40)nm='';
-      if(nm){(nameCnt[k]=nameCnt[k]||{})[nm]=(nameCnt[k][nm]||0)+1}}
-    rows.push({t,rq:g(x,I.rq)||('r'+n),k,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s)});
-  }
+    if(c&&p.ex.name){(nameCnt[c]=nameCnt[c]||{})[p.ex.name]=(nameCnt[c][p.ex.name]||0)+1}
+    rows.push({t:p.tm,rq:g(x,I.rq)||('r'+n),k,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s)});
+  });
   // เติม prefix ที่พิมพ์ตกหล่น เช่น 3B53C4BL -> WB3B53C4BL
   const byK={};rows.forEach(r=>{if('WM'.includes(r.term[0]||'#')){const it=r.term.slice(0,6);(byK[it.slice(2,6)]=byK[it.slice(2,6)]||new Set()).add(it)}});
   rows.forEach(r=>{const t=r.term;if(t&&!'WM'.includes(t[0])){const s=byK[t.slice(0,4)];if(s&&s.size===1)r.term=[...s][0].slice(0,2)+t}
     r.it=r.term.slice(0,6);const mm=r.term.slice(6).match(/^([A-Z]\d)?([A-Z]{2})?/);r.sz=mm[1]||'';r.co=mm[2]||'';r.sku=r.term});
-  const names={};for(const k in nameCnt){names[k]=Object.entries(nameCnt[k]).sort((a,b)=>b[1]-a[1])[0][0]}
+  const names={};for(const c in nameCnt){names[c]=Object.entries(nameCnt[c]).sort((a,b)=>b[1]-a[1]||b[0].length-a[0].length)[0][0]}
+  Object.assign(names,STORE_MASTER);
   return {rows:rows.filter(r=>r.term),names};
 }
 function parseSheetRef(s){s=(s||'').trim();const m=s.match(/\/d\/([\w-]+)/);const g=s.match(/[#&?]gid=(\d+)/);
@@ -575,7 +632,7 @@ function bindLoader(){
   ['dragleave','drop'].forEach(n=>d.addEventListener(n,e=>{e.preventDefault();d.classList.remove('over')}));
   d.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
 }
-bind();bindLoader();
+bind();bindHeat();bindLoader();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(ROWS.length)renderDaily()},80)}).observe($('daily'));
 autoLoad();
 </script>
