@@ -134,20 +134,21 @@ svg text{font-family:var(--font)}
 <body>
 <div class="wrap">
   <div class="gate card" id="gate">
-    <h2>เชื่อมต่อข้อมูล</h2>
-    <p>วางลิงก์ Google Sheet หรือ Sheet ID แล้วกดเชื่อมต่อ หรือเลือกไฟล์ CSV ที่ export จากชีต</p>
-    <div class="f" style="margin-top:10px"><label for="sheetRef">Google Sheet (ลิงก์หรือ ID)</label>
-      <input class="ctl" id="sheetRef" type="text" autocomplete="off" spellcheck="false"></div>
-    <div class="acts" style="margin-top:10px"><button class="btn" id="btnConnect" type="button">เชื่อมต่อ</button><button class="btn ghost" id="btnClose" type="button" hidden>ยกเลิก</button></div>
-    <div class="drop" id="drop" tabindex="0" role="button">ลากไฟล์ CSV มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์<input id="file" type="file" accept=".csv,text/csv" hidden></div>
+    <h2 id="gateTitle">กำลังโหลดข้อมูล...</h2>
     <div class="msg" id="msg"></div>
-    <p style="margin-top:14px"><b>ให้เว็บอ่านชีตได้:</b> ใน Google Sheet เลือก Share > General access > "Anyone with the link" เป็น Viewer (หรือ File > Share > Publish to web) เว็บจะอ่านข้อมูลสดเมื่อเปิดหรือกดรีเฟรช ถ้าไม่ต้องการเปิดชีต ให้ใช้ File > Download > CSV แล้วลากมาวางด้านบน ข้อมูลประมวลผลในเบราว์เซอร์ของคุณเท่านั้น</p>
+    <div class="acts" id="gateActs" style="margin-top:12px" hidden><button class="btn" id="btnRetry" type="button">ลองใหม่</button></div>
+    <details id="gateHelp" style="margin-top:14px;color:var(--ink2)" hidden>
+      <summary style="cursor:pointer">วิธีแก้ไข หรือใช้ไฟล์ CSV แทน</summary>
+      <p>ถ้าตั้งค่า <code>API_URL</code> ไว้ ให้ตรวจว่า Deploy Apps Script เป็น Web app และ Who has access เป็น Anyone ถ้าไม่ได้ตั้ง ให้ตั้ง Share ของ Google Sheet เป็น "Anyone with the link" (Viewer)</p>
+      <p>หรือดาวน์โหลดชีตเป็น CSV (File > Download > CSV) แล้วลากมาวางด้านล่าง ข้อมูลประมวลผลในเบราว์เซอร์ของคุณเท่านั้น</p>
+      <div class="drop" id="drop" tabindex="0" role="button">ลากไฟล์ CSV มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์<input id="file" type="file" accept=".csv,text/csv" hidden></div>
+    </details>
   </div>
   <div id="app" hidden>
   <div class="bar">
     <div class="bar-top">
       <h1>LINE Somjuk · สรุปการเช็ค Stock</h1>
-      <span class="acts"><span class="asof" id="asof"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnSource" type="button">แหล่งข้อมูล</button></span>
+      <span class="acts"><span class="asof" id="asof"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button></span>
     </div>
     <div class="filters">
       <div class="f"><span class="lbl">ช่วงเวลา</span>
@@ -483,7 +484,7 @@ async function reload(){
   const text=await fetchSheet(source.ref);init(text,{type:'sheet',ref:source.ref});
 }
 function setMsg(t,err){const m=$('msg');m.textContent=t||'';m.className='msg'+(err?' err':'')}
-function showGate(on){$('gate').hidden=!on;$('app').hidden=on&&!ROWS.length;$('btnClose').hidden=!ROWS.length;if(on)$('app').hidden=true;else $('app').hidden=false}
+function showGate(on){$('gate').hidden=!on;$('app').hidden=on}
 let source={type:'',ref:'',at:null};
 function init(text,src){
   const table=typeof text==='string'?parseCSV(text):text;if(!table||table.length<2)throw new Error('ไฟล์ไม่มีข้อมูล');
@@ -498,24 +499,24 @@ function init(text,src){
   $('btnRefresh').hidden=src.type==='file';
   showGate(false);update();
 }
-async function connect(ref){
-  const b=$('btnConnect');b.disabled=true;setMsg('กำลังโหลดข้อมูล...');
-  try{const text=await fetchSheet(ref);init(text,{type:'sheet',ref});lsSet('somjuk.sheet',ref);setMsg('')}
-  catch(e){setMsg(e.message,true);if(!ROWS.length)showGate(true);else $('gate').hidden=false}
-  finally{b.disabled=false}
-}
 function readFile(f){if(!f)return;const fr=new FileReader();
   fr.onload=()=>{try{init(String(fr.result),{type:'file',name:f.name});setMsg('')}catch(e){setMsg(e.message,true)}};
   fr.onerror=()=>setMsg('อ่านไฟล์ไม่ได้',true);fr.readAsText(f,'utf-8')}
+async function reload(){
+  if(API_URL){init(await loadApi(),{type:'api'});return}
+  init(await fetchSheet(DEFAULT_SHEET_ID),{type:'sheet'});
+}
+async function autoLoad(){
+  showGate(true);$('gateTitle').textContent='กำลังโหลดข้อมูล...';$('gateActs').hidden=true;$('gateHelp').hidden=true;setMsg('');
+  try{await reload()}
+  catch(e){showGate(true);$('gateTitle').textContent='โหลดข้อมูลไม่สำเร็จ';setMsg(e.message,true);$('gateActs').hidden=false;$('gateHelp').hidden=false}
+}
 function bindLoader(){
-  $('btnConnect').onclick=()=>connect($('sheetRef').value);
-  $('sheetRef').onkeydown=e=>{if(e.key==='Enter')connect($('sheetRef').value)};
-  $('btnClose').onclick=()=>{$('gate').hidden=true;$('app').hidden=false};
-  $('btnSource').onclick=()=>{$('gate').hidden=false;$('btnClose').hidden=!ROWS.length;window.scrollTo(0,0)};
+  $('btnRetry').onclick=autoLoad;
   $('btnRefresh').onclick=async()=>{const b=$('btnRefresh');b.disabled=true;const keep={from:S.from,to:S.to,store:S.store};
-    try{await reload();
-      if(keep.from>=MIN&&keep.to<=MAX){S.from=keep.from;S.to=keep.to}if(keep.store&&[...ROWS].some(r=>r.k===keep.store))S.store=keep.store;update()}
-    catch(e){alert_(e.message)}finally{b.disabled=false}};
+    try{await reload();if(keep.from>=MIN&&keep.to<=MAX){S.from=keep.from;S.to=keep.to}
+      if(keep.store&&ROWS.some(r=>r.k===keep.store))S.store=keep.store;update()}
+    catch(e){$('asof').textContent='รีเฟรชไม่สำเร็จ: '+e.message}finally{b.disabled=false}};
   const d=$('drop'),fi=$('file');
   d.onclick=()=>fi.click();d.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')fi.click()};
   fi.onchange=()=>readFile(fi.files[0]);
@@ -523,18 +524,9 @@ function bindLoader(){
   ['dragleave','drop'].forEach(n=>d.addEventListener(n,e=>{e.preventDefault();d.classList.remove('over')}));
   d.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
 }
-function alert_(t){$('gate').hidden=false;setMsg(t,true)}
 bind();bindLoader();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(ROWS.length)renderDaily()},80)}).observe($('daily'));
-if(API_URL){
-  document.querySelector('#gate .f').hidden=true;$('btnConnect').hidden=true;
-  setMsg('กำลังโหลดข้อมูลจาก Google Sheet...');
-  loadApi().then(tb=>{init(tb,{type:'api'});setMsg('')}).catch(e=>{setMsg(e.message+' · หรือเลือกไฟล์ CSV ด้านล่างแทน',true);showGate(true)});
-}else{
-  const saved=lsGet('somjuk.sheet')||DEFAULT_SHEET_ID;
-  $('sheetRef').value=saved;
-  if(saved)connect(saved);else showGate(true);
-}
+autoLoad();
 </script>
 </body>
 </html>
