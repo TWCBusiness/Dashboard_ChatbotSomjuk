@@ -72,6 +72,7 @@ h2{font-size:16px;font-weight:600;margin:0}
 .sub{font-size:12.5px;color:var(--ink3);margin-top:2px}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.bleg{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:8px;font-size:12.5px;color:var(--ink2)}.bleg>div{display:flex;gap:6px;min-width:0}.bleg b{color:var(--ink3);min-width:16px}.bleg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bleg small{color:var(--ink3)}
 .tabs{display:flex;gap:2px;background:var(--soft);padding:3px;border-radius:10px}
 .tab{border:none;background:none;padding:5px 12px;border-radius:8px;cursor:pointer;color:var(--ink2);font-size:13px}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(42,48,66,.12)}
@@ -256,7 +257,11 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock</div></div></div>
+      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub" id="storeSub"></div></div>
+        <div class="tabs" role="tablist" id="storeTabs">
+          <button class="tab" role="tab" data-v="bub" aria-selected="true">กราฟกระจาย</button>
+          <button class="tab" role="tab" data-v="bar" aria-selected="false">อันดับ</button>
+        </div></div>
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -303,7 +308,7 @@ const dispKey=k=>k.endsWith('_')?k+'-':k;
 const storeLabel=k=>nameOf(k)?dispKey(k)+' · '+nameOf(k):dispKey(k);
 
 let allDays=[],MIN="",MAX="";
-const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
+const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",stv:"bub",open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
 
 /* ---------- filters UI ---------- */
 function addDays(d,n){const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10)}
@@ -335,6 +340,7 @@ function bind(){
     $(pid).onchange=e=>{if(e.target.value)applyDate(w,e.target.value)}});
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const p=$(b.dataset.pick);try{p.showPicker()}catch(e){p.focus();p.click()}});
   $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.hm=null;update()};
+  $('storeTabs').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;S.stv=b.dataset.v;document.querySelectorAll('#storeTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderStores()};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const r=e.target.closest('.row[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.row[data-it]')){e.preventDefault();e.target.click()}};
@@ -397,7 +403,7 @@ function renderKpis(){
   const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.id)).size;
   const yes=F.filter(inStock).length, no=F.length-yes;
   const k=[
-    ['คำถามทั้งหมด',fmt(q),'นับ RequestID ไม่ซ้ำ (1 ข้อความ = 1 คำถาม) · ค้นหา '+fmt(F.length)+' รายการ (นับทุกแถวในชีต) · เฉลี่ย '+(q?(F.length/q).toFixed(1):'0')+' รายการ/คำถาม',''],
+    ['คำถามทั้งหมด',fmt(q),'นับจาก RequestID · ค้นหา '+fmt(F.length)+' รายการ',''],
     ['ร้านค้าที่ถาม',fmt(st),'CustID ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)',''],
     ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการที่ค้นหา','good'],
     ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการที่ค้นหา','bad']];
@@ -490,14 +496,31 @@ function renderItems(){
   $('items').innerHTML=h;
 }
 function renderStores(){
-  const g=new Map();let unk=0;F.forEach(r=>{if(r.k==='(ไม่ระบุ)'){unk++;return}let o=g.get(r.k);if(!o){o={k:r.k,n:0,y:0};g.set(r.k,o)}o.n++;inStock(r)&&o.y++});
+  const g=new Map();let unk=0;F.forEach(r=>{if(r.k==='(ไม่ระบุ)'){unk++;return}let o=g.get(r.id);if(!o){o={k:r.id,nm:r.nm,n:0,y:0};g.set(r.id,o)}o.n++;inStock(r)&&o.y++});
   const arr=[...g.values()].sort((a,b)=>b.n-a.n).slice(0,10);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
+  $('storeSub').textContent=S.stv==='bub'?'ซ้าย→ขวา = ถามบ่อยขึ้น · บน = ไม่มี Stock มากขึ้น · ขนาดวง = จำนวนรายการที่ไม่มี Stock':'แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock';
+  if(S.stv==='bub'){
+    const W=520,H=300,L=44,R=16,T=14,B=48,pw=W-L-R,ph=H-T-B;
+    const xm=niceMax(Math.max(...arr.map(o=>o.n),1));
+    const ymax=Math.max(60,Math.ceil(Math.max(...arr.map(o=>pct(o.n-o.y,o.n)))/10)*10+10);
+    const X=v=>L+v/xm*pw,Y=v=>T+ph-v/ymax*ph;
+    const mxo=Math.max(...arr.map(o=>o.n-o.y),1);
+    let g='';
+    for(let v=0;v<=ymax;v+=ymax>60?20:10){g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink3)">${v}%</text>`}
+    for(let i=0;i<=4;i++){const v=xm/4*i;g+=`<text x="${X(v)}" y="${T+ph+16}" text-anchor="middle" font-size="11" fill="var(--ink3)">${Math.round(v)}</text>`}
+    g+=`<line x1="${L}" x2="${W-R}" y1="${Y(50)}" y2="${Y(50)}" stroke="var(--s2)" stroke-dasharray="4 4" opacity=".8"/><text x="${W-R}" y="${Y(50)-5}" text-anchor="end" font-size="11" fill="var(--bad-ink)">ไม่มี Stock 50%</text>`;
+    g+=`<text x="${L+pw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--ink3)">จำนวนรายการที่ค้นหา</text>`;
+    g+=arr.map((o,i)=>{const no=o.n-o.y,p=pct(no,o.n),r=7+Math.sqrt(no/mxo)*11,hi=p>=50;
+      return `<g data-tip="${esc(o.nm+'\n'+o.k+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no+' ('+p+'%)')}"><circle cx="${X(o.n)}" cy="${Y(p)}" r="${r}" fill="${hi?'var(--s2)':'var(--s1)'}" fill-opacity=".6" stroke="var(--surface)" stroke-width="2"/><text x="${X(o.n)}" y="${Y(p)+4}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${i+1}</text></g>`}).join('');
+    $('stores').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟกระจายร้านค้า: จำนวนที่ค้นหา เทียบสัดส่วนไม่มี Stock">${g}</svg>
+      <div class="bleg">${arr.map((o,i)=>`<div><b class="num">${i+1}</b><span>${esc(o.nm&&o.nm!=='(ไม่ระบุ)'?o.nm:'ยังไม่มีชื่อร้าน')} <small>${esc(o.k)}</small></span></div>`).join('')}</div>`+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
+    return}
   const mx=Math.max(...arr.map(o=>o.n),1);
   $('stores').innerHTML=arr.map((o,i)=>{const no=o.n-o.y,hi=pct(no,o.n)>=50;
-    return `<div class="row st" data-tip="${esc(storeLabel(o.k)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
+    return `<div class="row st" data-tip="${esc((o.k+' · '+o.nm)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
       <span class="rk num">${i+1}</span>
-      <span class="nm"><b>${esc(o.k==='(ไม่ระบุ)'?'ไม่ระบุร้านในข้อความ':(nameOf(o.k)||'ยังไม่มีชื่อร้าน'))}</b><small>${esc(o.k==='(ไม่ระบุ)'?'ไม่พบ CustID':dispKey(o.k))}</small></span>
+      <span class="nm"><b>${esc(o.nm&&o.nm!=='(ไม่ระบุ)'?o.nm:'ยังไม่มีชื่อร้าน')}</b><small>${esc(o.k)}</small></span>
       <span class="trk"><span class="fill" style="width:${o.n/mx*100}%;background:var(--s1)"></span></span>
       <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
       <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
