@@ -229,13 +229,6 @@ svg text{font-family:var(--font)}
       <div class="hb" id="statBars"></div>
     </section>
 
-    <section class="card c12">
-      <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · คลิกช่องสี (หรือชื่อวัน/ชั่วโมง) เพื่อดูคำถามด้านล่าง</div></div></div>
-      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
-      <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
-    </section>
-    <section class="card c12" id="hmDetail" hidden></section>
-
     <section class="card c7">
       <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">แท่ง = จำนวนครั้งที่ถูกค้นหา · ป้ายส้ม = ไม่มี Stock ตั้งแต่ 50% · คลิกแถวเพื่อดู SKU / Size / Color</div></div>
         <div class="tabs" role="tablist" id="itemTabs">
@@ -248,6 +241,13 @@ svg text{font-family:var(--font)}
       <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock</div></div></div>
       <div class="tbl" id="stores"></div>
     </section>
+
+    <section class="card c12">
+      <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · คลิกช่องสี (หรือชื่อวัน/ชั่วโมง) เพื่อดูคำถามด้านล่าง</div></div></div>
+      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
+      <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
+    </section>
+    <section class="card c12" id="hmDetail" hidden></section>
   </div>
 
   <p class="foot">คำจำกัดความ: <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
