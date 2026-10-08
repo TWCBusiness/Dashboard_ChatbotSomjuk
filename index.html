@@ -89,6 +89,19 @@ h2{font-size:16px;font-weight:600;margin:0}
 [data-store]:hover .nm{text-decoration:underline;text-underline-offset:3px}
 
 /* date input */
+.cbrow{flex:1 1 100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cbw{position:relative;min-width:0}
+.cb{position:relative}
+.cb input.ctl{width:100%;padding-right:30px;text-overflow:ellipsis}
+.cb input.ctl.auto{border-style:dashed;background:var(--soft)}
+.cbx{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--ink3);width:24px;height:24px;border-radius:6px;font-size:16px;line-height:1}
+.cbx:hover{background:var(--soft);color:var(--ink)}
+.opts{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;margin:0;padding:4px;list-style:none;background:var(--surface);border-radius:10px;box-shadow:0 8px 28px rgba(42,48,66,.18);border:1px solid var(--line);max-height:280px;overflow:auto;min-width:200px}
+.opts li{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:14px}
+.opts li .cnt{color:var(--ink3);font-size:12.5px;white-space:nowrap}
+.opts li:hover,.opts li.act{background:var(--soft)}
+.opts li.sel{font-weight:600}
+.opts li.none{color:var(--ink3);cursor:default}
 .dinp{position:relative;display:flex;align-items:center}
 .dinp .ctl{width:128px;padding-right:34px;font-variant-numeric:tabular-nums}
 .dinp .cal{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--ink3);padding:4px;border-radius:6px;display:flex}
@@ -156,7 +169,11 @@ h2{font-size:16px;font-weight:600;margin:0}
 svg text{font-family:var(--font)}
 .foot{margin-top:22px;color:var(--ink3);font-size:12.5px;line-height:1.7}
 
-/* loading / gate */
+/* loading */
+.prog{position:fixed;left:0;right:0;top:0;height:3px;z-index:60;overflow:hidden;background:transparent}
+.prog::after{content:"";position:absolute;inset:0;width:35%;background:var(--s1);border-radius:3px;animation:prog 1.1s ease-in-out infinite}
+@keyframes prog{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+/* gate */
 .gate{max-width:560px;margin:56px auto 0}
 .gate h2{font-size:18px;margin-bottom:4px}
 .btn{background:var(--s1);color:#fff;border:none;border-radius:10px;padding:8px 18px;cursor:pointer;font-weight:600}
@@ -168,8 +185,8 @@ svg text{font-family:var(--font)}
 .msg.err{color:#d2705a}
 .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
-@media (max-width:1000px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
-@media (max-width:560px){.donut{grid-template-columns:1fr}.row.st{grid-template-columns:20px minmax(0,1fr) 40px 80px}.row.st .trk{display:none}.kpi .v{font-size:28px}.card{padding:16px}
+@media (max-width:1000px){.cbrow{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+@media (max-width:560px){.cbrow{grid-template-columns:1fr}.donut{grid-template-columns:1fr}.row.st{grid-template-columns:20px minmax(0,1fr) 40px 80px}.row.st .trk{display:none}.kpi .v{font-size:28px}.card{padding:16px}
   .row:not(.st){grid-template-columns:20px 80px minmax(0,1fr) 36px 14px}.row:not(.st) .badge{display:none}
   .sku-wrap{margin-left:0}.hrow{grid-template-columns:minmax(80px,40%) 1fr auto}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -177,7 +194,7 @@ svg text{font-family:var(--font)}
 </head>
 <body>
 <div class="wrap">
-  <div class="gate card" id="gate">
+  <div class="gate card" id="gate" hidden>
     <h2 id="gateTitle">กำลังโหลดข้อมูล...</h2>
     <div class="msg" id="msg"></div>
     <div class="acts" id="gateActs" style="margin-top:12px" hidden><button class="btn" id="btnRetry" type="button">ลองใหม่</button></div>
@@ -188,10 +205,11 @@ svg text{font-family:var(--font)}
       <div class="drop" id="drop" tabindex="0" role="button">ลากไฟล์ CSV มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์<input id="file" type="file" accept=".csv,text/csv" hidden></div>
     </details>
   </div>
-  <div id="app" hidden>
+  <div class="prog" id="prog" hidden></div>
+  <div id="app">
   <div class="bar">
     <div class="bar-top">
-      <h1>LINE Somjuk · สรุปการเช็ค Stock</h1>
+      <h1>Dashboard · LINE Somjuk </h1>
       <span class="acts"><span class="asof" id="asof"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button></span>
     </div>
     <div class="filters">
@@ -203,30 +221,30 @@ svg text{font-family:var(--font)}
         </div>
       </div>
       <div class="f"><span class="lbl">เลือกเร็ว</span><div class="chips" id="presets"></div></div>
-      <div class="f"><label for="store">CustID_Corner</label><select class="ctl" id="store"></select></div>
+      <div class="f cbrow" id="cbrow"></div>
       <div class="f"><span class="lbl">ประเภทการค้นหา</span><div class="chips" id="typeChips"></div></div>
       <div class="f"><span class="lbl">ผลลัพธ์</span><div class="chips" id="statChips"></div></div>
       <button class="reset" id="reset" type="button">ล้างตัวกรอง</button>
     </div>
   </div>
 
-  <div class="kpis" id="kpis"></div>
-  <div class="insight" id="insight"></div>
+  <div class="kpis" id="kpis"><div class="kpi "><div class="k">คำถามทั้งหมด</div><div class="v num">–</div><div class="s">&nbsp;</div></div><div class="kpi "><div class="k">ร้านค้าที่ถาม</div><div class="v num">–</div><div class="s">&nbsp;</div></div><div class="kpi good"><div class="k">รายการที่มี Stock</div><div class="v num">–</div><div class="s">&nbsp;</div></div><div class="kpi bad"><div class="k">รายการที่ไม่มี Stock</div><div class="v num">–</div><div class="s">&nbsp;</div></div></div>
+  <div class="insight" id="insight">กำลังโหลดข้อมูลจาก Google Sheet...</div>
 
   <div class="grid">
     <section class="card c12">
       <div class="hd"><div><h2>รายการที่ค้นหาในแต่ละวัน</h2><div class="sub" id="dailySub"></div></div>
         <div class="legend"><span><i style="background:var(--s1)"></i>มี Stock</span><span><i style="background:var(--s2)"></i>ไม่มี Stock</span></div></div>
-      <div id="daily"></div>
+      <div id="daily"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c6">
       <div class="hd"><div><h2>รูปแบบการค้นหา</h2><div class="sub">ลูกค้าค้นหาด้วยรหัสแบบไหน</div></div></div>
-      <div class="donut" id="typeDonut"></div>
+      <div class="donut" id="typeDonut"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c6">
       <div class="hd"><div><h2>ผลลัพธ์การค้นหา</h2><div class="sub">สถานะที่ระบบตอบกลับ</div></div></div>
-      <div class="hb" id="statBars"></div>
+      <div class="hb" id="statBars"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c7">
@@ -235,16 +253,16 @@ svg text{font-family:var(--font)}
           <button class="tab" role="tab" data-t="top" aria-selected="true">ถูกค้นหามากสุด</button>
           <button class="tab" role="tab" data-t="out" aria-selected="false">ไม่มี Stock บ่อยสุด</button>
         </div></div>
-      <div class="tbl" id="items"></div>
+      <div class="tbl" id="items"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c5">
       <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock</div></div></div>
-      <div class="tbl" id="stores"></div>
+      <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c12">
       <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · คลิกช่องสี (หรือชื่อวัน/ชั่วโมง) เพื่อดูคำถามด้านล่าง</div></div></div>
-      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
+      <div class="hm-scroll"><div class="hm" id="heat"><div class="empty">กำลังโหลดข้อมูล...</div></div></div>
       <div class="ramp"><span>น้อย</span><i></i><span>มาก</span></div>
     </section>
     <section class="card c12" id="hmDetail" hidden></section>
@@ -259,7 +277,6 @@ svg text{font-family:var(--font)}
 let ROWS=[],NAMES={};
 const API_URL="https://script.google.com/macros/s/AKfycbwzLSpFo0Ln2zsdX6JaMoXqSR6vl6EAJbSx1UbBv6Y3eIvvriVl3o1vifAGl_vhrU58bA/exec"; // วาง Web App URL จาก Apps Script (ลงท้ายด้วย /exec) แล้วเว็บจะโหลดข้อมูลเองอัตโนมัติ
 const API_KEY=""; // ถ้าตั้ง KEY ใน Code.gs ให้ใส่ค่าเดียวกันที่นี่
-const STORE_MASTER={"10900068":"เซ็นทรัลลาดพร้าว","80000004":"สหไทยพลาซ่านครศรีฯ","5000N218":"เซ็นทรัลเฟสเชียงใหม่","55000007":"Shopนราไฮเปอร์มาร์ท","74000009":"Shop wacoal studio โลตัส สมุทรสาคร","16000006":"ไชยแสงสิงห์บุรี","84000005":"โรบินสัน-สุราษฎร์ธานี","92000002":"โรบินสันตรัง","86000015":"โอเชี่ยน ชุมพร","73210008":"เซ็นทรัลศาลายา","10240084":"The Mall บางกะปิ","9011H085":"เซ็นทรัลเฟสหาดใหญ่","73000017":"C นครปฐม","10150022":"เซ็นทรัลพระราม 2","33000046":"ซุ่นเฮงพลาซ่า","2000FT92":"โรบินสันชลบุรี","12130047":"ช้อปวาโก้ สตูดิโอ โลตัส รังสิต","2000F096":"โง้วจิ้นง้วน","41000034":"เซ็นทรัลอุดรธานี","76150001":"โรบินสันเพชรบุรี","11000015":"The Mll งามวงค์วาน","10200034":"ดิโอล์ดสยาม","45000020":"ร้อยเอ็ดพลาซ่า","18000003":"R สระบุรี","63000003":"Wacoa lstudio โลตัสตาก","20150010":"Terminal21 พัทยา","34000013":"โรบินสันอุบลฯ","11000054":"CPN Northville","6000P012":"ห้างเซ็นทรัลนครสวรรค์","11140001":"เซ็นทรัลเวสต์เกต","50000022":"บิ๊กซีเชียงใหม่1","71000003":"R กาญจนบุรี","10120001":"C พระราม3 ja","6500D015":"6500D015/BGW-004","80110001":"สหไทยทุ่งสง","84000013":"สุราษฎร์ธานีดีเวลลอปเม้นท์","2026FT86":"เซ็นทรัลพัทยา","94000002":"ไดอาน่า ปัตตานี","10160006":"The Mall บางแค","65000008":"โลตัส พิษณุโลก","11120001":"C แจ้งวัฒนะ","10500043":"Cenสีลมฯ","25000003":"โรบินสันปราจีนบุรี","340000013":"โรบินสันอุบลฯ2","4000C086":"เซ็นทรัลขอนแก่น","5000N191":"โรบินสันเชียงใหม่","10270034":"โลตัสศรีนครินทร์","13000011":"R อยุธยา2","80000016":"R โอเชี่ยน 2","10160100":"Shop วาโก้ซีคอนบางแค","72000006":"โรบินสันสุพรรณบุรี","20110002":"J-PARK ศรีราชา","71190020":"กนกกาญ UPC31","54000024":"แสงไทยแพร่","21000012":"CPN ระยอง","12130022":"R รังสิต","10330059":"ZEN","6000P001":"วิถีเทพ","11130019":"เซ็นทรัลเวสวิลล์","8311S003":"ROBINSON ถลาง","11400001":"เซ็นทรัล เวสท์เกต","49000006":"SKUWB9M36A3OT06A2","34000003":"สินทรัพย์ก้าวหน้า จ.อุบล","3000K63C":"The Mall โคราช","10220011":"C รามอินทรา Mai","12130018":"เซ็นทรัล-รังสิต","63110022":"R แม่สอด","20000001":"SHOP.CPNชลบุรี","10600089":"The Mall ท่าพระ","5100N003":"แจ่มฟ้าช้อปปิ้วมอลล์ ลูกค้าต้องการ","57000009":"โรบินสันเชียงราย","93000012":"ห้างโคลีเซี่ยมพัทลุง","12130049":"Shop ฟิวเจอร์-รังสิต","10120189":"His&Her outlet icc","10330035":"Siam Paragon","84000001":"โคลิเซียม สุราษ","10600022":"สยามทาคาชิมาย่า","2000FT99":"Ro -ไลฟ์สไตล์ชลบุรี","18000006":"ทวีกิจ สระบุรี","84320003":"เซ็นทรัลสมุย","45000005":"R ร้อยเอ็ด","64000002":"Shop Wacoal Big c สุโขทัย","52100008":"R ลำปาง","65000006":"โลตัส พิษณุโลก","70000014":"Rราชบุรี","74000026":"R.มหาชัย","70000018":"Shopโลตัสราชบุรี","10500050":"CT-บางรัก","63110002":"Rแม่สอด","9011H073":"R หาดใหญ่","84000":"โรบินสันสุราษฎร์ธานี","95000015":"โคลีเซียมยะลา","000N1919":"โรบินสันเชียงใหม่","10100020":"Yaowarat Space","4000C020":"แฟรี่พลาซ่า","47000016":"โรบินสันสกลนคร","15000025":"ภิญญา","5300D001":"อุตรดิตถ์ เทรดดิ้ง","6000P003":"V98","94000004":"ไดอาน่า ปัตตานี","50300004":"โลตัส คำเที่ยง เชียงใหม่","72000026":"โรบินสัน สุพรรณบุรี","13000023":"อัมพร อยุธยา","65000024":"showroom ท๊อปแลนด์-พิษณุโลก","6200P013":"R กำแพง"}; // CustID -> ชื่อร้าน (แก้ไข/เพิ่มได้ ค่านี้ชนะชื่อที่ดึงจากข้อความ)
 const DEFAULT_SHEET_ID="1yR13_-X14zyAlmVYK1Zm-r41LXPafHjeYTg_9-wree0"; // แก้เป็น Sheet ID ของคุณได้ที่นี่
 const DEFAULT_GID=""; // เว้นว่าง = ชีตแรก
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -286,7 +303,7 @@ const dispKey=k=>k.endsWith('_')?k+'-':k;
 const storeLabel=k=>nameOf(k)?dispKey(k)+' · '+nameOf(k):dispKey(k);
 
 let allDays=[],MIN="",MAX="";
-const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",open:new Set(),hm:null};
+const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
 
 /* ---------- filters UI ---------- */
 function addDays(d,n){const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10)}
@@ -298,12 +315,10 @@ function buildFilters(){
   $('presets').innerHTML=PRESETS.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p[0]}</button>`).join('');
   $('typeChips').innerHTML=TYPES.map(t=>`<button type="button" class="chip" data-type="${t[0]}" aria-pressed="false" title="${t[2]}"><span class="dot" style="background:var(${t[3]})"></span>${t[1]}</button>`).join('');
   $('statChips').innerHTML=STATS.map(t=>`<button type="button" class="chip" data-stat="${t[0]}" aria-pressed="false" title="${t[2]}"><span class="dot" style="background:var(${t[3]})"></span>${t[1]}</button>`).join('');
-  const cnt={};ROWS.forEach(r=>cnt[r.k]=(cnt[r.k]||0)+1);
-  const ks=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
-  $('store').innerHTML='<option value="">ทั้งหมด ('+ks.length+' ร้าน)</option>'+ks.map(k=>`<option value="${esc(k)}">${esc(storeLabel(k))} (${cnt[k]})</option>`).join('');
+  buildCombos();
 }
 function syncFilters(){
-  $('dFrom').value=isoToDmy(S.from);$('dTo').value=isoToDmy(S.to);$('pFrom').value=S.from;$('pTo').value=S.to;$('dFrom').classList.remove('bad');$('dTo').classList.remove('bad');$('store').value=S.store;
+  $('dFrom').value=isoToDmy(S.from);$('dTo').value=isoToDmy(S.to);$('pFrom').value=S.from;$('pTo').value=S.to;$('dFrom').classList.remove('bad');$('dTo').classList.remove('bad');renderCombos();
   document.querySelectorAll('[data-p]').forEach(b=>{const p=PRESETS[+b.dataset.p];b.setAttribute('aria-pressed',String(p[1]===S.from&&p[2]===S.to))});
   document.querySelectorAll('[data-type]').forEach(b=>b.setAttribute('aria-pressed',String(S.types.has(b.dataset.type))));
   document.querySelectorAll('[data-stat]').forEach(b=>b.setAttribute('aria-pressed',String(S.stats.has(b.dataset.stat))));
@@ -319,8 +334,7 @@ function bind(){
     el.onkeydown=e=>{if(e.key==='Enter')el.onchange()};
     $(pid).onchange=e=>{if(e.target.value)applyDate(w,e.target.value)}});
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const p=$(b.dataset.pick);try{p.showPicker()}catch(e){p.focus();p.click()}});
-  $('store').onchange=e=>{S.store=e.target.value;update()};
-  $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();S.store='';S.hm=null;update()};
+  $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.hm=null;update()};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const r=e.target.closest('.row[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.row[data-it]')){e.preventDefault();e.target.click()}};
@@ -337,7 +351,45 @@ document.addEventListener('pointerleave',()=>tip.style.opacity=0);
 
 /* ---------- data ---------- */
 let F=[];
-function filtered(){return ROWS.filter(r=>{const d=dayOf(r);return d>=S.from&&d<=S.to&&(!S.types.size||S.types.has(r.ty))&&(!S.stats.size||S.stats.has(r.s))&&(!S.store||r.k===S.store)})}
+/* ---------- ตัวกรองร้านค้า 4 ตัว (ค้นหาได้ และเชื่อมโยงกัน) ---------- */
+const SF=[['ch','CustChannel','ช่องทาง'],['gr','CustGroupName','กลุ่มห้าง'],['nm','CustName','ชื่อร้าน'],['id','CustID','รหัสร้าน']];
+function sfOptions(k){const m=new Map();
+  ROWS.forEach(r=>{if(SF.every(([o])=>o===k||!S.sf[o]||r[o]===S.sf[o]))m.set(r[k],(m.get(r[k])||0)+1)});
+  return [...m].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),'th'))}
+function setSf(k,v){
+  S.sf[k]=v||'';S.auto.delete(k);
+  S.auto.forEach(a=>{S.sf[a]=''});S.auto.clear();            // ล้างค่าที่เติมอัตโนมัติรอบก่อน
+  if(SF.some(([x])=>S.sf[x]))SF.forEach(([x])=>{if(!S.sf[x]){const o=sfOptions(x);if(o.length===1){S.sf[x]=o[0][0];S.auto.add(x)}}}); // เหลือตัวเลือกเดียว = เติมให้
+  update();
+}
+function buildCombos(){
+  $('cbrow').innerHTML=SF.map(([k,label,hint])=>`<div class="cbw" data-k="${k}"><label class="lbl" style="font-size:12px;color:var(--ink3);font-weight:500" for="cb_${k}">${label} <span style="font-weight:400">· ${hint}</span></label>
+    <div class="cb"><input class="ctl" id="cb_${k}" type="text" role="combobox" aria-expanded="false" aria-controls="ol_${k}" autocomplete="off" spellcheck="false"><button class="cbx" type="button" aria-label="ล้าง ${label}" hidden>×</button><ul class="opts" id="ol_${k}" role="listbox" hidden></ul></div></div>`).join('');
+  SF.forEach(([k])=>{
+    const w=document.querySelector(`.cbw[data-k="${k}"]`),inp=w.querySelector('input'),ul=w.querySelector('.opts'),x=w.querySelector('.cbx');let act=-1,items=[];
+    const draw=q=>{const all=sfOptions(k);const ql=(q||'').trim().toLowerCase();
+      items=all.filter(([v])=>!ql||String(v).toLowerCase().includes(ql)).slice(0,200);act=-1;
+      ul.innerHTML=`<li data-v="" class="${S.sf[k]?'':'sel'}"><span>ทั้งหมด</span><span class="cnt">${all.length} ตัวเลือก</span></li>`+(items.length?items.map(([v,n])=>`<li data-v="${esc(v)}" class="${S.sf[k]===v?'sel':''}"><span>${esc(v)}</span><span class="cnt num">${fmt(n)}</span></li>`).join(''):'<li class="none">ไม่พบตัวเลือกที่ตรงกัน</li>')};
+    const open=q=>{draw(q);ul.hidden=false;inp.setAttribute('aria-expanded','true')};
+    const close=()=>{ul.hidden=true;inp.setAttribute('aria-expanded','false');inp.value=S.sf[k]||''};
+    const pick=v=>{setSf(k,v);close()};
+    inp.addEventListener('focus',()=>{inp.select();open('')});
+    inp.addEventListener('click',()=>{if(ul.hidden){inp.select();open('')}});
+    inp.addEventListener('input',()=>open(inp.value));
+    inp.addEventListener('blur',()=>setTimeout(close,120));
+    inp.addEventListener('keydown',e=>{const lis=[...ul.querySelectorAll('li[data-v]')];
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(ul.hidden)open(inp.value);act=(act+(e.key==='ArrowDown'?1:-1)+lis.length+1)%(lis.length+1)-1;lis.forEach((l,i)=>l.classList.toggle('act',i===act));if(lis[act])lis[act].scrollIntoView({block:'nearest'})}
+      else if(e.key==='Enter'){e.preventDefault();const l=act>=0?lis[act]:(inp.value.trim()&&items.length?lis[1]:null);if(l)pick(l.dataset.v)}
+      else if(e.key==='Escape'){close();inp.blur()}});
+    ul.addEventListener('mousedown',e=>{e.preventDefault();const li=e.target.closest('li[data-v]');if(li)pick(li.dataset.v)});
+    x.addEventListener('click',()=>{setSf(k,'')});
+  });
+}
+function renderCombos(){SF.forEach(([k])=>{const inp=$('cb_'+k);if(!inp)return;const n=sfOptions(k).length;
+  if(document.activeElement!==inp)inp.value=S.sf[k]||'';
+  inp.placeholder='ทั้งหมด ('+n+')';inp.classList.toggle('auto',S.auto.has(k));inp.title=S.auto.has(k)?'เติมอัตโนมัติจากตัวกรองอื่น':'';
+  document.querySelector(`.cbw[data-k="${k}"] .cbx`).hidden=!S.sf[k]})}
+function filtered(){return ROWS.filter(r=>{const d=dayOf(r);return d>=S.from&&d<=S.to&&(!S.types.size||S.types.has(r.ty))&&(!S.stats.size||S.stats.has(r.s))&&SF.every(([k])=>!S.sf[k]||r[k]===S.sf[k])})}
 function countBy(rows,f){const m=new Map();rows.forEach(r=>{const k=f(r);m.set(k,(m.get(k)||0)+1)});return m}
 
 /* ---------- renderers ---------- */
@@ -360,7 +412,7 @@ function renderInsight(){
   const hr=topOf(countBy(F,r=>+r.t.slice(11,13)))[0], h2=String(hr[0]).padStart(2,'0');
   $('insight').innerHTML=`${dLabel(S.from)} – ${dLong(S.to)} · ไม่มี Stock <b>${pct(no,F.length)}%</b> · Item ที่ถูกถามมากสุด <b class="mono">${esc(ti[0])}</b> (${fmt(ti[1])} ครั้ง ไม่มี Stock ${pct(tiNo,tiRows.length)}%) · คึกคักสุดช่วง <b>${h2}:00 น.</b>`;
 }
-function niceMax(v){if(v<=5)return 5;const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+function niceMax(v){for(const s of [1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000])if(s*4>=v)return s*4;return Math.ceil(v/4)*4}
 function renderDaily(){
   const el=$('daily');
   if(!F.length){el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
@@ -448,7 +500,7 @@ function renderStores(){
       <span class="nm"><b>${esc(o.k==='(ไม่ระบุ)'?'ไม่ระบุร้านในข้อความ':(nameOf(o.k)||'ยังไม่มีชื่อร้าน'))}</b><small>${esc(o.k==='(ไม่ระบุ)'?'ไม่พบ CustID':dispKey(o.k))}</small></span>
       <span class="trk"><span class="fill" style="width:${o.n/mx*100}%;background:var(--s1)"></span></span>
       <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
-      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ข้อความไม่ระบุรหัสร้าน</div>`:'');
+      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
 }
 function hmSel(d,h){const s=S.hm;return !!s&&(s.d===null||s.d===d)&&(s.h===null||s.h===h)}
 function renderHeat(){
@@ -515,55 +567,31 @@ function parseDT(s){s=(s||'').trim();let m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](
   m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})/);
   if(m){const p=n=>String(n).padStart(2,'0');return `${m[3]}-${p(m[1])}-${p(m[2])} ${p(m[4])}:${m[5]}`}
   return ''}
-const NAME_BAD=/\bsku\b|^[WM][A-Z0-9]{5,}|สต[็๊]?อก|มีสินค้า|มีของ|ขอดู|ไซ[ส์ซ]|^มี|^@|^\d+$/i;
-function cleanName(n){return n.replace(/@\S+/g,'').replace(/[^\u0E00-\u0E7Fa-zA-Z0-9 .&\/\-+()]/g,'').replace(/^[\s:\-–]+/,'').replace(/\s+/g,' ').trim()}
-function lev1(a,b){if(Math.abs(a.length-b.length)>1)return false;
-  if(a.length===b.length){let d=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])d++;return d===1}
-  if(a.length<b.length)[a,b]=[b,a];for(let i=0;i<a.length;i++)if(a.slice(0,i)+a.slice(i+1)===b)return true;return false}
-// ดึง CustID / Corner / ชื่อร้าน จากข้อความต้นฉบับของลูกค้า (รูปแบบพิมพ์หลากหลาย)
-function extractStore(raw){
-  const ls=(raw||'').split('\n').map(l=>l.trim()).filter(Boolean);const out={cid:'',cn:'',name:''};
-  if(!ls.length)return out;const t=ls.join('\n');
-  const m1=ls[0].match(/(\d{6,10}|[0-9A-Za-z]{8})\s*[\/\-]\s*([0-9A-Za-z]{2,4})(?![0-9A-Za-z])/);
-  if(m1&&/\d/.test(m1[1])){out.cid=m1[1];out.cn=m1[2].toUpperCase()}
-  let name='';const m=t.match(/ชื่อร้าน\s*[:：]?\s*(.+)/);
-  if(m)name=cleanName(m[1]);
-  if(!name&&m1){const rest=cleanName(ls[0].slice(m1.index+m1[0].length));
-    if(rest)name=rest;else if(ls.length>1&&!/^[\d\s\/\-]+$/.test(ls[1]))name=cleanName(ls[1])}
-  if(!name){const m2=ls[0].match(/(\d{7,9}|[0-9A-Za-z]{8})\s+(?:BGW-?)?([0-9A-Za-z]{3})\s+(.+)/);
-    if(m2&&/\d/.test(m2[1])){out.cid=out.cid||m2[1];out.cn=out.cn||m2[2].toUpperCase();name=cleanName(m2[3])}}
-  if(!name){const m3=t.match(/รหัสร้านค้า\s*[:：]?\s*([0-9A-Za-z]+)/);
-    if(m3){out.cid=out.cid||m3[1];if(!/\d{5}/.test(ls[0]))name=cleanName(ls[0]);
-      const m4=t.match(/คอนเนอร์\s*[:：]?\s*(?:BGW-?)?([0-9A-Za-z]{2,4})/);if(m4)out.cn=out.cn||m4[1].toUpperCase()}}
-  if(name&&(NAME_BAD.test(name)||name.length>40||name.length<3))name='';
-  out.name=name;return out}
 function buildRows(table){
   const head=table[0].map(h=>h.trim().toLowerCase());
   const ix=n=>head.findIndex(h=>h===n||h.startsWith(n));
-  const I={dt:ix('datetime'),rq:ix('requestid'),c:ix('custid'),cn:ix('corner'),term:ix('searchterm'),ty:ix('searchtype'),q:ix('requestedqty'),m:ix('matchcount'),s:ix('status'),raw:ix('rawmessage')};
+  const I={nm:ix('custname'),ch:ix('custchannel'),gr:ix('custgroupname'),dt:ix('datetime'),rq:ix('requestid'),c:ix('custid'),cn:ix('corner'),term:ix('searchterm'),ty:ix('searchtype'),q:ix('requestedqty'),m:ix('matchcount'),s:ix('status'),raw:ix('rawmessage')};
   const miss=['dt','rq','term','ty','s'].filter(k=>I[k]<0);
   if(miss.length)throw new Error('ไม่พบคอลัมน์ที่ต้องใช้ในชีต: '+miss.join(', ')+' (ต้องมี DateTime, RequestID, SearchTerm, SearchType, Status)');
   const g=(r,i)=>i<0?'':(r[i]||'').trim();
   const pre=[];
   for(let n=1;n<table.length;n++){const x=table[n];if(x.length<3)continue;
     const tm=parseDT(g(x,I.dt));if(!tm)continue;
-    pre.push({n,x,tm,c:g(x,I.c),cn:g(x,I.cn).toUpperCase(),ex:extractStore(I.raw<0?'':(x[I.raw]||''))});
+    pre.push({n,x,tm,c:g(x,I.c).toUpperCase(),cn:g(x,I.cn).toUpperCase()});
   }
-  const known=new Set(pre.map(p=>p.c).filter(Boolean));
-  const rows=[],nameCnt={};
-  pre.forEach(p=>{const {x,n}=p;let c=p.c||p.ex.cid,cn=p.cn||p.ex.cn;
-    if(c&&!known.has(c)){const cand=[...known].filter(s=>lev1(c,s));if(cand.length===1)c=cand[0]} // แก้รหัสที่พิมพ์ผิด 1 ตัวอักษร
+    const rows=[],info={};
+  pre.forEach(p=>{if(p.c&&(g(p.x,I.nm)||g(p.x,I.ch)||g(p.x,I.gr))){const o=info[p.c]=info[p.c]||{nm:'',ch:'',gr:''};o.nm=o.nm||g(p.x,I.nm);o.ch=o.ch||g(p.x,I.ch);o.gr=o.gr||g(p.x,I.gr)}});
+  pre.forEach(p=>{const {x,n}=p;let c=p.c,cn=p.cn;
     if(/^\d{1,2}$/.test(cn))cn=cn.padStart(3,'0');
     const k=c?c+'_'+cn:'(ไม่ระบุ)';
-    if(c&&p.ex.name){(nameCnt[c]=nameCnt[c]||{})[p.ex.name]=(nameCnt[c][p.ex.name]||0)+1}
-    rows.push({t:p.tm,rq:g(x,I.rq)||('r'+n),k,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s)});
+    const inf=info[c]||{},U='(ไม่ระบุ)';
+    rows.push({t:p.tm,rq:g(x,I.rq)||('r'+n),k,id:c||U,nm:g(x,I.nm)||inf.nm||U,ch:g(x,I.ch)||inf.ch||U,gr:g(x,I.gr)||inf.gr||U,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s)});
   });
   // เติม prefix ที่พิมพ์ตกหล่น เช่น 3B53C4BL -> WB3B53C4BL
   const byK={};rows.forEach(r=>{if('WM'.includes(r.term[0]||'#')){const it=r.term.slice(0,6);(byK[it.slice(2,6)]=byK[it.slice(2,6)]||new Set()).add(it)}});
   rows.forEach(r=>{const t=r.term;if(t&&!'WM'.includes(t[0])){const s=byK[t.slice(0,4)];if(s&&s.size===1)r.term=[...s][0].slice(0,2)+t}
     r.it=r.term.slice(0,6);const mm=r.term.slice(6).match(/^([A-Z]\d)?([A-Z]{2})?/);r.sz=mm[1]||'';r.co=mm[2]||'';r.sku=r.term});
-  const names={};for(const c in nameCnt){names[c]=Object.entries(nameCnt[c]).sort((a,b)=>b[1]-a[1]||b[0].length-a[0].length)[0][0]}
-  Object.assign(names,STORE_MASTER);
+  const names={};rows.forEach(r=>{if(r.id!=='(ไม่ระบุ)'&&r.nm!=='(ไม่ระบุ)'&&!names[r.id])names[r.id]=r.nm});
   return {rows:rows.filter(r=>r.term),names};
 }
 function parseSheetRef(s){s=(s||'').trim();const m=s.match(/\/d\/([\w-]+)/);const g=s.match(/[#&?]gid=(\d+)/);
@@ -587,10 +615,6 @@ async function loadApi(){
   if(j.error)throw new Error('Apps Script: '+j.error);
   return j.table;
 }
-async function reload(){
-  if(API_URL){init(await loadApi(),{type:'api'});return}
-  const text=await fetchSheet(source.ref);init(text,{type:'sheet',ref:source.ref});
-}
 function setMsg(t,err){const m=$('msg');m.textContent=t||'';m.className='msg'+(err?' err':'')}
 function showGate(on){$('gate').hidden=!on;$('app').hidden=on}
 let source={type:'',ref:'',at:null};
@@ -599,7 +623,7 @@ function init(text,src){
   const {rows,names}=buildRows(table);if(!rows.length)throw new Error('ไม่พบแถวข้อมูลที่มีวันที่ ตรวจสอบรูปแบบคอลัมน์ DateTime');
   ROWS=rows;NAMES=names;source=Object.assign({at:new Date()},src);
   allDays=[...new Set(ROWS.map(dayOf))].sort();MIN=allDays[0];MAX=allDays[allDays.length-1];
-  S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();S.store='';S.open.clear();
+  S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.open.clear();
   setupPresets();buildFilters();
   const last=ROWS.reduce((a,r)=>r.t>a?r.t:a,'');
   const hh=String(source.at.getHours()).padStart(2,'0')+':'+String(source.at.getMinutes()).padStart(2,'0');
@@ -610,21 +634,42 @@ function init(text,src){
 function readFile(f){if(!f)return;const fr=new FileReader();
   fr.onload=()=>{try{init(String(fr.result),{type:'file',name:f.name});setMsg('')}catch(e){setMsg(e.message,true)}};
   fr.onerror=()=>setMsg('อ่านไฟล์ไม่ได้',true);fr.readAsText(f,'utf-8')}
-async function reload(){
-  if(API_URL){init(await loadApi(),{type:'api'});return}
-  init(await fetchSheet(DEFAULT_SHEET_ID),{type:'sheet'});
+/* ---- แคชข้อมูลล่าสุดไว้ในเบราว์เซอร์ เปิดครั้งต่อไปแสดง Dashboard ทันทีแล้วอัปเดตเบื้องหลัง ---- */
+const CACHE_KEY='somjuk.cache.v2.'+(API_URL||DEFAULT_SHEET_ID);
+function cacheGet(){try{const j=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');return j&&Array.isArray(j.table)?j:null}catch(e){return null}}
+function cacheSet(table){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),table}))}catch(e){}}
+async function fetchTable(){return API_URL?await loadApi():parseCSV(await fetchSheet(DEFAULT_SHEET_ID))}
+function srcType(){return API_URL?'api':'sheet'}
+function setBusy(on){$('prog').hidden=!on;$('btnRefresh').disabled=on}
+function initKeep(table,src){ // โหลดข้อมูลใหม่ แต่คงตัวกรองที่ผู้ใช้เลือกไว้
+  const wasAll=!!ROWS.length&&S.from===MIN&&S.to===MAX;
+  const keep={from:S.from,to:S.to,types:[...S.types],stats:[...S.stats],sf:{...S.sf},hm:S.hm,had:ROWS.length>0};
+  init(table,src);
+  if(!keep.had)return;
+  if(!wasAll&&keep.from>=MIN&&keep.to<=MAX){S.from=keep.from;S.to=keep.to}
+  keep.types.forEach(x=>S.types.add(x));keep.stats.forEach(x=>S.stats.add(x));
+  SF.forEach(([k])=>{if(keep.sf[k]&&ROWS.some(r=>r[k]===keep.sf[k]))S.sf[k]=keep.sf[k]});
+  S.hm=keep.hm;update();
 }
-async function autoLoad(){
-  showGate(true);$('gateTitle').textContent='กำลังโหลดข้อมูล...';$('gateActs').hidden=true;$('gateHelp').hidden=true;setMsg('');
-  try{await reload()}
-  catch(e){showGate(true);$('gateTitle').textContent='โหลดข้อมูลไม่สำเร็จ';setMsg(e.message,true);$('gateActs').hidden=false;$('gateHelp').hidden=false}
+async function refreshData(){
+  setBusy(true);
+  try{const table=await fetchTable();initKeep(table,{type:srcType()});cacheSet(table)}
+  catch(e){
+    if(ROWS.length){$('asof').textContent='อัปเดตไม่สำเร็จ ใช้ข้อมูลที่บันทึกไว้ · '+e.message}
+    else{showGate(true);$('gateTitle').textContent='โหลดข้อมูลไม่สำเร็จ';setMsg(e.message,true);$('gateActs').hidden=false;$('gateHelp').hidden=false}
+  }finally{setBusy(false)}
+}
+function autoLoad(){
+  $('gate').hidden=true;$('app').hidden=false;
+  const c=cacheGet();
+  if(c){try{init(c.table,{type:srcType()});const d=new Date(c.ts),p=n=>String(n).padStart(2,'0');
+    $('asof').textContent='ข้อมูลที่บันทึกไว้เมื่อ '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+' · กำลังอัปเดต...'}catch(e){}}
+  else $('asof').textContent='กำลังโหลดข้อมูล...';
+  return refreshData();
 }
 function bindLoader(){
   $('btnRetry').onclick=autoLoad;
-  $('btnRefresh').onclick=async()=>{const b=$('btnRefresh');b.disabled=true;const keep={from:S.from,to:S.to,store:S.store};
-    try{await reload();if(keep.from>=MIN&&keep.to<=MAX){S.from=keep.from;S.to=keep.to}
-      if(keep.store&&ROWS.some(r=>r.k===keep.store))S.store=keep.store;update()}
-    catch(e){$('asof').textContent='รีเฟรชไม่สำเร็จ: '+e.message}finally{b.disabled=false}};
+  $('btnRefresh').onclick=refreshData;
   const d=$('drop'),fi=$('file');
   d.onclick=()=>fi.click();d.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')fi.click()};
   fi.onchange=()=>readFile(fi.files[0]);
