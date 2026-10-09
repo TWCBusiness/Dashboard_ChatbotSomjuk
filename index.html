@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINE Somjuk Stock Dashboard</title>
+<title>LINE Somjuk Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -224,6 +224,39 @@ svg text{font-family:var(--font)}
   .card{break-inside:avoid;box-shadow:none;border:1px solid var(--line)}
   .sku-wrap,.hm-scroll,.mx-scroll,.rf-wrap{max-height:none!important;overflow:visible!important}
 }
+
+/* ---- รายละเอียดร้านค้า / การ์ดร้านค้า ---- */
+.stl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px}
+.sr{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);min-width:0}
+.sr .nm{flex:1;min-width:0;line-height:1.3;font-size:13.5px}
+.sr .nm b{font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr .nm small{color:var(--ink3);font-size:11.5px;font-family:var(--mono)}
+.sr .c{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.sr .c b{color:var(--ink)}
+.more-n{grid-column:1/-1;font-size:12.5px;color:var(--ink3);padding-top:6px}
+.sc{padding:13px 4px 12px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
+.sc:hover{background:var(--soft)}
+.sc .l1{display:flex;align-items:center;gap:10px}
+.sc .rkc{flex:none;width:24px;height:24px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--ink2)}
+.sc:nth-child(-n+3) .rkc{background:var(--s1);color:#fff}
+.sc .nm{flex:1;min-width:0;line-height:1.35}
+.sc .nm b{font-weight:600}
+.sc .nm small{display:block;color:var(--ink3);font-size:12px;font-family:var(--mono)}
+.sc .tot{text-align:right;line-height:1.2}.sc .tot b{font-size:20px}.sc .tot small{display:block;color:var(--ink3);font-size:11.5px}
+.sc .chev{color:var(--ink3);transition:transform .15s}
+.sc[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.sc .b2{display:flex;gap:2px;height:9px;border-radius:999px;overflow:hidden;margin:9px 0 5px 34px;background:var(--soft)}
+.sc .b2 i{display:block;min-width:3px}
+.sc .l3{display:flex;justify-content:space-between;margin-left:34px;font-size:12.5px;color:var(--ink2);gap:8px;flex-wrap:wrap}
+.sc .l3 i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.sc .l3 .hi{color:var(--bad-ink);font-weight:600}
+.sc-d{margin:2px 0 6px 34px;background:var(--soft);border-radius:10px;padding:12px 14px}
+.sc-d h4{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--ink2)}
+.rf tr.rfr{cursor:pointer}.rf tr.rfr:hover td{background:var(--soft)}
+.rf tr.rfd>td{background:var(--soft);padding:12px 16px}
+.rf .stn{font-size:13px}.rf .stn small{color:var(--ink3)}
+@media (max-width:700px){.stl{grid-template-columns:1fr}}
+@media print{.sc-d,.mx-wrap{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -244,7 +277,7 @@ svg text{font-family:var(--font)}
   <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
-      <h1>LINE Somjuk · สรุปการเช็ค Stock</h1>
+      <h1>LINE Somjuk · Dashboard</h1>
       <span class="acts"><span class="asof" id="asof"></span><span class="asof" id="chk"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnXlsx" type="button">Export Excel</button><button class="btn ghost" id="btnPdf" type="button">Export PDF</button></span>
     </div>
     <div class="filters">
@@ -291,11 +324,7 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub" id="storeSub"></div></div>
-        <div class="tabs" role="tablist" id="storeTabs">
-          <button class="tab" role="tab" data-v="stk" aria-selected="true">แท่งซ้อน</button>
-          <button class="tab" role="tab" data-v="bub" aria-selected="false">กราฟกระจาย</button>
-        </div></div>
+      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">ร้านที่ถามบ่อยที่สุด · แถบสีแสดงสัดส่วนที่ตอบว่ามี Stock (ฟ้า) กับไม่มี Stock (พีช) · คลิกเพื่อดูรายการที่ร้านนั้นถาม</div></div></div>
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -347,7 +376,7 @@ const dispKey=k=>k.endsWith('_')?k+'-':k;
 const storeLabel=k=>nameOf(k)?dispKey(k)+' · '+nameOf(k):dispKey(k);
 
 let allDays=[],MIN="",MAX="";
-const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",stv:"stk",rfAll:false,open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
+const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",rfAll:false,stOpen:new Set(),rfOpen:new Set(),open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
 
 /* ---------- filters UI ---------- */
 function addDays(d,n){const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10)}
@@ -379,7 +408,10 @@ function bind(){
     $(pid).onchange=e=>{if(e.target.value)applyDate(w,e.target.value)}});
   document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const p=$(b.dataset.pick);try{p.showPicker()}catch(e){p.focus();p.click()}});
   $('reset').onclick=()=>{S.from=MIN;S.to=MAX;S.types.clear();S.stats.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.hm=null;update()};
-  $('storeTabs').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;S.stv=b.dataset.v;document.querySelectorAll('#storeTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderStores()};
+  $('stores').onclick=e=>{const r=e.target.closest('.sc[data-st]');if(!r)return;const k=r.dataset.st;S.stOpen.has(k)?S.stOpen.delete(k):S.stOpen.add(k);renderStores()};
+  $('stores').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.sc[data-st]')){e.preventDefault();e.target.click()}};
+  $('refill').onclick=e=>{const r=e.target.closest('tr[data-rf]');if(!r)return;const k=r.dataset.rf;S.rfOpen.has(k)?S.rfOpen.delete(k):S.rfOpen.add(k);renderRefill()};
+  $('refill').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-rf]')){e.preventDefault();e.target.click()}};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const r=e.target.closest('.row[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.row[data-it]')){e.preventDefault();e.target.click()}};
@@ -506,6 +538,21 @@ function renderBars(){
   $('statBars').innerHTML=hbars(STATS.map(t=>({nm:t[1],sub:t[2],v:sc.get(t[0])||0,color:`var(${t[3]})`,extra:pct(sc.get(t[0])||0,tot)+'%',tip:`${t[1]}\n${sc.get(t[0])||0} รายการ (${pct(sc.get(t[0])||0,tot)}%)`})));
 }
 
+
+/* ---- ร้านค้าที่ถาม: จัดกลุ่ม + แสดงผล ---- */
+const UNS='(ไม่ระบุ)';
+const stName=o=>o.id===UNS?'ไม่ระบุร้านในข้อความ':(o.nm&&o.nm!==UNS?o.nm:o.id);
+function storesOf(rows){const m=new Map();
+  rows.forEach(r=>{let o=m.get(r.id);if(!o){o={id:r.id,nm:r.nm,ch:r.ch,gr:r.gr,n:0,no:0,ins:0,y:0};m.set(r.id,o)}
+    o.n++;if(r.s==='NotFound')o.no++;else{o.y++;if(r.s==='Insufficient')o.ins++}});
+  return [...m.values()].sort((a,b)=>(a.id===UNS)-(b.id===UNS)||b.n-a.n||stName(a).localeCompare(stName(b)))}
+function storePanel(rows,title,limit,badOnly){
+  const arr=storesOf(rows),named=arr.filter(o=>o.id!==UNS),unk=arr.find(o=>o.id===UNS),show=named.slice(0,limit);
+  const pills=o=>{const bad=badOnly?(o.no+o.ins):o.no;return (o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'')+(o.ins&&badOnly?` <span class="pill" style="--c:var(--s4)">ไม่พอ ${o.ins}</span>`:'')}
+  const row=o=>`<div class="sr"><span class="nm"><b title="${esc(stName(o))}">${esc(stName(o))}</b><small>${esc(o.id)}${o.ch?' · '+esc(o.ch):''}</small></span><span class="c"><b class="num">${o.n}</b> ครั้ง</span>${pills(o)}</div>`;
+  return `<div class="mx-wrap" style="margin-left:36px"><h4>${title} <span class="sub" style="font-weight:400">${named.length} ร้าน${unk?' · ไม่ระบุร้าน '+unk.n+' ครั้ง':''}</span></h4><div class="stl">${show.map(row).join('')}${named.length>limit?`<div class="more-n">และอีก ${named.length-limit} ร้าน (ดูทั้งหมดได้ในไฟล์ Export Excel)</div>`:''}</div></div>`}
+function storeTip(rows,n){const a=storesOf(rows).filter(o=>o.id!==UNS);return a.slice(0,n).map(o=>stName(o)+' ('+o.n+')').join('\n')+(a.length>n?'\n+อีก '+(a.length-n)+' ร้าน':'')}
+
 /* ---- ตารางสต็อกตามไซส์ x สี ---- */
 const UNK='ไม่ระบุ';
 function sizeCmp(a,b){if(a===UNK)return 1;if(b===UNK)return -1;const pa=a.match(/^([A-Z])(\d)$/),pb=b.match(/^([A-Z])(\d)$/);
@@ -514,13 +561,13 @@ function cellCls(c){return c.no/c.n>=.5?'no':((c.no+c.ins)/c.n>=.5?'low':'ok')}
 function matrixHtml(rows){
   const sc=new Map(),cc=new Map(),cells=new Map();
   rows.forEach(r=>{const sz=r.sz||UNK,co=r.co||UNK;sc.set(sz,(sc.get(sz)||0)+1);cc.set(co,(cc.get(co)||0)+1);
-    const k=sz+'|'+co;let c=cells.get(k);if(!c){c={n:0,no:0,ins:0,suf:0,info:0,st:new Set()};cells.set(k,c)}
-    c.n++;if(r.s==='NotFound')c.no++;else if(r.s==='Insufficient')c.ins++;else if(r.s==='Sufficient')c.suf++;else c.info++;c.st.add(r.id)});
+    const k=sz+'|'+co;let c=cells.get(k);if(!c){c={n:0,no:0,ins:0,suf:0,info:0,st:new Set(),rows:[]};cells.set(k,c)}
+    c.n++;if(r.s==='NotFound')c.no++;else if(r.s==='Insufficient')c.ins++;else if(r.s==='Sufficient')c.suf++;else c.info++;c.st.add(r.id);c.rows.push(r)});
   const sizes=[...sc.keys()].sort(sizeCmp),colors=[...cc.keys()].sort((a,b)=>a===UNK?1:b===UNK?-1:cc.get(b)-cc.get(a)||a.localeCompare(b)).slice(0,14);
   if(sizes.length===1&&colors.length===1&&sizes[0]===UNK&&colors[0]===UNK)return `<div class="mx-wrap"><h4>ตารางสต็อกตามไซส์ × สี</h4><div class="sub">ลูกค้าถามรุ่นนี้โดยไม่ระบุไซส์และสี จึงยังแยกเป็นตารางไม่ได้</div></div>`;
   const head='<tr><th></th>'+colors.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>';
   const body=sizes.map(sz=>'<tr><th class="rl">'+esc(sz)+'</th>'+colors.map(co=>{const c=cells.get(sz+'|'+co);if(!c)return '<td class="e"></td>';
-    return `<td class="${cellCls(c)}" data-tip="${esc(sz+' · '+co+'\nถูกถาม '+c.n+' ครั้ง · '+c.st.size+' ร้าน\nStock เพียงพอ '+c.suf+' · ตอบข้อมูล '+c.info+'\nStock ไม่พอ '+c.ins+' · ไม่มี Stock '+c.no)}">${c.n}</td>`}).join('')+'</tr>').join('');
+    return `<td class="${cellCls(c)}" data-tip="${esc(sz+' · '+co+'\nถูกถาม '+c.n+' ครั้ง · '+c.st.size+' ร้าน\nStock เพียงพอ '+c.suf+' · ตอบข้อมูล '+c.info+'\nStock ไม่พอ '+c.ins+' · ไม่มี Stock '+c.no+'\n— ร้านที่ถาม —\n'+storeTip(c.rows,5))}">${c.n}</td>`}).join('')+'</tr>').join('');
   return `<div class="mx-wrap"><h4>ตารางสต็อกตามไซส์ × สี <span class="sub" style="font-weight:400">ตัวเลข = จำนวนครั้งที่ถูกถาม</span></h4>
     <div class="mx-scroll"><table class="mx"><thead>${head}</thead><tbody>${body}</tbody></table></div>
     <div class="mxl"><span><i style="background:color-mix(in srgb,var(--s3) 60%,var(--surface))"></i>มี Stock เพียงพอ</span><span><i style="background:color-mix(in srgb,var(--s4) 70%,var(--surface))"></i>Stock ไม่พอ (ตั้งแต่ครึ่งของการถาม)</span><span><i style="background:color-mix(in srgb,var(--s2) 75%,var(--surface))"></i>ไม่มี Stock (ตั้งแต่ครึ่งของการถาม)</span></div></div>`}
@@ -528,8 +575,8 @@ function matrixHtml(rows){
 /* ---- SKU ที่ควรเติมสต็อก ---- */
 function refillList(){
   const g=new Map();
-  F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:''};g.set(r.sku,o)}
-    r.s==='NotFound'?o.no++:o.ins++;o.st.add(r.id);if(r.t>o.last)o.last=r.t});
+  F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
+    r.s==='NotFound'?o.no++:o.ins++;o.st.add(r.id);o.rows.push(r);if(r.t>o.last)o.last=r.t});
   const tot=countBy(F,r=>r.sku);
   const arr=[...g.values()];arr.forEach(o=>{o.bad=o.no+o.ins;o.n=tot.get(o.sku)||o.bad});
   return arr.sort((a,b)=>b.bad-a.bad||b.no-a.no||a.sku.localeCompare(b.sku))}
@@ -538,9 +585,13 @@ function renderRefill(){
   $('refillSub').textContent='เรียงตามจำนวนครั้งที่ลูกค้าถามแล้วไม่มีของหรือมีไม่พอ · แสดง '+fmt(arr.length)+' จาก '+fmt(all.length)+' SKU';
   if(!arr.length){$('refill').innerHTML='<div class="empty">ไม่มี SKU ที่ Stock ไม่พอหรือไม่มีในช่วงที่เลือก</div>';return}
   const mx=Math.max(...arr.map(o=>o.bad),1),dash='<span style="color:var(--ink3)">—</span>';
-  $('refill').innerHTML=`<table class="rf"><thead><tr><th>#</th><th>Item</th><th>Size</th><th>Color</th><th class="r">ถามทั้งหมด</th><th>ไม่มี Stock</th><th>Stock ไม่พอ</th><th class="r">ร้านที่ถาม</th><th style="width:16%">ความเร่งด่วน</th><th>ล่าสุด</th></tr></thead><tbody>`+
-    arr.map((o,i)=>`<tr><td class="num" style="color:var(--ink3)">${i+1}</td><td class="mono" style="font-weight:600">${esc(o.it)}</td><td>${o.sz||dash}</td><td>${o.co||dash}</td><td class="r num">${o.n}</td><td>${o.no?`<span class="pill" style="--c:var(--s2)">${o.no}</span>`:dash}</td><td>${o.ins?`<span class="pill" style="--c:var(--s4)">${o.ins}</span>`:dash}</td><td class="r num">${o.st.size}</td><td><span class="pbar" data-tip="${esc(o.sku+'\nถามแล้วไม่มีของ/ไม่พอ '+o.bad+' ครั้ง')}"><i style="width:${o.bad/mx*100}%"></i></span></td><td class="num" style="color:var(--ink2)">${dLabel(o.last.slice(0,10))}</td></tr>`).join('')+
-    `</tbody></table>`+(all.length>15?`<button class="btn ghost more" id="rfMore" type="button">${S.rfAll?'แสดงน้อยลง':'แสดงมากขึ้น (สูงสุด 100)'}</button>`:'');
+  const stCell=o=>{const a=storesOf(o.rows).filter(x=>x.id!==UNS);if(!a.length)return '<span style="color:var(--ink3)">ไม่ระบุร้าน</span>';
+    return `<span class="stn" data-tip="${esc(storeTip(o.rows,10))}">${esc(stName(a[0]))}${a.length>1?` <small>+${a.length-1} ร้าน</small>`:''}</span>`};
+  $('refill').innerHTML=`<table class="rf"><thead><tr><th>#</th><th>Item</th><th>Size</th><th>Color</th><th class="r">ถามทั้งหมด</th><th>ไม่มี Stock</th><th>Stock ไม่พอ</th><th>ร้านที่ถาม</th><th style="width:13%">ความเร่งด่วน</th><th>ล่าสุด</th></tr></thead><tbody>`+
+    arr.map((o,i)=>{const open=S.rfOpen.has(o.sku);
+      return `<tr class="rfr" data-rf="${esc(o.sku)}" tabindex="0" role="button" aria-expanded="${open}"><td class="num" style="color:var(--ink3)">${i+1}</td><td class="mono" style="font-weight:600">${esc(o.it)}</td><td>${o.sz||dash}</td><td>${o.co||dash}</td><td class="r num">${o.n}</td><td>${o.no?`<span class="pill" style="--c:var(--s2)">${o.no}</span>`:dash}</td><td>${o.ins?`<span class="pill" style="--c:var(--s4)">${o.ins}</span>`:dash}</td><td>${stCell(o)}</td><td><span class="pbar" data-tip="${esc(o.sku+'\nถามแล้วไม่มีของ/ไม่พอ '+o.bad+' ครั้ง')}"><i style="width:${o.bad/mx*100}%"></i></span></td><td class="num" style="color:var(--ink2)">${dLabel(o.last.slice(0,10))}</td></tr>`+
+      (open?`<tr class="rfd"><td colspan="10">${storePanel(o.rows,'ร้านค้าที่ถามแล้วไม่มีของ/ไม่พอ ('+esc(o.sku)+')',12,true).replace('class="mx-wrap" style="margin-left:36px"','class="sc-d" style="margin:0"')}</td></tr>`:'')}).join('')+
+    `</tbody></table><div class="sub" style="margin-top:8px">คลิกแถวเพื่อดูว่าร้านไหนถามบ้าง</div>`+(all.length>15?`<button class="btn ghost more" id="rfMore" type="button">${S.rfAll?'แสดงน้อยลง':'แสดงมากขึ้น (สูงสุด 100)'}</button>`:'');
   const b=$('rfMore');if(b)b.onclick=()=>{S.rfAll=!S.rfAll;renderRefill()}}
 function renderItems(){
   const g=new Map();
@@ -566,6 +617,7 @@ function renderItems(){
       const list=[...sk.values()].sort((a,b)=>b.n-a.n||a.sku.localeCompare(b.sku));
       const dash='<span style="color:var(--ink3)">—</span>';
       h+=matrixHtml(o.rows);
+      h+=storePanel(o.rows,'ร้านค้าที่ถามรุ่นนี้',10,false);
       h+=`<div class="sku-wrap"><table class="sku"><thead><tr><th>SKU ที่ค้นหา</th><th>Size</th><th>Color</th><th class="r">ครั้ง</th><th>Stock</th><th>ล่าสุด</th></tr></thead><tbody>`+
         list.slice(0,200).map(x=>{const no=x.n-x.y;return `<tr><td class="mono">${esc(x.sku)}</td><td>${x.sz||dash}</td><td>${x.co||dash}</td><td class="r num">${x.n}</td><td>${x.y?`<span class="pill" style="--c:var(--s1)">มี ${x.y}</span> `:''}${no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${no}</span>`:''}</td><td class="num" style="color:var(--ink2)">${dLabel(x.last.slice(0,10))} ${x.last.slice(11)}</td></tr>`}).join('')+`</tbody></table></div>`;
     }
@@ -573,34 +625,22 @@ function renderItems(){
   $('items').innerHTML=h;
 }
 function renderStores(){
-  const g=new Map();let unk=0;F.forEach(r=>{if(r.k==='(ไม่ระบุ)'){unk++;return}let o=g.get(r.id);if(!o){o={k:r.id,nm:r.nm,n:0,y:0};g.set(r.id,o)}o.n++;inStock(r)&&o.y++});
-  const arr=[...g.values()].sort((a,b)=>b.n-a.n).slice(0,10);
+  let unk=0;const known=F.filter(r=>{if(r.k===UNS){unk++;return false}return true});
+  const arr=storesOf(known).slice(0,10);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  $('storeSub').textContent=S.stv==='bub'?'ซ้าย→ขวา = ถามบ่อยขึ้น · บน = ไม่มี Stock มากขึ้น · ขนาดวง = จำนวนรายการที่ไม่มี Stock':'ความยาวแท่ง = จำนวนครั้งที่ค้นหา · ฟ้า = มี Stock · พีช = ไม่มี Stock';
-  if(S.stv==='bub'){
-    const W=520,H=300,L=44,R=16,T=14,B=48,pw=W-L-R,ph=H-T-B;
-    const xm=niceMax(Math.max(...arr.map(o=>o.n),1));
-    const ymax=Math.max(60,Math.ceil(Math.max(...arr.map(o=>pct(o.n-o.y,o.n)))/10)*10+10);
-    const X=v=>L+v/xm*pw,Y=v=>T+ph-v/ymax*ph;
-    const mxo=Math.max(...arr.map(o=>o.n-o.y),1);
-    let g='';
-    for(let v=0;v<=ymax;v+=ymax>60?20:10){g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink3)">${v}%</text>`}
-    for(let i=0;i<=4;i++){const v=xm/4*i;g+=`<text x="${X(v)}" y="${T+ph+16}" text-anchor="middle" font-size="11" fill="var(--ink3)">${Math.round(v)}</text>`}
-    g+=`<line x1="${L}" x2="${W-R}" y1="${Y(50)}" y2="${Y(50)}" stroke="var(--s2)" stroke-dasharray="4 4" opacity=".8"/><text x="${W-R}" y="${Y(50)-5}" text-anchor="end" font-size="11" fill="var(--bad-ink)">ไม่มี Stock 50%</text>`;
-    g+=`<text x="${L+pw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--ink3)">จำนวนรายการที่ค้นหา</text>`;
-    g+=arr.map((o,i)=>{const no=o.n-o.y,p=pct(no,o.n),r=7+Math.sqrt(no/mxo)*11,hi=p>=50;
-      return `<g data-tip="${esc(o.nm+'\n'+o.k+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no+' ('+p+'%)')}"><circle cx="${X(o.n)}" cy="${Y(p)}" r="${r}" fill="${hi?'var(--s2)':'var(--s1)'}" fill-opacity=".6" stroke="var(--surface)" stroke-width="2"/><text x="${X(o.n)}" y="${Y(p)+4}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${i+1}</text></g>`}).join('');
-    $('stores').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="กราฟกระจายร้านค้า: จำนวนที่ค้นหา เทียบสัดส่วนไม่มี Stock">${g}</svg>
-      <div class="bleg">${arr.map((o,i)=>`<div><b class="num">${i+1}</b><span>${esc(o.nm&&o.nm!=='(ไม่ระบุ)'?o.nm:'ยังไม่มีชื่อร้าน')} <small>${esc(o.k)}</small></span></div>`).join('')}</div>`+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
-    return}
-  const mx=Math.max(...arr.map(o=>o.n),1);
-  $('stores').innerHTML=arr.map((o,i)=>{const no=o.n-o.y,hi=pct(no,o.n)>=50;
-    return `<div class="row st" data-tip="${esc((o.k+' · '+o.nm)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
-      <span class="rk num">${i+1}</span>
-      <span class="nm"><b>${esc(o.nm&&o.nm!=='(ไม่ระบุ)'?o.nm:'ยังไม่มีชื่อร้าน')}</b><small>${esc(o.k)}</small></span>
-      <span class="trk"><span class="fill" style="width:${o.n/mx*100}%"><i style="width:${o.y/o.n*100}%;background:var(--s1)"></i><i style="flex:1;background:var(--s2)"></i></span></span>
-      <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
-      <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
+  $('stores').innerHTML=arr.map((o,i)=>{const open=S.stOpen.has(o.id),no=o.no,hi=pct(no,o.n)>=50;
+    let d='';
+    if(open){const rows=known.filter(r=>r.id===o.id),ig=new Map();
+      rows.forEach(r=>{let x=ig.get(r.it);if(!x){x={it:r.it,n:0,no:0};ig.set(r.it,x)}x.n++;if(r.s==='NotFound')x.no++});
+      const li=[...ig.values()].sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it)),show=li.slice(0,10);
+      d=`<div class="sc-d"><h4>รายการที่ร้านนี้ถามบ่อย <span class="sub" style="font-weight:400">${[o.ch,o.gr].filter(Boolean).map(esc).join(' · ')}</span></h4><div class="stl">`+
+        show.map(x=>`<div class="sr"><span class="nm"><b class="mono">${esc(x.it)}</b></span><span class="c"><b class="num">${x.n}</b> ครั้ง</span>${x.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${x.no}</span>`:`<span class="pill" style="--c:var(--s1)">มี Stock</span>`}</div>`).join('')+
+        (li.length>10?`<div class="more-n">และอีก ${li.length-10} รุ่น</div>`:'')+`</div></div>`}
+    return `<div class="sc" role="button" tabindex="0" data-st="${esc(o.id)}" aria-expanded="${open}" data-tip="${esc(stName(o)+'\n'+o.id+'\nค้นหา '+o.n+' รายการ · มี Stock '+o.y+' · ไม่มี Stock '+no)}">
+      <div class="l1"><span class="rkc num">${i+1}</span><span class="nm"><b>${esc(stName(o))}</b><small>${esc(o.id)}</small></span><span class="tot"><b class="num">${fmt(o.n)}</b><small>รายการที่ถาม</small></span><span class="chev">›</span></div>
+      <div class="b2"><i style="flex:${o.y};background:var(--s1)"></i>${no?`<i style="flex:${no};background:var(--s2)"></i>`:''}</div>
+      <div class="l3"><span><i style="background:var(--s1)"></i>มี Stock ${fmt(o.y)} (${pct(o.y,o.n)}%)</span><span class="${hi?'hi':''}"><i style="background:var(--s2)"></i>ไม่มี Stock ${fmt(no)} (${pct(no,o.n)}%)</span></div>
+    </div>${d}`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
 }
 function hmSel(d,h){const s=S.hm;return !!s&&(s.d===null||s.d===d)&&(s.h===null||s.h===h)}
 function renderHeat(){
@@ -664,10 +704,11 @@ function exportData(){
   const summary=[['LINE Somjuk · สรุปการเช็ค Stock'],['ตัวกรอง',filterText()],['สร้างเมื่อ',new Date().toLocaleString('th-TH')],[],
     ['ตัวชี้วัด','ค่า'],['คำถามทั้งหมด',q],['ร้านค้าที่ถาม (CustID ไม่ซ้ำ)',st],['รายการที่ค้นหา',F.length],['รายการที่มี Stock',yes],['รายการที่ไม่มี Stock',F.length-yes]];
   const ig=new Map();F.forEach(r=>{let o=ig.get(r.it);if(!o){o={n:0,y:0,st:new Set()};ig.set(r.it,o)}o.n++;inStock(r)&&o.y++;o.st.add(r.id)});
-  const items=[['Item (6 หลัก)','ถูกค้นหา','มี Stock','ไม่มี Stock','% ไม่มี Stock','ร้านที่ถาม'],...[...ig].sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>[k,o.n,o.y,o.n-o.y,pct(o.n-o.y,o.n)/100,o.st.size])];
+  const irows=new Map();F.forEach(r=>{(irows.get(r.it)||irows.set(r.it,[]).get(r.it)).push(r)});
+  const items=[['Item (6 หลัก)','ถูกค้นหา','มี Stock','ไม่มี Stock','% ไม่มี Stock','ร้านที่ถาม','ชื่อร้าน (ครั้ง)'],...[...ig].sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>[k,o.n,o.y,o.n-o.y,pct(o.n-o.y,o.n)/100,o.st.size,storesOf(irows.get(k)).filter(x=>x.id!==UNS).map(x=>stName(x)+' '+x.n).join('; ')])];
   const sg=new Map();F.forEach(r=>{if(r.k==='(ไม่ระบุ)')return;let o=sg.get(r.id);if(!o){o={nm:r.nm,ch:r.ch,gr:r.gr,n:0,y:0}; sg.set(r.id,o)}o.n++;inStock(r)&&o.y++});
   const stores=[['CustID','CustName','CustChannel','CustGroupName','ถูกค้นหา','มี Stock','ไม่มี Stock','% ไม่มี Stock'],...[...sg].sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>[k,o.nm,o.ch,o.gr,o.n,o.y,o.n-o.y,pct(o.n-o.y,o.n)/100])];
-  const refill=[['อันดับ','SKU','Item','Size','Color','ถามทั้งหมด','ไม่มี Stock','Stock ไม่พอ','ถามแล้วไม่มีของ/ไม่พอ','ร้านที่ถาม','ล่าสุด'],...refillList().map((o,i)=>[i+1,o.sku,o.it,o.sz,o.co,o.n,o.no,o.ins,o.bad,o.st.size,o.last])];
+  const refill=[['อันดับ','SKU','Item','Size','Color','ถามทั้งหมด','ไม่มี Stock','Stock ไม่พอ','ถามแล้วไม่มีของ/ไม่พอ','ร้านที่ถาม','ล่าสุด','ร้านที่ถาม (ชื่อ ครั้ง)'],...refillList().map((o,i)=>[i+1,o.sku,o.it,o.sz,o.co,o.n,o.no,o.ins,o.bad,o.st.size,o.last,storesOf(o.rows).map(x=>x.id===UNS?'ไม่ระบุร้าน '+x.n:stName(x)+' ('+x.id+') '+x.n).join('; ')])];
   const raw=[['DateTime','RequestID','CustChannel','CustGroupName','CustName','CustID','Corner','SearchTerm','Item','Size','Color','SearchType','Status','สถานะ (ไทย)'],
     ...F.map(r=>[r.t,r.rq,r.ch,r.gr,r.nm,r.k==='(ไม่ระบุ)'?'':r.id,r.k.includes('_')?r.k.split('_').slice(1).join('_'):'',r.term,r.it,r.sz,r.co,lbT(r.ty),r.s,lbS(r.s)])];
   return {summary,items,stores,refill,raw}}
@@ -677,7 +718,7 @@ async function exportXlsx(){
   try{
     await loadXlsxLib();
     const wb=XLSX.utils.book_new();
-    [['สรุป',d.summary,[34,60]],['Top Item',d.items,[16,12,12,12,14,12]],['ร้านค้า',d.stores,[14,34,16,22,12,12,12,14]],['SKU ควรเติม',d.refill,[8,18,12,8,8,12,12,12,20,12,20]],['ข้อมูลดิบ',d.raw,[20,14,16,22,34,12,8,18,10,8,8,16,14,22]]]
+    [['สรุป',d.summary,[34,60]],['Top Item',d.items,[16,12,12,12,14,12,70]],['ร้านค้า',d.stores,[14,34,16,22,12,12,12,14]],['SKU ควรเติม',d.refill,[8,18,12,8,8,12,12,12,20,12,20,70]],['ข้อมูลดิบ',d.raw,[20,14,16,22,34,12,8,18,10,8,8,16,14,22]]]
       .forEach(([n,a,w])=>{const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=w.map(x=>({wch:x}));if(n!=='สรุป')ws['!freeze']={xSplit:0,ySplit:1};XLSX.utils.book_append_sheet(wb,ws,n)});
     XLSX.writeFile(wb,'LineSomjuk_Stock_'+stamp()+'.xlsx');
   }catch(e){
