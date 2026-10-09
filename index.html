@@ -191,6 +191,39 @@ svg text{font-family:var(--font)}
   .row:not(.st){grid-template-columns:20px 80px minmax(0,1fr) 36px 14px}.row:not(.st) .badge{display:none}
   .sku-wrap{margin-left:0}.hrow{grid-template-columns:minmax(80px,40%) 1fr auto}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- ตาราง Size x Color / เติมสต็อก / print ---- */
+.mx-wrap{margin:6px 0 10px 36px;background:var(--soft);border-radius:10px;padding:12px 14px}
+.mx-wrap h4{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--ink2)}
+.mx-scroll{overflow:auto;max-height:340px}
+.mx{border-collapse:separate;border-spacing:3px;font-size:13px}
+.mx th{font-weight:500;color:var(--ink3);font-size:12px;padding:2px 8px;white-space:nowrap;text-align:center}
+.mx th.rl{text-align:right}
+.mx td{min-width:44px;height:30px;text-align:center;border-radius:7px;font-weight:600;color:var(--ink)}
+.mx td.ok{background:color-mix(in srgb,var(--s3) 60%,var(--surface))}
+.mx td.low{background:color-mix(in srgb,var(--s4) 70%,var(--surface))}
+.mx td.no{background:color-mix(in srgb,var(--s2) 75%,var(--surface))}
+.mx td.e{background:transparent}
+.mxl{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--ink2)}
+.mxl i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.rf-wrap{overflow:auto}
+.rf{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+.rf th{text-align:left;font-weight:500;color:var(--ink3);font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.rf td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.rf th.r,.rf td.r{text-align:right}
+.rf .pbar{display:block;height:8px;border-radius:999px;background:var(--soft);min-width:70px;overflow:hidden}
+.rf .pbar i{display:block;height:100%;background:var(--s2)}
+.more{margin-top:10px}
+.print-only{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  :root:root:root{color-scheme:light;--bg:#fff;--surface:#fff;--ink:#2a3042;--ink2:#5d6579;--ink3:#9097a8;--line:#e9ebf3;--soft:#f1f3f9;--s1:#7fa8e6;--s2:#f0a994;--s3:#86cfb1;--s4:#f1cd7e;--good-bg:#eaf2fd;--bad-bg:#fdeee9;--bad-ink:#b65a42;--shadow:none}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar-top .acts,.filters,.tabs,#prog,.reset,.xbtn,.chev,.btn,.more,#tip{display:none!important}
+  .print-only{display:block;margin:0 0 8px;color:var(--ink2);font-size:12.5px}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid var(--line)}
+  .sku-wrap,.hm-scroll,.mx-scroll,.rf-wrap{max-height:none!important;overflow:visible!important}
+}
 </style>
 </head>
 <body>
@@ -208,10 +241,11 @@ svg text{font-family:var(--font)}
   </div>
   <div class="prog" id="prog" hidden></div>
   <div id="app">
+  <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
-      <h1>Dashboard · LINE Somjuk</h1>
-      <span class="acts"><span class="asof" id="asof"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button></span>
+      <h1>LINE Somjuk · สรุปการเช็ค Stock</h1>
+      <span class="acts"><span class="asof" id="asof"></span><span class="asof" id="chk"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnXlsx" type="button">Export Excel</button><button class="btn ghost" id="btnPdf" type="button">Export PDF</button></span>
     </div>
     <div class="filters">
       <div class="f"><span class="lbl">ช่วงเวลา</span>
@@ -259,10 +293,15 @@ svg text{font-family:var(--font)}
     <section class="card c5">
       <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub" id="storeSub"></div></div>
         <div class="tabs" role="tablist" id="storeTabs">
-          <button class="tab" role="tab" data-v="bub" aria-selected="true">กราฟกระจาย</button>
-          <button class="tab" role="tab" data-v="bar" aria-selected="false">อันดับ</button>
+          <button class="tab" role="tab" data-v="stk" aria-selected="true">แท่งซ้อน</button>
+          <button class="tab" role="tab" data-v="bub" aria-selected="false">กราฟกระจาย</button>
         </div></div>
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
+    </section>
+
+    <section class="card c12" id="refillCard">
+      <div class="hd"><div><h2>SKU ที่ควรเติมสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
+      <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c12">
@@ -308,7 +347,7 @@ const dispKey=k=>k.endsWith('_')?k+'-':k;
 const storeLabel=k=>nameOf(k)?dispKey(k)+' · '+nameOf(k):dispKey(k);
 
 let allDays=[],MIN="",MAX="";
-const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",stv:"bub",open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
+const S={from:"",to:"",types:new Set(),stats:new Set(),store:"",tab:"top",stv:"stk",rfAll:false,open:new Set(),hm:null,sf:{ch:"",gr:"",nm:"",id:""},auto:new Set()};
 
 /* ---------- filters UI ---------- */
 function addDays(d,n){const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10)}
@@ -466,6 +505,43 @@ function renderBars(){
   const sc=countBy(F,r=>r.s);
   $('statBars').innerHTML=hbars(STATS.map(t=>({nm:t[1],sub:t[2],v:sc.get(t[0])||0,color:`var(${t[3]})`,extra:pct(sc.get(t[0])||0,tot)+'%',tip:`${t[1]}\n${sc.get(t[0])||0} รายการ (${pct(sc.get(t[0])||0,tot)}%)`})));
 }
+
+/* ---- ตารางสต็อกตามไซส์ x สี ---- */
+const UNK='ไม่ระบุ';
+function sizeCmp(a,b){if(a===UNK)return 1;if(b===UNK)return -1;const pa=a.match(/^([A-Z])(\d)$/),pb=b.match(/^([A-Z])(\d)$/);
+  if(pa&&pb)return pa[1]===pb[1]?pa[2]-pb[2]:pa[1].localeCompare(pb[1]);return a.localeCompare(b)}
+function cellCls(c){return c.no/c.n>=.5?'no':((c.no+c.ins)/c.n>=.5?'low':'ok')}
+function matrixHtml(rows){
+  const sc=new Map(),cc=new Map(),cells=new Map();
+  rows.forEach(r=>{const sz=r.sz||UNK,co=r.co||UNK;sc.set(sz,(sc.get(sz)||0)+1);cc.set(co,(cc.get(co)||0)+1);
+    const k=sz+'|'+co;let c=cells.get(k);if(!c){c={n:0,no:0,ins:0,suf:0,info:0,st:new Set()};cells.set(k,c)}
+    c.n++;if(r.s==='NotFound')c.no++;else if(r.s==='Insufficient')c.ins++;else if(r.s==='Sufficient')c.suf++;else c.info++;c.st.add(r.id)});
+  const sizes=[...sc.keys()].sort(sizeCmp),colors=[...cc.keys()].sort((a,b)=>a===UNK?1:b===UNK?-1:cc.get(b)-cc.get(a)||a.localeCompare(b)).slice(0,14);
+  if(sizes.length===1&&colors.length===1&&sizes[0]===UNK&&colors[0]===UNK)return `<div class="mx-wrap"><h4>ตารางสต็อกตามไซส์ × สี</h4><div class="sub">ลูกค้าถามรุ่นนี้โดยไม่ระบุไซส์และสี จึงยังแยกเป็นตารางไม่ได้</div></div>`;
+  const head='<tr><th></th>'+colors.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>';
+  const body=sizes.map(sz=>'<tr><th class="rl">'+esc(sz)+'</th>'+colors.map(co=>{const c=cells.get(sz+'|'+co);if(!c)return '<td class="e"></td>';
+    return `<td class="${cellCls(c)}" data-tip="${esc(sz+' · '+co+'\nถูกถาม '+c.n+' ครั้ง · '+c.st.size+' ร้าน\nStock เพียงพอ '+c.suf+' · ตอบข้อมูล '+c.info+'\nStock ไม่พอ '+c.ins+' · ไม่มี Stock '+c.no)}">${c.n}</td>`}).join('')+'</tr>').join('');
+  return `<div class="mx-wrap"><h4>ตารางสต็อกตามไซส์ × สี <span class="sub" style="font-weight:400">ตัวเลข = จำนวนครั้งที่ถูกถาม</span></h4>
+    <div class="mx-scroll"><table class="mx"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+    <div class="mxl"><span><i style="background:color-mix(in srgb,var(--s3) 60%,var(--surface))"></i>มี Stock เพียงพอ</span><span><i style="background:color-mix(in srgb,var(--s4) 70%,var(--surface))"></i>Stock ไม่พอ (ตั้งแต่ครึ่งของการถาม)</span><span><i style="background:color-mix(in srgb,var(--s2) 75%,var(--surface))"></i>ไม่มี Stock (ตั้งแต่ครึ่งของการถาม)</span></div></div>`}
+
+/* ---- SKU ที่ควรเติมสต็อก ---- */
+function refillList(){
+  const g=new Map();
+  F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:''};g.set(r.sku,o)}
+    r.s==='NotFound'?o.no++:o.ins++;o.st.add(r.id);if(r.t>o.last)o.last=r.t});
+  const tot=countBy(F,r=>r.sku);
+  const arr=[...g.values()];arr.forEach(o=>{o.bad=o.no+o.ins;o.n=tot.get(o.sku)||o.bad});
+  return arr.sort((a,b)=>b.bad-a.bad||b.no-a.no||a.sku.localeCompare(b.sku))}
+function renderRefill(){
+  const all=refillList(),arr=S.rfAll?all.slice(0,100):all.slice(0,15);
+  $('refillSub').textContent='เรียงตามจำนวนครั้งที่ลูกค้าถามแล้วไม่มีของหรือมีไม่พอ · แสดง '+fmt(arr.length)+' จาก '+fmt(all.length)+' SKU';
+  if(!arr.length){$('refill').innerHTML='<div class="empty">ไม่มี SKU ที่ Stock ไม่พอหรือไม่มีในช่วงที่เลือก</div>';return}
+  const mx=Math.max(...arr.map(o=>o.bad),1),dash='<span style="color:var(--ink3)">—</span>';
+  $('refill').innerHTML=`<table class="rf"><thead><tr><th>#</th><th>Item</th><th>Size</th><th>Color</th><th class="r">ถามทั้งหมด</th><th>ไม่มี Stock</th><th>Stock ไม่พอ</th><th class="r">ร้านที่ถาม</th><th style="width:16%">ความเร่งด่วน</th><th>ล่าสุด</th></tr></thead><tbody>`+
+    arr.map((o,i)=>`<tr><td class="num" style="color:var(--ink3)">${i+1}</td><td class="mono" style="font-weight:600">${esc(o.it)}</td><td>${o.sz||dash}</td><td>${o.co||dash}</td><td class="r num">${o.n}</td><td>${o.no?`<span class="pill" style="--c:var(--s2)">${o.no}</span>`:dash}</td><td>${o.ins?`<span class="pill" style="--c:var(--s4)">${o.ins}</span>`:dash}</td><td class="r num">${o.st.size}</td><td><span class="pbar" data-tip="${esc(o.sku+'\nถามแล้วไม่มีของ/ไม่พอ '+o.bad+' ครั้ง')}"><i style="width:${o.bad/mx*100}%"></i></span></td><td class="num" style="color:var(--ink2)">${dLabel(o.last.slice(0,10))}</td></tr>`).join('')+
+    `</tbody></table>`+(all.length>15?`<button class="btn ghost more" id="rfMore" type="button">${S.rfAll?'แสดงน้อยลง':'แสดงมากขึ้น (สูงสุด 100)'}</button>`:'');
+  const b=$('rfMore');if(b)b.onclick=()=>{S.rfAll=!S.rfAll;renderRefill()}}
 function renderItems(){
   const g=new Map();
   F.forEach(r=>{let o=g.get(r.it);if(!o){o={it:r.it,n:0,y:0,st:new Set(),rows:[]};g.set(r.it,o)}o.n++;inStock(r)&&o.y++;o.st.add(r.k);o.rows.push(r)});
@@ -489,6 +565,7 @@ function renderItems(){
       const sk=new Map();o.rows.forEach(r=>{let x=sk.get(r.sku);if(!x){x={sku:r.sku,sz:r.sz,co:r.co,n:0,y:0,last:''};sk.set(r.sku,x)}x.n++;inStock(r)&&x.y++;if(r.t>x.last)x.last=r.t});
       const list=[...sk.values()].sort((a,b)=>b.n-a.n||a.sku.localeCompare(b.sku));
       const dash='<span style="color:var(--ink3)">—</span>';
+      h+=matrixHtml(o.rows);
       h+=`<div class="sku-wrap"><table class="sku"><thead><tr><th>SKU ที่ค้นหา</th><th>Size</th><th>Color</th><th class="r">ครั้ง</th><th>Stock</th><th>ล่าสุด</th></tr></thead><tbody>`+
         list.slice(0,200).map(x=>{const no=x.n-x.y;return `<tr><td class="mono">${esc(x.sku)}</td><td>${x.sz||dash}</td><td>${x.co||dash}</td><td class="r num">${x.n}</td><td>${x.y?`<span class="pill" style="--c:var(--s1)">มี ${x.y}</span> `:''}${no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${no}</span>`:''}</td><td class="num" style="color:var(--ink2)">${dLabel(x.last.slice(0,10))} ${x.last.slice(11)}</td></tr>`}).join('')+`</tbody></table></div>`;
     }
@@ -499,7 +576,7 @@ function renderStores(){
   const g=new Map();let unk=0;F.forEach(r=>{if(r.k==='(ไม่ระบุ)'){unk++;return}let o=g.get(r.id);if(!o){o={k:r.id,nm:r.nm,n:0,y:0};g.set(r.id,o)}o.n++;inStock(r)&&o.y++});
   const arr=[...g.values()].sort((a,b)=>b.n-a.n).slice(0,10);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  $('storeSub').textContent=S.stv==='bub'?'ซ้าย→ขวา = ถามบ่อยขึ้น · บน = ไม่มี Stock มากขึ้น · ขนาดวง = จำนวนรายการที่ไม่มี Stock':'แท่ง = จำนวนครั้งที่ค้นหา · ป้าย = สัดส่วนที่ไม่มี Stock';
+  $('storeSub').textContent=S.stv==='bub'?'ซ้าย→ขวา = ถามบ่อยขึ้น · บน = ไม่มี Stock มากขึ้น · ขนาดวง = จำนวนรายการที่ไม่มี Stock':'ความยาวแท่ง = จำนวนครั้งที่ค้นหา · ฟ้า = มี Stock · พีช = ไม่มี Stock';
   if(S.stv==='bub'){
     const W=520,H=300,L=44,R=16,T=14,B=48,pw=W-L-R,ph=H-T-B;
     const xm=niceMax(Math.max(...arr.map(o=>o.n),1));
@@ -521,7 +598,7 @@ function renderStores(){
     return `<div class="row st" data-tip="${esc((o.k+' · '+o.nm)+'\nค้นหา '+o.n+' รายการ\nมี Stock '+o.y+' · ไม่มี Stock '+no)}">
       <span class="rk num">${i+1}</span>
       <span class="nm"><b>${esc(o.nm&&o.nm!=='(ไม่ระบุ)'?o.nm:'ยังไม่มีชื่อร้าน')}</b><small>${esc(o.k)}</small></span>
-      <span class="trk"><span class="fill" style="width:${o.n/mx*100}%;background:var(--s1)"></span></span>
+      <span class="trk"><span class="fill" style="width:${o.n/mx*100}%"><i style="width:${o.y/o.n*100}%;background:var(--s1)"></i><i style="flex:1;background:var(--s2)"></i></span></span>
       <span class="r num" style="font-weight:600">${fmt(o.n)}</span>
       <span class="badge ${hi?'hi':''} num">ไม่มี ${pct(no,o.n)}%</span></div>`}).join('')+(unk?`<div class="sub" style="margin-top:10px">ไม่รวม ${fmt(unk)} รายการที่ถามแบบไม่ระบุร้านค้า</div>`:'');
 }
@@ -567,8 +644,51 @@ function bindHeat(){
 }
 function update(){
   F=filtered();syncFilters();
-  renderKpis();renderInsight();renderDaily();renderBars();renderItems();renderStores();renderHeat();
+  renderKpis();renderInsight();renderDaily();renderBars();renderItems();renderStores();renderRefill();renderHeat();
 }
+
+
+/* ---------- Export Excel / PDF ---------- */
+function filterText(){
+  const p=[ 'ช่วงวันที่ '+isoToDmy(S.from)+' – '+isoToDmy(S.to) ];
+  if(S.types.size)p.push('ประเภท: '+[...S.types].map(t=>(TYPES.find(x=>x[0]===t)||[t,t])[1]).join(', '));
+  if(S.stats.size)p.push('สถานะ: '+[...S.stats].map(t=>(STATS.find(x=>x[0]===t)||[t,t])[1]).join(', '));
+  SF.forEach(([k,f,l])=>{if(S.sf[k])p.push(l+': '+S.sf[k])});
+  return p.join(' · ')}
+function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+function loadXlsxLib(){return new Promise((res,rej)=>{if(window.XLSX)return res();const sc=document.createElement('script');
+  sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';sc.onload=()=>window.XLSX?res():rej(new Error('โหลดไลบรารี Excel ไม่สำเร็จ'));sc.onerror=()=>rej(new Error('โหลดไลบรารี Excel ไม่ได้ (ตรวจอินเทอร์เน็ต)'));document.head.appendChild(sc)})}
+function exportData(){
+  const lbT=t=>(TYPES.find(x=>x[0]===t)||[t,t])[1],lbS=t=>(STATS.find(x=>x[0]===t)||[t,t])[1];
+  const q=new Set(F.map(r=>r.rq)).size,st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.id)).size,yes=F.filter(inStock).length;
+  const summary=[['LINE Somjuk · สรุปการเช็ค Stock'],['ตัวกรอง',filterText()],['สร้างเมื่อ',new Date().toLocaleString('th-TH')],[],
+    ['ตัวชี้วัด','ค่า'],['คำถามทั้งหมด',q],['ร้านค้าที่ถาม (CustID ไม่ซ้ำ)',st],['รายการที่ค้นหา',F.length],['รายการที่มี Stock',yes],['รายการที่ไม่มี Stock',F.length-yes]];
+  const ig=new Map();F.forEach(r=>{let o=ig.get(r.it);if(!o){o={n:0,y:0,st:new Set()};ig.set(r.it,o)}o.n++;inStock(r)&&o.y++;o.st.add(r.id)});
+  const items=[['Item (6 หลัก)','ถูกค้นหา','มี Stock','ไม่มี Stock','% ไม่มี Stock','ร้านที่ถาม'],...[...ig].sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>[k,o.n,o.y,o.n-o.y,pct(o.n-o.y,o.n)/100,o.st.size])];
+  const sg=new Map();F.forEach(r=>{if(r.k==='(ไม่ระบุ)')return;let o=sg.get(r.id);if(!o){o={nm:r.nm,ch:r.ch,gr:r.gr,n:0,y:0}; sg.set(r.id,o)}o.n++;inStock(r)&&o.y++});
+  const stores=[['CustID','CustName','CustChannel','CustGroupName','ถูกค้นหา','มี Stock','ไม่มี Stock','% ไม่มี Stock'],...[...sg].sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>[k,o.nm,o.ch,o.gr,o.n,o.y,o.n-o.y,pct(o.n-o.y,o.n)/100])];
+  const refill=[['อันดับ','SKU','Item','Size','Color','ถามทั้งหมด','ไม่มี Stock','Stock ไม่พอ','ถามแล้วไม่มีของ/ไม่พอ','ร้านที่ถาม','ล่าสุด'],...refillList().map((o,i)=>[i+1,o.sku,o.it,o.sz,o.co,o.n,o.no,o.ins,o.bad,o.st.size,o.last])];
+  const raw=[['DateTime','RequestID','CustChannel','CustGroupName','CustName','CustID','Corner','SearchTerm','Item','Size','Color','SearchType','Status','สถานะ (ไทย)'],
+    ...F.map(r=>[r.t,r.rq,r.ch,r.gr,r.nm,r.k==='(ไม่ระบุ)'?'':r.id,r.k.includes('_')?r.k.split('_').slice(1).join('_'):'',r.term,r.it,r.sz,r.co,lbT(r.ty),r.s,lbS(r.s)])];
+  return {summary,items,stores,refill,raw}}
+async function exportXlsx(){
+  const b=$('btnXlsx');b.disabled=true;const old=b.textContent;b.textContent='กำลังสร้างไฟล์...';
+  const d=exportData();
+  try{
+    await loadXlsxLib();
+    const wb=XLSX.utils.book_new();
+    [['สรุป',d.summary,[34,60]],['Top Item',d.items,[16,12,12,12,14,12]],['ร้านค้า',d.stores,[14,34,16,22,12,12,12,14]],['SKU ควรเติม',d.refill,[8,18,12,8,8,12,12,12,20,12,20]],['ข้อมูลดิบ',d.raw,[20,14,16,22,34,12,8,18,10,8,8,16,14,22]]]
+      .forEach(([n,a,w])=>{const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=w.map(x=>({wch:x}));if(n!=='สรุป')ws['!freeze']={xSplit:0,ySplit:1};XLSX.utils.book_append_sheet(wb,ws,n)});
+    XLSX.writeFile(wb,'LineSomjuk_Stock_'+stamp()+'.xlsx');
+  }catch(e){
+    // สำรอง: ส่งออกข้อมูลดิบเป็น CSV (เปิดใน Excel ได้ ภาษาไทยไม่เพี้ยน)
+    const csv='\ufeff'+d.raw.map(r=>r.map(v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='LineSomjuk_Stock_'+stamp()+'.csv';document.body.appendChild(a);a.click();a.remove();
+    alert('สร้างไฟล์ Excel ไม่ได้ ('+e.message+')\nจึงส่งออกข้อมูลดิบเป็น CSV แทน');
+  }finally{b.disabled=false;b.textContent=old}}
+function fillPrintHdr(){$('printHdr').innerHTML='<b style="color:var(--ink);font-size:16px">LINE Somjuk · สรุปการเช็ค Stock</b><br>'+esc(filterText())+' · พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')}
+function exportPdf(){fillPrintHdr();window.print()}
+window.addEventListener('beforeprint',fillPrintHdr);
 
 /* ---------- loading ---------- */
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -666,33 +786,43 @@ function srcType(){return API_URL?'api':'sheet'}
 function setBusy(on){$('prog').hidden=!on;$('btnRefresh').disabled=on}
 function initKeep(table,src){ // โหลดข้อมูลใหม่ แต่คงตัวกรองที่ผู้ใช้เลือกไว้
   const wasAll=!!ROWS.length&&S.from===MIN&&S.to===MAX;
-  const keep={from:S.from,to:S.to,types:[...S.types],stats:[...S.stats],sf:{...S.sf},hm:S.hm,had:ROWS.length>0};
+  const keep={open:[...S.open],from:S.from,to:S.to,types:[...S.types],stats:[...S.stats],sf:{...S.sf},hm:S.hm,had:ROWS.length>0};
   init(table,src);
   if(!keep.had)return;
   if(!wasAll&&keep.from>=MIN&&keep.to<=MAX){S.from=keep.from;S.to=keep.to}
   keep.types.forEach(x=>S.types.add(x));keep.stats.forEach(x=>S.stats.add(x));
   SF.forEach(([k])=>{if(keep.sf[k]&&ROWS.some(r=>r[k]===keep.sf[k]))S.sf[k]=keep.sf[k]});
-  S.hm=keep.hm;update();
+  S.hm=keep.hm;keep.open.forEach(x=>S.open.add(x));update();
 }
-async function refreshData(){
-  setBusy(true);
-  try{const table=await fetchTable();initKeep(table,{type:srcType()});cacheSet(table)}
+let lastSig='',lastFetch=0,refreshing=false;
+function sigOf(t){const j=JSON.stringify(t);let h=5381;for(let i=0;i<j.length;i++)h=((h<<5)+h+j.charCodeAt(i))|0;return j.length+':'+h}
+function markChecked(msg){const d=new Date(),p=n=>String(n).padStart(2,'0');
+  $('chk').textContent=msg||('· ตรวจล่าสุด '+p(d.getHours())+':'+p(d.getMinutes())+' (อัปเดตอัตโนมัติทุก 2 นาที)')}
+async function refreshData(auto){
+  if(refreshing)return;refreshing=true;const silent=auto===true;if(!silent)setBusy(true);
+  try{const table=await fetchTable();lastFetch=Date.now();const sg=sigOf(table);
+    if(silent&&sg===lastSig&&ROWS.length){markChecked()} // ข้อมูลไม่เปลี่ยน ไม่ต้องวาดใหม่
+    else{initKeep(table,{type:srcType()});lastSig=sg;cacheSet(table);markChecked()}}
   catch(e){
-    if(ROWS.length){$('asof').textContent='อัปเดตไม่สำเร็จ ใช้ข้อมูลที่บันทึกไว้ · '+e.message}
+    if(silent){markChecked('· ตรวจข้อมูลไม่สำเร็จ จะลองใหม่รอบถัดไป')}
+    else if(ROWS.length){$('asof').textContent='อัปเดตไม่สำเร็จ ใช้ข้อมูลที่บันทึกไว้ · '+e.message}
     else{showGate(true);$('gateTitle').textContent='โหลดข้อมูลไม่สำเร็จ';setMsg(e.message,true);$('gateActs').hidden=false;$('gateHelp').hidden=false}
-  }finally{setBusy(false)}
+  }finally{refreshing=false;if(!silent)setBusy(false)}
 }
 function autoLoad(){
   $('gate').hidden=true;$('app').hidden=false;
   const c=cacheGet();
-  if(c){try{init(c.table,{type:srcType()});const d=new Date(c.ts),p=n=>String(n).padStart(2,'0');
+  if(c){try{init(c.table,{type:srcType()});lastSig=sigOf(c.table);const d=new Date(c.ts),p=n=>String(n).padStart(2,'0');
     $('asof').textContent='ข้อมูลที่บันทึกไว้เมื่อ '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+' · กำลังอัปเดต...'}catch(e){}}
   else $('asof').textContent='กำลังโหลดข้อมูล...';
   return refreshData();
 }
+setInterval(()=>{if(document.hidden||source.type==='file'||!ROWS.length)return;refreshData(true)},120000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&source.type!=='file'&&ROWS.length&&Date.now()-lastFetch>60000)refreshData(true)});
 function bindLoader(){
   $('btnRetry').onclick=autoLoad;
-  $('btnRefresh').onclick=refreshData;
+  $('btnRefresh').onclick=()=>refreshData();
+  $('btnXlsx').onclick=exportXlsx;$('btnPdf').onclick=exportPdf;
   const d=$('drop'),fi=$('file');
   d.onclick=()=>fi.click();d.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')fi.click()};
   fi.onchange=()=>readFile(fi.files[0]);
