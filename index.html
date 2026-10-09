@@ -199,6 +199,9 @@ svg text{font-family:var(--font)}
 .mx{border-collapse:separate;border-spacing:3px;font-size:13px}
 .mx th{font-weight:500;color:var(--ink3);font-size:12px;padding:2px 8px;white-space:nowrap;text-align:center}
 .mx th.rl{text-align:right}
+.mx thead th{position:sticky;top:0;z-index:2;background:var(--soft);box-shadow:0 4px 0 var(--soft)}
+.mx tbody th{position:sticky;left:0;z-index:1;background:var(--soft);box-shadow:4px 0 0 var(--soft)}
+.mx thead th:first-child{left:0;z-index:3}
 .mx td{min-width:44px;height:30px;text-align:center;border-radius:7px;font-weight:600;color:var(--ink)}
 .mx td.ok{background:color-mix(in srgb,var(--s3) 60%,var(--surface))}
 .mx td.low{background:color-mix(in srgb,var(--s4) 70%,var(--surface))}
@@ -324,7 +327,7 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 10 ร้านค้า</h2><div class="sub">ร้านที่ถามบ่อยที่สุด · แถบสีแสดงสัดส่วนที่ตอบว่ามี Stock (ฟ้า) กับไม่มี Stock (พีช) · คลิกเพื่อดูรายการที่ร้านนั้นถาม</div></div></div>
+      <div class="hd"><div><h2>Top 5 ร้านค้า</h2><div class="sub">ร้านที่ถามบ่อยที่สุด · แถบสีแสดงสัดส่วนที่ตอบว่ามี Stock (ฟ้า) กับไม่มี Stock (พีช) · คลิกเพื่อดูรายการที่ร้านนั้นถาม</div></div></div>
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -617,7 +620,6 @@ function renderItems(){
       const list=[...sk.values()].sort((a,b)=>b.n-a.n||a.sku.localeCompare(b.sku));
       const dash='<span style="color:var(--ink3)">—</span>';
       h+=matrixHtml(o.rows);
-      h+=storePanel(o.rows,'ร้านค้าที่ถามรุ่นนี้',10,false);
       h+=`<div class="sku-wrap"><table class="sku"><thead><tr><th>SKU ที่ค้นหา</th><th>Size</th><th>Color</th><th class="r">ครั้ง</th><th>Stock</th><th>ล่าสุด</th></tr></thead><tbody>`+
         list.slice(0,200).map(x=>{const no=x.n-x.y;return `<tr><td class="mono">${esc(x.sku)}</td><td>${x.sz||dash}</td><td>${x.co||dash}</td><td class="r num">${x.n}</td><td>${x.y?`<span class="pill" style="--c:var(--s1)">มี ${x.y}</span> `:''}${no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${no}</span>`:''}</td><td class="num" style="color:var(--ink2)">${dLabel(x.last.slice(0,10))} ${x.last.slice(11)}</td></tr>`}).join('')+`</tbody></table></div>`;
     }
@@ -626,7 +628,7 @@ function renderItems(){
 }
 function renderStores(){
   let unk=0;const known=F.filter(r=>{if(r.k===UNS){unk++;return false}return true});
-  const arr=storesOf(known).slice(0,10);
+  const arr=storesOf(known).slice(0,5);
   if(!arr.length){$('stores').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
   $('stores').innerHTML=arr.map((o,i)=>{const open=S.stOpen.has(o.id),no=o.no,hi=pct(no,o.n)>=50;
     let d='';
