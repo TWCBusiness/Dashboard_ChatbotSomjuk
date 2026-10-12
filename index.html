@@ -392,7 +392,7 @@ svg text{font-family:var(--font)}
     </section>
 
     <section class="card c12" id="refillCard">
-      <div class="hd"><div><h2>สินค้าที่ไม่พบStock</h2><div class="sub" id="refillSub"></div></div></div>
+      <div class="hd"><div><h2>SKU ที่ควรเติมสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
       <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -630,7 +630,7 @@ function storePanel(rows,title,limit,badOnly){
   return `<div class="mx-wrap" style="margin-left:36px"><h4>${title} <span class="sub" style="font-weight:400">${named.length} ร้าน${unk?' · ไม่ระบุร้าน '+unk.n+' ครั้ง':''}</span></h4><div class="stl">${show.map(row).join('')}${named.length>limit?`<div class="more-n">และอีก ${named.length-limit} ร้าน (ดูทั้งหมดได้ในไฟล์ Export Excel)</div>`:''}</div></div>`}
 function storeTip(rows,n){const a=storesOf(rows).filter(o=>o.id!==UNS);return a.slice(0,n).map(o=>stName(o)+' ('+o.n+')').join('\n')+(a.length>n?'\n+อีก '+(a.length-n)+' ร้าน':'')}
 
-/* ---- SKU ที่ควรเติมสต็อก ---- */
+/* ---- SKU ที่ไม่พบ Stock ---- */
 function refillList(){
   const g=new Map();
   F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
