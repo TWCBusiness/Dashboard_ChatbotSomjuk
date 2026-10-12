@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
+<meta name="color-scheme" content="only light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LINE Somjuk Dashboard</title>
@@ -9,7 +10,7 @@
 <style>
 /* Layout: sticky toolbar, 4 big KPI tiles, one insight line, then daily chart, breakdowns, Top 10 tables, collapsible deep-dive. Pastel tokens. */
 :root{
-  color-scheme:light;
+  color-scheme:only light;
   --bg:#e2e5ea; --surface:#ffffff; --ink:#2a3042; --ink2:#5d6579; --ink3:#9097a8; --line:#e4e7ed; --soft:#f3f4f7;
   --s1:#7fa8e6; --s2:#f0a994; --s3:#86cfb1; --s4:#f1cd7e;
   --t1:#7c5cd6; --t2:#d0489a; --t3:#a8754a; --t4:#6b7a90; --r1:#9bd6c0; --r2:#62b98c; --k0:#cfd4de; --k1:#4fb6c4; --k2:#f2a44f; --k3:#b9855a; --k4:#c262c9; --kg:#5fbf86;--kr:#f29b9b; --hp:#e98cb5;--n1:#b7bfcf;
@@ -17,14 +18,6 @@
   --font:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --shadow:0 1px 2px rgba(42,48,66,.04),0 6px 20px rgba(42,48,66,.05);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  color-scheme:dark;
-  --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
-  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#d27cc2; --t3:#c79570; --t4:#97a3bb; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
-  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#d27cc2; --t3:#c79570; --t4:#97a3bb; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
 .wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
@@ -45,8 +38,6 @@ h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
 .chip{border:none;background:var(--soft);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--ink2);line-height:1.4}
 .chip:hover{background:var(--line)}
 .chip[aria-pressed="true"]{background:var(--s1);color:#fff;font-weight:600}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#12151c}}
-:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#12151c}
 .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .chip[aria-pressed="true"] .dot{box-shadow:0 0 0 1.5px rgba(255,255,255,.8)}
 .ctl{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;min-height:34px}
@@ -315,6 +306,20 @@ svg text{font-family:var(--font)}
 .scr .val small{display:block;font-weight:400;color:var(--ink3);font-size:12px}
 @media (max-width:760px){.scb{grid-template-columns:1fr}.scr{grid-template-columns:minmax(100px,40%) 1fr auto}}
 @media print{.ms-pop{display:none!important}}
+/* ---- ธีมสี pastel (เลือกได้) ---- */
+html[data-pal="mint"]:root:root{--bg:#e1ebe6;--s1:#6fb7a8;--s2:#f0a68c;--hp:#74c0a4;--soft:#eef4f1;--line:#d6e4dd}
+html[data-pal="lav"]:root:root{--bg:#e7e5f1;--s1:#9a8fe0;--s2:#f2a9b8;--hp:#b39ddb;--soft:#f1effa;--line:#dbd8ee}
+html[data-pal="sand"]:root:root{--bg:#eee8de;--s1:#86a6cc;--s2:#e8a287;--hp:#e3a56b;--soft:#f6f1e8;--line:#e3dac9}
+html[data-pal="ocean"]:root:root{--bg:#dfe9f1;--s1:#5fa3d6;--s2:#f4a995;--hp:#6db8cf;--soft:#edf3f8;--line:#d3e0ea}
+html[data-pal="lav"]:root:root{--good-bg:#efedfb;--bad-bg:#fdeef1}
+html[data-pal="mint"]:root:root{--good-bg:#e8f5f1}
+html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
+.palsw{display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 10px;background:#fff;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink2)}
+.palsw button{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);padding:0;cursor:pointer;background:var(--c);transition:transform .12s}
+.palsw button:hover{transform:scale(1.18)}
+.palsw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink2)}
+.card,.kpi{transition:box-shadow .15s,transform .15s}.kpi:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(30,40,60,.12)}
+@media print{.palsw{display:none!important}}
 </style>
 </head>
 <body>
@@ -336,7 +341,7 @@ svg text{font-family:var(--font)}
   <div class="bar">
     <div class="bar-top">
       <h1>LINE Somjuk · DASHBOARD</h1>
-      <span class="acts"><span class="asof" id="asof"></span><span class="asof" id="chk"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnXlsx" type="button">Export Excel</button><button class="btn ghost" id="btnPdf" type="button">Export PDF</button></span>
+      <span class="acts"><span class="asof" id="asof"></span><span class="asof" id="chk"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnXlsx" type="button">Export Excel</button><button class="btn ghost" id="btnPdf" type="button">Export PDF</button><span class="palsw" id="palsw" title="เลือกธีมสี">ธีม<button type="button" data-pal="pastel" style="--c:#7fa8e6" aria-label="Pastel คลาสสิก" title="Pastel คลาสสิก" aria-pressed="false"></button><button type="button" data-pal="mint" style="--c:#6fb7a8" aria-label="Mint Sage" title="Mint Sage" aria-pressed="false"></button><button type="button" data-pal="lav" style="--c:#9a8fe0" aria-label="Lavender" title="Lavender" aria-pressed="false"></button><button type="button" data-pal="sand" style="--c:#86a6cc" aria-label="Sand & Sky" title="Sand & Sky" aria-pressed="false"></button><button type="button" data-pal="ocean" style="--c:#5fa3d6" aria-label="Ocean Mist" title="Ocean Mist" aria-pressed="false"></button></span></span>
     </div>
     <div class="filters">
       <div class="f"><span class="lbl">ช่วงเวลา</span>
@@ -374,12 +379,12 @@ svg text{font-family:var(--font)}
     </section>
 
     <section class="card c12" id="scCard">
-      <div class="hd"><div><h2>สรุปตาม Status สินค้า</h2><div class="sub">สถานะของสินค้าที่ถูกสอบถาม (NEW · NEW&amp;CAMP. · REPEAT · ACTIVE REPEAT = สีเขียว · สถานะอื่นหรือไม่ทราบ = สีแดงอ่อน) · แท่ง ฟ้า = มี Stock · พีช = ไม่มี Stock</div></div></div>
+      <div class="hd"><div><h2>สรุปตาม Status สินค้า</h2><div class="sub">สถานะของสินค้าที่ถูกสอบถาม (NEW · NEW&amp;CAMP. · REPEAT · ACTIVE REPEAT = สีเขียว · สถานะอื่นหรือไม่ทราบ = สีแดงอ่อน) · แท่งสีเข้ม = มี Stock · สีอ่อนอุ่น = ไม่มี Stock</div></div></div>
       <div class="scb" id="scBody"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c7">
-      <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">แท่ง ฟ้า = มี Stock · พีช = ไม่มี Stock · % = สัดส่วนที่ไม่มี Stock · คลิกแถวเพื่อดูว่าร้านค้าไหนถามรุ่นนี้เข้ามา</div></div>
+      <div class="hd"><div><h2>Top 10 Item</h2><div class="sub">แท่งสีเข้ม = มี Stock · สีอ่อนอุ่น = ไม่มี Stock · % = สัดส่วนที่ไม่มี Stock · คลิกแถวเพื่อดูว่าร้านค้าไหนถามรุ่นนี้เข้ามา</div></div>
         <div class="tabs" role="tablist" id="itemTabs">
           <button class="tab" role="tab" data-t="top" aria-selected="true">ถูกค้นหามากสุด</button>
           <button class="tab" role="tab" data-t="out" aria-selected="false">ไม่มี Stock บ่อยสุด</button>
@@ -387,12 +392,12 @@ svg text{font-family:var(--font)}
       <div class="tbl" id="items"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
     <section class="card c5">
-      <div class="hd"><div><h2>Top 5 ร้านค้า</h2><div class="sub">ร้านที่ถามบ่อยที่สุด · แถบสีแสดงสัดส่วนที่ตอบว่ามี Stock (ฟ้า) กับไม่มี Stock (พีช) · คลิกเพื่อดูรายการที่ร้านนั้นถาม</div></div></div>
+      <div class="hd"><div><h2>Top 5 ร้านค้า</h2><div class="sub">ร้านที่ถามบ่อยที่สุด · แถบสีแสดงสัดส่วนที่ตอบว่ามี Stock (สีเย็น) กับไม่มี Stock (สีอุ่น) · คลิกเพื่อดูรายการที่ร้านนั้นถาม</div></div></div>
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
     <section class="card c12" id="refillCard">
-      <div class="hd"><div><h2>SKU ที่ที่ไม่พบสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
+      <div class="hd"><div><h2>SKU ที่ไม่มีสต๊อก</h2><div class="sub" id="refillSub"></div></div></div>
       <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -971,6 +976,16 @@ function bindLoader(){
 bind();bindHeat();bindLoader();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(ROWS.length)renderDaily()},80)}).observe($('daily'));
 autoLoad();
+</script>
+<script>
+(function(){var K='somjukPal',P=['pastel','mint','lav','sand','ocean'];
+function get(){try{return localStorage.getItem(K)}catch(e){return null}}
+function apply(p){if(P.indexOf(p)<0)p='pastel';if(p==='pastel')document.documentElement.removeAttribute('data-pal');else document.documentElement.setAttribute('data-pal',p);
+ document.querySelectorAll('#palsw button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pal===p)})}
+apply(get());
+function run(){apply(get());var w=document.getElementById('palsw');if(w)w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;try{localStorage.setItem(K,b.dataset.pal)}catch(x){}apply(b.dataset.pal)})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+})();
 </script>
 </body>
 </html>
