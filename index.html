@@ -10,9 +10,9 @@
 /* Layout: sticky toolbar, 4 big KPI tiles, one insight line, then daily chart, breakdowns, Top 10 tables, collapsible deep-dive. Pastel tokens. */
 :root{
   color-scheme:light;
-  --bg:#eceef2; --surface:#ffffff; --ink:#2a3042; --ink2:#5d6579; --ink3:#9097a8; --line:#e4e7ed; --soft:#f3f4f7;
+  --bg:#e2e5ea; --surface:#ffffff; --ink:#2a3042; --ink2:#5d6579; --ink3:#9097a8; --line:#e4e7ed; --soft:#f3f4f7;
   --s1:#7fa8e6; --s2:#f0a994; --s3:#86cfb1; --s4:#f1cd7e;
-  --t1:#8f78d9; --t2:#a994e3; --t3:#c4b6ee; --t4:#ddd4f6; --r1:#9bd6c0; --r2:#62b98c; --k0:#cfd4de; --k1:#4fb6c4; --k2:#f2a44f; --k3:#b9855a; --k4:#c262c9; --kg:#5fbf86;--kr:#f29b9b; --hp:#e98cb5;--n1:#b7bfcf;
+  --t1:#7c5cd6; --t2:#d0489a; --t3:#a8754a; --t4:#6b7a90; --r1:#9bd6c0; --r2:#62b98c; --k0:#cfd4de; --k1:#4fb6c4; --k2:#f2a44f; --k3:#b9855a; --k4:#c262c9; --kg:#5fbf86;--kr:#f29b9b; --hp:#e98cb5;--n1:#b7bfcf;
   --good-bg:#eaf2fd; --bad-bg:#fdeee9; --bad-ink:#b65a42;
   --font:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --shadow:0 1px 2px rgba(42,48,66,.04),0 6px 20px rgba(42,48,66,.05);
@@ -20,11 +20,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   color-scheme:dark;
   --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
-  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#8f78d9; --t3:#7461bd; --t4:#5a4b96; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}}
+  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#d27cc2; --t3:#c79570; --t4:#97a3bb; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}}
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#161922; --surface:#1e222d; --ink:#eceef6; --ink2:#b5bbcc; --ink3:#7e8598; --line:#2b3040; --soft:#252a37;
-  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#8f78d9; --t3:#7461bd; --t4:#5a4b96; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}
+  --s1:#86aeea; --s2:#e8a08b; --s3:#86cdb0; --s4:#e8c777; --good-bg:#222e44; --bad-bg:#3a2a2c; --bad-ink:#f1b5a5; --t1:#a58ee6; --t2:#d27cc2; --t3:#c79570; --t4:#97a3bb; --r1:#8fcdb8; --r2:#6cc096; --k0:#4a5164; --k1:#5cc0cd; --k2:#efae63; --k3:#c79570; --k4:#cc78d2; --kg:#6cc896;--kr:#e98c8a; --hp:#e895bb;--n1:#5b6376; --shadow:none}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
 .wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
@@ -56,17 +56,17 @@ select.ctl{max-width:100%}
 
 /* KPI */
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:6px}
-.kpi{background:var(--surface);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
-.kpi.good{box-shadow:inset 4px 0 0 var(--s1),var(--shadow)}.kpi.bad{box-shadow:inset 4px 0 0 var(--s2),var(--shadow)}
+.kpi{background:#fff;border-radius:14px;padding:16px 18px 18px;box-shadow:0 2px 8px rgba(30,40,60,.10);border:1px solid var(--line);border-top:5px solid var(--ka,var(--ink));min-width:0}
+.kpi.q{--ka:#3b4a6b}.kpi.st{--ka:#e0a030}.kpi.good{--ka:var(--s1)}.kpi.bad{--ka:var(--s2)}.kpi .k{font-weight:600;color:var(--ink)}.kpi .v{color:var(--ka)}
 .kpi .k{font-size:13px;color:var(--ink2)}
-.kpi .v{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-top:4px}
+.kpi .v{font-size:42px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-top:4px}
 .kpi .s{font-size:13px;color:var(--ink2);margin-top:2px}
 .insight{margin-top:14px;padding:2px 4px;color:var(--ink2);font-size:14.5px}
 .insight b{color:var(--ink);font-weight:600}
 
 /* cards */
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-top:14px}
-.card{background:var(--surface);border-radius:14px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.card{background:var(--surface);border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(30,40,60,.08);border:1px solid var(--line);min-width:0}
 .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 h2{font-size:16px;font-weight:600;margin:0}
@@ -221,7 +221,7 @@ svg text{font-family:var(--font)}
 .print-only{display:none}
 @media print{
   @page{size:A4 landscape;margin:10mm}
-  :root:root:root{color-scheme:light;--bg:#fff;--surface:#fff;--ink:#2a3042;--ink2:#5d6579;--ink3:#9097a8;--line:#e9ebf3;--soft:#f1f3f9;--s1:#7fa8e6;--s2:#f0a994;--s3:#86cfb1;--s4:#f1cd7e;--good-bg:#eaf2fd;--bad-bg:#fdeee9;--bad-ink:#b65a42;--shadow:none;--t1:#8f78d9;--t2:#a994e3;--t3:#c4b6ee;--t4:#ddd4f6;--r1:#9bd6c0;--r2:#62b98c;--k0:#cfd4de;--k1:#4fb6c4;--k2:#f2a44f;--k3:#b9855a;--k4:#c262c9;--kg:#5fbf86;--kr:#f29b9b;--hp:#e98cb5;--n1:#b7bfcf}
+  :root:root:root{color-scheme:light;--bg:#fff;--surface:#fff;--ink:#2a3042;--ink2:#5d6579;--ink3:#9097a8;--line:#e9ebf3;--soft:#f1f3f9;--s1:#7fa8e6;--s2:#f0a994;--s3:#86cfb1;--s4:#f1cd7e;--good-bg:#eaf2fd;--bad-bg:#fdeee9;--bad-ink:#b65a42;--shadow:none;--t1:#7c5cd6;--t2:#d0489a;--t3:#a8754a;--t4:#6b7a90;--r1:#9bd6c0;--r2:#62b98c;--k0:#cfd4de;--k1:#4fb6c4;--k2:#f2a44f;--k3:#b9855a;--k4:#c262c9;--kg:#5fbf86;--kr:#f29b9b;--hp:#e98cb5;--n1:#b7bfcf}
   body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .bar-top .acts,.filters,.tabs,#prog,.reset,.xbtn,.chev,.btn,.more,#tip{display:none!important}
   .print-only{display:block;margin:0 0 8px;color:var(--ink2);font-size:12.5px}
@@ -279,9 +279,9 @@ svg text{font-family:var(--font)}
 .ms-ft button{background:none;border:none;color:var(--ink2);cursor:pointer;font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
 .sch{display:inline-flex;align-items:center;gap:5px;padding:1px 9px;border-radius:999px;background:var(--soft);font-size:11.5px;color:var(--ink2);white-space:nowrap}
 .sch::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c,var(--k0))}
-.ith,.itr{display:grid;grid-template-columns:34px minmax(0,1.4fr) 104px minmax(150px,1.2fr) 16px;gap:12px;align-items:center}
+.ith,.itr{display:grid;grid-template-columns:34px minmax(0,1.3fr) 92px minmax(150px,1.2fr) 16px;gap:12px;align-items:center}
 .ith{padding:8px 6px;color:var(--ink3);font-size:12px;font-weight:500;border-bottom:1px solid var(--line)}
-.ith .r,.itr .cnt{text-align:right}
+.ith .r,.itr .cnt{text-align:right}.ith{line-height:1.25}
 .itr{padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
 .itr:hover{background:var(--soft)}
 .itr .rk{color:var(--ink3);font-size:13px}
@@ -392,7 +392,7 @@ svg text{font-family:var(--font)}
     </section>
 
     <section class="card c12" id="refillCard">
-      <div class="hd"><div><h2>SKU ที่ควรเติมสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
+      <div class="hd"><div><h2>SKU ที่ที่ไม่พบสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
       <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -551,8 +551,8 @@ function renderKpis(){
   const q=new Set(F.map(r=>r.rq)).size, st=new Set(F.filter(r=>r.k!=='(ไม่ระบุ)').map(r=>r.id)).size;
   const yes=F.filter(inStock).length, no=F.length-yes;
   const k=[
-    ['คำถามทั้งหมด',fmt(q),'นับจาก RequestID · ค้นหา '+fmt(F.length)+' รายการ',''],
-    ['ร้านค้าที่ถาม',fmt(st),'CustID ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)',''],
+    ['คำถามทั้งหมด',fmt(q),'นับจาก RequestID · ค้นหา '+fmt(F.length)+' รายการ','q'],
+    ['ร้านค้าที่ถาม',fmt(st),'CustID ไม่ซ้ำ (ไม่นับแถวที่ไม่ระบุร้าน)','st'],
     ['รายการที่มี Stock',fmt(yes),pct(yes,F.length)+'% ของรายการที่ค้นหา','good'],
     ['รายการที่ไม่มี Stock',fmt(no),pct(no,F.length)+'% ของรายการที่ค้นหา','bad']];
   $('kpis').innerHTML=k.map(x=>`<div class="kpi ${x[3]}"><div class="k">${x[0]}</div><div class="v num">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
@@ -630,7 +630,7 @@ function storePanel(rows,title,limit,badOnly){
   return `<div class="mx-wrap" style="margin-left:36px"><h4>${title} <span class="sub" style="font-weight:400">${named.length} ร้าน${unk?' · ไม่ระบุร้าน '+unk.n+' ครั้ง':''}</span></h4><div class="stl">${show.map(row).join('')}${named.length>limit?`<div class="more-n">และอีก ${named.length-limit} ร้าน (ดูทั้งหมดได้ในไฟล์ Export Excel)</div>`:''}</div></div>`}
 function storeTip(rows,n){const a=storesOf(rows).filter(o=>o.id!==UNS);return a.slice(0,n).map(o=>stName(o)+' ('+o.n+')').join('\n')+(a.length>n?'\n+อีก '+(a.length-n)+' ร้าน':'')}
 
-/* ---- SKU ที่ไม่พบ Stock ---- */
+/* ---- SKU ที่ควรเติมสต็อก ---- */
 function refillList(){
   const g=new Map();
   F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
@@ -666,7 +666,7 @@ function renderItems(){
   else arr.sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it));
   arr=arr.slice(0,10);
   if(!arr.length){$('items').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  let h=`<div class="ith"><span>#</span><span>รุ่นสินค้า · Status สินค้า</span><span class="r">ถูกสอบถาม</span><span>สัดส่วน มี / ไม่มี Stock</span><span></span></div>`;
+  let h=`<div class="ith"><span>#</span><span>รุ่นสินค้า · Status สินค้า</span><span class="r">จำนวนครั้งที่สอบถาม</span><span class="r">สัดส่วน มี / ไม่มี Stock</span><span></span></div>`;
   arr.forEach((o,i)=>{
     const open=S.open.has(o.it),p=pct(o.no,o.n),hi=p>=50;
     h+=`<div class="itr" role="button" tabindex="0" data-it="${esc(o.it)}" aria-expanded="${open}" data-tip="${esc(o.it+'\nค้นหา '+o.n+' ครั้ง\nมี Stock '+o.y+' ('+pct(o.y,o.n)+'%)\nไม่มี Stock '+o.no+' ('+p+'%)')}">
@@ -683,11 +683,11 @@ function renderSc(){
   const g=new Map();F.forEach(r=>{let o=g.get(r.sc);if(!o){o={k:r.sc,n:0,y:0};g.set(r.sc,o)}o.n++;inStock(r)&&o.y++});
   const arr=[...g.values()].sort((a,b)=>(a.k===NS)-(b.k===NS)||b.n-a.n),tot=F.length||1;
   if(!arr.length){$('scBody').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  const R=35;let cum=0,segs='';
+  const R=54;let cum=0,segs='';
   arr.forEach(o=>{const l=o.n/tot*100,vis=Math.max(l-(l>=100?0:1.2),0.3);
-    segs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="${scColor(o.k)}" stroke-width="70" pathLength="100" stroke-dasharray="${vis} ${100-vis}" stroke-dashoffset="${-cum}" transform="rotate(-90 95 95)" data-tip="${esc(o.k+'\n'+o.n+' รายการ ('+pct(o.n,tot)+'%)')}"/>`;cum+=l});
+    segs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="${scColor(o.k)}" stroke-width="34" pathLength="100" stroke-dasharray="${vis} ${100-vis}" stroke-dashoffset="${-cum}" transform="rotate(-90 95 95)" data-tip="${esc(o.k+'\n'+o.n+' รายการ ('+pct(o.n,tot)+'%)')}"/>`;cum+=l});
   const mx=Math.max(...arr.map(o=>o.n),1);
-  $('scBody').innerHTML=`<div class="pie"><svg viewBox="0 0 190 190" role="img" aria-label="สัดส่วนรายการที่ถามแยกตาม Status สินค้า"><circle cx="95" cy="95" r="70" fill="var(--soft)"/>${segs}<circle cx="95" cy="95" r="70" fill="none" stroke="var(--surface)" stroke-width="2"/></svg><div class="pie-c"><b class="num">${fmt(F.length)}</b> รายการ</div></div>
+  $('scBody').innerHTML=`<div class="pie"><svg viewBox="0 0 190 190" role="img" aria-label="สัดส่วนรายการที่ถามแยกตาม Status สินค้า"><circle cx="95" cy="95" r="54" fill="none" stroke="var(--soft)" stroke-width="34"/>${segs}<text x="95" y="96" text-anchor="middle" font-size="26" font-weight="700" fill="var(--ink)">${fmt(F.length)}</text><text x="95" y="116" text-anchor="middle" font-size="12" fill="var(--ink2)">รายการ</text></svg></div>
     <div class="scl">${arr.map(o=>{const no=o.n-o.y;return `<div class="scr" data-tip="${esc(o.k+'\nถาม '+o.n+' รายการ ('+pct(o.n,tot)+'%)\nมี Stock '+o.y+' · ไม่มี Stock '+no+' ('+pct(no,o.n)+'%)')}">
       <div class="nm"><i style="background:${scColor(o.k)}"></i><div>${esc(o.k)}<small>${pct(o.n,tot)}% ของรายการทั้งหมด</small></div></div>
       <div class="trk"><div class="fill" style="width:${o.n/mx*100}%"><i style="flex:${o.y||0.0001};background:var(--s1)"></i><i style="flex:${no||0.0001};background:var(--s2)"></i></div></div>
@@ -827,7 +827,14 @@ function scBlocks(t){const m=[],re=/SKU\s*:\s*([A-Za-z0-9]+)[^\n]*\n(?:(?!\s*SKU
   while((a=re.exec(t||'')))m.push([a[1].toUpperCase(),a[2].trim().toUpperCase()]);return m}
 let SCV=[];
 const SC_KNOWN=['NEW','NEW&CAMP.','REPEAT','ACTIVE REPEAT']; // สถานะอื่นนอกจากนี้ (รวมถึง ไม่ทราบ) แสดงเป็นสีแดงอ่อน
-function scColor(v){return SC_KNOWN.includes(v)?'var(--kg)':'var(--kr)'}
+const SC_COOL={'NEW':'#0f9d8a','NEW&CAMP.':'#38b6e8','REPEAT':'#2c5fb8','ACTIVE REPEAT':'#0c7a99'};
+const SC_WARM=['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'];
+function scColor(v){
+  if(SC_COOL[v])return SC_COOL[v];
+  if(v===NS)return '#e0262f';
+  const o=(typeof SCV!=='undefined'?SCV:[]).filter(x=>!SC_COOL[x]&&x!==NS);
+  let i=o.indexOf(v);if(i<0){i=0;for(const c of String(v))i=(i*31+c.charCodeAt(0))%997}
+  return SC_WARM[i%SC_WARM.length]}
 function buildRows(table){
   const head=table[0].map(h=>h.trim().toLowerCase());
   const ix=n=>head.findIndex(h=>h===n||h.startsWith(n));
