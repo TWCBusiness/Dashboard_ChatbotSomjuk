@@ -320,6 +320,10 @@ html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
 .palsw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink2)}
 .card,.kpi{transition:box-shadow .15s,transform .15s}.kpi:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(30,40,60,.12)}
 @media print{.palsw{display:none!important}}
+html[data-pal="mint"]:root:root{--t1:#5b6fd0;--t2:#b05cc0;--t3:#a8754a;--t4:#6b7a90}
+html[data-pal="lav"]:root:root{--t1:#1f9e8f;--t2:#3f7fd0;--t3:#c0783a;--t4:#6b7a90}
+html[data-pal="sand"]:root:root{--t1:#7c5cd6;--t2:#c0488f;--t3:#1f9e8f;--t4:#6b7a90}
+html[data-pal="ocean"]:root:root{--t1:#7c5cd6;--t2:#d0489a;--t3:#a8754a;--t4:#8a9a3a}
 </style>
 </head>
 <body>
@@ -340,7 +344,7 @@ html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
   <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
-      <h1>LINE Somjuk · DASHBOARD</h1>
+      <h1>LINE Somjuk · Dashboard</h1>
       <span class="acts"><span class="asof" id="asof"></span><span class="asof" id="chk"></span><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><button class="btn ghost" id="btnXlsx" type="button">Export Excel</button><button class="btn ghost" id="btnPdf" type="button">Export PDF</button><span class="palsw" id="palsw" title="เลือกธีมสี">ธีม<button type="button" data-pal="pastel" style="--c:#7fa8e6" aria-label="Pastel คลาสสิก" title="Pastel คลาสสิก" aria-pressed="false"></button><button type="button" data-pal="mint" style="--c:#6fb7a8" aria-label="Mint Sage" title="Mint Sage" aria-pressed="false"></button><button type="button" data-pal="lav" style="--c:#9a8fe0" aria-label="Lavender" title="Lavender" aria-pressed="false"></button><button type="button" data-pal="sand" style="--c:#86a6cc" aria-label="Sand & Sky" title="Sand & Sky" aria-pressed="false"></button><button type="button" data-pal="ocean" style="--c:#5fa3d6" aria-label="Ocean Mist" title="Ocean Mist" aria-pressed="false"></button></span></span>
     </div>
     <div class="filters">
@@ -379,7 +383,7 @@ html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
     </section>
 
     <section class="card c12" id="scCard">
-      <div class="hd"><div><h2>สรุปตาม Status สินค้า</h2><div class="sub">สถานะของสินค้าที่ถูกสอบถาม (NEW · NEW&amp;CAMP. · REPEAT · ACTIVE REPEAT = สีเขียว · สถานะอื่นหรือไม่ทราบ = สีแดงอ่อน) · แท่งสีเข้ม = มี Stock · สีอ่อนอุ่น = ไม่มี Stock</div></div></div>
+      <div class="hd"><div><h2>สรุปตาม Status สินค้า</h2><div class="sub">สถานะของสินค้าที่ถูกสอบถาม (NEW · NEW&amp;CAMP. · REPEAT · ACTIVE REPEAT = โทนเย็น · สถานะอื่น = โทนร้อน · ไม่ทราบ = แดง) · แท่งสีเข้ม = มี Stock · สีอ่อนอุ่น = ไม่มี Stock</div></div></div>
       <div class="scb" id="scBody"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -397,7 +401,7 @@ html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
     </section>
 
     <section class="card c12" id="refillCard">
-      <div class="hd"><div><h2>SKU ที่ไม่มีสต๊อก</h2><div class="sub" id="refillSub"></div></div></div>
+      <div class="hd"><div><h2>SKU ที่ไม่พบสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
       <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
@@ -832,14 +836,21 @@ function scBlocks(t){const m=[],re=/SKU\s*:\s*([A-Za-z0-9]+)[^\n]*\n(?:(?!\s*SKU
   while((a=re.exec(t||'')))m.push([a[1].toUpperCase(),a[2].trim().toUpperCase()]);return m}
 let SCV=[];
 const SC_KNOWN=['NEW','NEW&CAMP.','REPEAT','ACTIVE REPEAT']; // สถานะอื่นนอกจากนี้ (รวมถึง ไม่ทราบ) แสดงเป็นสีแดงอ่อน
-const SC_COOL={'NEW':'#0f9d8a','NEW&CAMP.':'#38b6e8','REPEAT':'#2c5fb8','ACTIVE REPEAT':'#0c7a99'};
-const SC_WARM=['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'];
+const SCPAL={
+ pastel:{cool:['#0f9d8a','#38b6e8','#2c5fb8','#0c7a99'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'},
+ mint:{cool:['#38a8e0','#3f6fd0','#7a6ad8','#4a8aa8'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'},
+ lav:{cool:['#0f9d8a','#38b6e8','#2c5fb8','#0c7a99'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#c9923a','#e5774a'],ns:'#e0262f'},
+ sand:{cool:['#0f9d8a','#4a5fc8','#2c8fc0','#2c5fb8'],warm:['#d9473f','#e0a030','#a8643a','#c9456a','#e07a5a','#b8884a'],ns:'#d62839'},
+ ocean:{cool:['#2e9e6b','#4a5fc8','#6a5fd0','#3aa7a0'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'}};
+function curPal(){const p=document.documentElement.getAttribute('data-pal');return SCPAL[p]||SCPAL.pastel}
+const SC_ORDER=['NEW','NEW&CAMP.','REPEAT','ACTIVE REPEAT'];
 function scColor(v){
-  if(SC_COOL[v])return SC_COOL[v];
-  if(v===NS)return '#e0262f';
-  const o=(typeof SCV!=='undefined'?SCV:[]).filter(x=>!SC_COOL[x]&&x!==NS);
-  let i=o.indexOf(v);if(i<0){i=0;for(const c of String(v))i=(i*31+c.charCodeAt(0))%997}
-  return SC_WARM[i%SC_WARM.length]}
+  const P=curPal(),ci=SC_ORDER.indexOf(v);
+  if(ci>=0)return P.cool[ci];
+  if(v===NS)return P.ns;
+  const o=(typeof SCV!=='undefined'?SCV:[]).filter(x=>SC_ORDER.indexOf(x)<0&&x!==NS);
+  let k=o.indexOf(v);if(k<0){k=0;for(const c of String(v))k=(k*31+c.charCodeAt(0))%997}
+  return P.warm[k%P.warm.length]}
 function buildRows(table){
   const head=table[0].map(h=>h.trim().toLowerCase());
   const ix=n=>head.findIndex(h=>h===n||h.startsWith(n));
@@ -975,13 +986,14 @@ function bindLoader(){
 }
 bind();bindHeat();bindLoader();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(ROWS.length)renderDaily()},80)}).observe($('daily'));
+window.__repaint=function(){try{if(ROWS.length){update();buildMs();syncMs()}}catch(e){}};
 autoLoad();
 </script>
 <script>
 (function(){var K='somjukPal',P=['pastel','mint','lav','sand','ocean'];
 function get(){try{return localStorage.getItem(K)}catch(e){return null}}
 function apply(p){if(P.indexOf(p)<0)p='pastel';if(p==='pastel')document.documentElement.removeAttribute('data-pal');else document.documentElement.setAttribute('data-pal',p);
- document.querySelectorAll('#palsw button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pal===p)})}
+ document.querySelectorAll('#palsw button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pal===p)});if(window.__repaint)window.__repaint()}
 apply(get());
 function run(){apply(get());var w=document.getElementById('palsw');if(w)w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;try{localStorage.setItem(K,b.dataset.pal)}catch(x){}apply(b.dataset.pal)})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
