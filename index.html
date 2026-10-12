@@ -320,10 +320,11 @@ html[data-pal="ocean"]:root:root{--good-bg:#e8f2fb}
 .palsw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink2)}
 .card,.kpi{transition:box-shadow .15s,transform .15s}.kpi:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(30,40,60,.12)}
 @media print{.palsw{display:none!important}}
-html[data-pal="mint"]:root:root{--t1:#5b6fd0;--t2:#b05cc0;--t3:#a8754a;--t4:#6b7a90}
-html[data-pal="lav"]:root:root{--t1:#1f9e8f;--t2:#3f7fd0;--t3:#c0783a;--t4:#6b7a90}
-html[data-pal="sand"]:root:root{--t1:#7c5cd6;--t2:#c0488f;--t3:#1f9e8f;--t4:#6b7a90}
-html[data-pal="ocean"]:root:root{--t1:#7c5cd6;--t2:#d0489a;--t3:#a8754a;--t4:#8a9a3a}
+html[data-pal="mint"]:root:root{--t1:#8f9fe0;--t2:#d9a0d6;--t3:#c9a27e;--t4:#a3adbf}
+html[data-pal="lav"]:root:root{--t1:#7fcfc0;--t2:#86b4e8;--t3:#e0b07a;--t4:#a3adbf}
+html[data-pal="sand"]:root:root{--t1:#a99be0;--t2:#d8a0cc;--t3:#7fcfc0;--t4:#a3adbf}
+html[data-pal="ocean"]:root:root{--t1:#a99be0;--t2:#e59bc0;--t3:#c9a27e;--t4:#b5c47a}
+html:root:root{--t1:#a99be0;--t2:#d8a0d8;--t3:#c9a27e;--t4:#a3adbf}
 </style>
 </head>
 <body>
@@ -837,11 +838,11 @@ function scBlocks(t){const m=[],re=/SKU\s*:\s*([A-Za-z0-9]+)[^\n]*\n(?:(?!\s*SKU
 let SCV=[];
 const SC_KNOWN=['NEW','NEW&CAMP.','REPEAT','ACTIVE REPEAT']; // สถานะอื่นนอกจากนี้ (รวมถึง ไม่ทราบ) แสดงเป็นสีแดงอ่อน
 const SCPAL={
- pastel:{cool:['#0f9d8a','#38b6e8','#2c5fb8','#0c7a99'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'},
- mint:{cool:['#38a8e0','#3f6fd0','#7a6ad8','#4a8aa8'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'},
- lav:{cool:['#0f9d8a','#38b6e8','#2c5fb8','#0c7a99'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#c9923a','#e5774a'],ns:'#e0262f'},
- sand:{cool:['#0f9d8a','#4a5fc8','#2c8fc0','#2c5fb8'],warm:['#d9473f','#e0a030','#a8643a','#c9456a','#e07a5a','#b8884a'],ns:'#d62839'},
- ocean:{cool:['#2e9e6b','#4a5fc8','#6a5fd0','#3aa7a0'],warm:['#f08a3c','#e8b23a','#d9703a','#b8704a','#e88a5a','#c9923a'],ns:'#e0262f'}};
+ pastel:{cool:['#6fcfbf','#8fd3f0','#7f9be0','#6fb5c9'],warm:['#f4a46c','#f0cf7a','#eb9a7c','#d9a888','#f2b08a','#e6bd6a'],ns:'#ef7f86'},
+ mint:{cool:['#8fcdf0','#8aa6e8','#aa9be8','#86bccd'],warm:['#f4a46c','#f0cf7a','#eb9a7c','#d9a888','#f2b08a','#e6bd6a'],ns:'#ef7f86'},
+ lav:{cool:['#6fcfbf','#8fd3f0','#7f9be0','#6fb5c9'],warm:['#f4a46c','#f0cf7a','#eb9a7c','#d9a888','#e6bd6a','#f2b08a'],ns:'#ef7f86'},
+ sand:{cool:['#6fcfbf','#8a9be0','#7fbfe0','#6f9fd0'],warm:['#ee8a82','#f0c27a','#c9a07a','#e48fa8','#f0a58a','#d8b98a'],ns:'#ec7a86'},
+ ocean:{cool:['#7fd1a8','#8a9be0','#aa9be8','#7fcfc8'],warm:['#f4a46c','#f0cf7a','#eb9a7c','#d9a888','#f2b08a','#e6bd6a'],ns:'#ef7f86'}};
 function curPal(){const p=document.documentElement.getAttribute('data-pal');return SCPAL[p]||SCPAL.pastel}
 const SC_ORDER=['NEW','NEW&CAMP.','REPEAT','ACTIVE REPEAT'];
 function scColor(v){
