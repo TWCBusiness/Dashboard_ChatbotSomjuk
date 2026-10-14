@@ -688,7 +688,7 @@ function scChips(rows,withN){const m=countBy(rows,r=>r.sc),known=[...m].filter(x
 function storeTable(rows,it){
   const arr=storesOf(rows),last=new Map();rows.forEach(r=>{if(r.t>(last.get(r.id)||''))last.set(r.id,r.t)});
   const qres=r=>r.s==='NotFound'?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
-  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
+  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
   const body=arr.map(o=>{const op=S.qOpen.has(it+'|'+o.id);return `<tr class="str" tabindex="0" role="button" aria-expanded="${op}" data-st="${esc(o.id)}" data-it="${esc(it)}"><td><span class="cv">›</span><b style="font-weight:600">${esc(stName(o))}</b>${o.ch&&o.ch!==UNS?`<small>${esc(o.ch)}</small>`:''}</td><td class="mono">${o.id===UNS?'—':esc(o.id)}</td><td class="r num">${o.n}</td><td class="r">${o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'<span style="color:var(--ink3)">—</span>'}</td><td class="num" style="color:var(--ink2)">${dLabel((last.get(o.id)||'').slice(0,10))}</td></tr>${op?`<tr class="qrow"><td colspan="5">${qtab(o.id)}</td></tr>`:''}`}).join('');
   return `<div class="dd"><h4>ร้านค้าที่ถามรุ่นนี้ <span class="sub" style="font-weight:400">${arr.filter(o=>o.id!==UNS).length} ร้าน</span></h4><div class="dd-s"><table class="dt"><thead><tr><th>ร้านค้า</th><th>CustID</th><th class="r">ถาม (ครั้ง)</th><th class="r">ไม่มี Stock</th><th>ล่าสุด</th></tr></thead><tbody>${body}</tbody></table></div></div>`}
 function renderItems(){
@@ -821,6 +821,17 @@ function parseDT(s){s=(s||'').trim();let m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](
   if(m){const p=n=>String(n).padStart(2,'0');return `${m[3]}-${p(m[1])}-${p(m[2])} ${p(m[4])}:${m[5]}`}
   return ''}
 const NS='ไม่ทราบ';
+// คำตอบแบบระดับรุ่น: "WB3A14 (06A) ที่มี Stock ✅ / Status Color : X / Color BE : Size A2, B2 ..."
+function itemBlocks(t){const out=[];if(!t)return out;let it='',ver='',st='',sc='',has=false;
+  const flush=()=>{if(sc&&!has)out.push({it,ver,stock:st,sc,co:'',sizes:[]});has=false};
+  String(t).split(/\r?\n/).forEach(line=>{line=line.trim();
+    let m=line.match(/^([A-Za-z0-9]{4,})\s*\(([^)]*)\)\s*(ที่มี Stock|ไม่มี Stock)/);
+    if(m){flush();it=m[1].toUpperCase().slice(0,6);ver=m[2];st=m[3]==='ที่มี Stock'?'Y':'N';sc='';return}
+    m=line.match(/^Status Color\s*:\s*(.+)$/i);
+    if(m){flush();sc=m[1].trim().toUpperCase();return}
+    m=line.match(/^Color\s+([A-Za-z0-9]{1,3})\s*:\s*Size\s+(.+)$/i);
+    if(m&&it){out.push({it,ver,stock:st,sc:sc,co:m[1].toUpperCase(),sizes:m[2].split(/[,\s]+/).filter(Boolean).map(x=>x.toUpperCase())});has=true}
+  });flush();return out.filter(x=>x.sc)}
 function scBlocks(t){const m=[],re=/SKU\s*:\s*([A-Za-z0-9]+)[^\n]*\n(?:(?!\s*SKU\s*:)[^\n]*\n){0,3}?\s*Status Color\s*:\s*([^\n\r]+)/g;let a;
   while((a=re.exec(t||'')))m.push([a[1].toUpperCase(),a[2].trim().toUpperCase()]);return m}
 let SCV=[];
@@ -861,15 +872,23 @@ function buildRows(table){
     r.it=r.term.slice(0,6);const mm=r.term.slice(6).match(/^([A-Z]\d)?([A-Z]{2})?/);r.sz=mm[1]||'';r.co=mm[2]||'';r.sku=r.term});
   // Status Color: อ่านจากคอลัมน์ StatusColor ถ้ามี ไม่เช่นนั้นดึงจากคำตอบของบอท (Answer Bot)
   const skuSc={},itemSc={};
-  rows.forEach(r=>{r._b=scBlocks(r._a);r._b.forEach(([k,v])=>{skuSc[k]=v;(itemSc[k.slice(0,6)]=itemSc[k.slice(0,6)]||new Set()).add(v)})});
+  rows.forEach(r=>{r._i=itemBlocks(r._a);r._b=scBlocks(r._a);r._b.forEach(([k,v])=>{skuSc[k]=v;(itemSc[k.slice(0,6)]=itemSc[k.slice(0,6)]||new Set()).add(v)})});
   rows.forEach(r=>{let v=(r._c||'').toUpperCase();
     if(!v){const t=r.term;let b=r._b.find(x=>x[0]===t);
       if(!b){const pb=r._b.filter(x=>x[0].startsWith(t));if(pb.length&&new Set(pb.map(x=>x[1])).size===1)b=pb[0]}
       if(!b&&r._b.length&&new Set(r._b.map(x=>x[1])).size===1)b=r._b[0];
       if(b)v=b[1]}
+    if(!v&&r._i&&r._i.length){const E=r._i.filter(x=>x.it===r.it),pick=a=>a.length?a[0].sc:'';
+      const uq=a=>[...new Set(a.map(x=>x.sc))];
+      let m=[];
+      if(r.sz&&r.co)m=E.filter(x=>x.co===r.co&&x.sizes.includes(r.sz));
+      if(!m.length&&r.co)m=E.filter(x=>x.co===r.co);
+      if(!m.length&&r.sz){const z=E.filter(x=>x.sizes.includes(r.sz));if(uq(z).length===1)m=z}
+      if(m.length){v=pick(m);r.scs=uq(m)}
+      else if(E.length){v=pick(E.filter(x=>x.stock==='Y').concat(E));r.scs=uq(E)}}
     if(!v&&skuSc[r.term])v=skuSc[r.term];
     if(!v){const z=itemSc[r.it];if(z&&z.size===1)v=[...z][0]}
-    r.sc=v||NS;delete r._a;delete r._b;delete r._c});
+    r.sc=v||NS;delete r._a;delete r._b;delete r._c;delete r._i});
   const names={};rows.forEach(r=>{if(r.id!=='(ไม่ระบุ)'&&r.nm!=='(ไม่ระบุ)'&&!names[r.id])names[r.id]=r.nm});
   return {rows:rows.filter(r=>r.term),names};
 }
