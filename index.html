@@ -455,8 +455,8 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="ดูรูปสินค้า"><div class="box"><img id="lbImg" alt=""><div class="cap"><span><span class="mono" id="lbIt"></span> <span id="lbNote" style="color:var(--ink3);font-size:12px"></span></span><span style="display:flex;gap:10px;align-items:center"><a id="lbOpen" target="_blank" rel="noopener noreferrer">เปิดรูปต้นฉบับ</a><button class="x" id="lbX" type="button">ปิด (Esc)</button></span></div></div></div>
 <script>
 let ROWS=[],NAMES={};
-const API_URL="https://script.google.com/macros/s/AKfycbwzLSpFo0Ln2zsdX6JaMoXqSR6vl6EAJbSx1UbBv6Y3eIvvriVl3o1vifAGl_vhrU58bA/exec"; // วาง Web App URL จาก Apps Script (ลงท้ายด้วย /exec) แล้วเว็บจะโหลดข้อมูลเองอัตโนมัติ
-const API_KEY="ppondd112233"; // ถ้าตั้ง KEY ใน Code.gs ให้ใส่ค่าเดียวกันที่นี่
+const API_URL="https://script.google.com/macros/s/AKfycbzWdMlcoQ3BRc5o2iGN34cPV21ZBU-yafyP5c_FsF4kQjc9Qahk4FkLnWP43JrjGfTn/exec"; // วาง Web App URL จาก Apps Script (ลงท้ายด้วย /exec) แล้วเว็บจะโหลดข้อมูลเองอัตโนมัติ
+const API_KEY=""; // ถ้าตั้ง KEY ใน Code.gs ให้ใส่ค่าเดียวกันที่นี่
 const DEFAULT_SHEET_ID="1yR13_-X14zyAlmVYK1Zm-r41LXPafHjeYTg_9-wree0"; // แก้เป็น Sheet ID ของคุณได้ที่นี่
 const DEFAULT_GID=""; // เว้นว่าง = ชีตแรก
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -716,14 +716,15 @@ function setImages(list){ // list = [[Item6,ImageURL,...],...] (แถวแร�
   IMG=m;try{localStorage.setItem('somjuk.img.v1',JSON.stringify(m))}catch(e){}
   if(typeof ROWS!=='undefined'&&ROWS.length&&typeof renderItems==='function'){try{renderItems()}catch(e){}}
 }
-const IMGDATA={},IMGWAIT={};let IMGQ=new Set(),IMGT=null,IMGBAD='',HYT=null;
-let DIRECT_BAD=false;try{DIRECT_BAD=Date.now()-Number(localStorage.getItem('somjuk.imgdirect')||0)<864e5}catch(e){}
-function imgSrcs(u){const a=[];if(DIRECT_BAD&&canProxy())return a;if(/^http:/i.test(u)){a.push(u.replace(/^http:/i,'https:'));if(location.protocol!=='https:')a.push(u)}else a.push(u);return a}
+function driveId(u){const m=/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)([\w-]{10,})/.exec(u)||/(?:lh3\.googleusercontent\.com|drive\.usercontent\.google\.com)\/d\/([\w-]{10,})/.exec(u);return m?m[1]:''}
+function imgSrcs(u,big){const id=driveId(u);
+  if(id){const w=big?1200:240;return ['https://drive.google.com/thumbnail?id='+id+'&sz=w'+w,'https://lh3.googleusercontent.com/d/'+id+'=w'+w]}
+  const a=[];if(/^http:/i.test(u)){a.push(u.replace(/^http:/i,'https:'));if(location.protocol!=='https:')a.push(u)}else a.push(u);return a}
+const IMGDATA={},IMGWAIT={};let IMGQ=new Set(),IMGT=null,IMGBAD='';
 function canProxy(){return !!API_URL&&API_URL!=='preview'}
-function markDirectBad(){if(DIRECT_BAD)return;DIRECT_BAD=true;try{localStorage.setItem('somjuk.imgdirect',String(Date.now()))}catch(e){}}
-function proxyImg(it){ // ขอรูปผ่าน Apps Script แบบรวมเป็นชุดเดียว (action=imgs) ลดจำนวนครั้งที่เรียก
+function proxyImg(it){ // ขอรูปผ่าน Apps Script แบบรวมเป็นชุด (action=imgs) ใช้กับรูปที่เบราว์เซอร์โหลดตรงไม่ได้ (เช่น pis)
   if(IMGDATA[it])return Promise.resolve(IMGDATA[it]);
-  if(!canProxy())return Promise.reject(new Error('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html (บรรทัด const API_URL="..." ต้องเป็น Web App URL ของ Apps Script) จึงดึงรูปผ่าน Apps Script ไม่ได้'));
+  if(!canProxy())return Promise.reject(new Error('ยังไม่ได้ตั้งค่า API_URL ใน index.html'));
   if(IMGBAD)return Promise.reject(new Error(IMGBAD));
   if(IMGWAIT[it])return IMGWAIT[it].p;
   let res,rej;const p=new Promise((a,b)=>{res=a;rej=b});IMGWAIT[it]={p,res,rej};IMGQ.add(it);
@@ -738,38 +739,42 @@ function flushImgs(){
       else w.rej(new Error((o&&o.error)||'ไม่พบรูป'))})
   }).catch(err=>{IMGBAD=err.message||'โหลดรูปผ่าน Apps Script ไม่ได้';
     items.forEach(it=>{const w=IMGWAIT[it];delete IMGWAIT[it];if(w)w.rej(new Error(IMGBAD))})})}
-function picCell(it){const u=IMG[it];
-  if(!u)return `<span class="pic"><span class="noimg" title="ไม่มีรูปในชีต ProductImages">ไม่มีรูป</span></span>`;
-  const a=imgSrcs(u),src=IMGDATA[it]||a[0]||'';
-  if(!src){clearTimeout(HYT);HYT=setTimeout(hydrateImgs,0)}
-  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img ${src?`src="${esc(src)}"`:''} data-it="${esc(it)}" data-n="0" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
+function whyFail(u,extra){return driveId(u)?'โหลดรูปจาก Google Drive ไม่ได้ ตรวจว่าไฟล์หรือโฟลเดอร์แชร์เป็น "Anyone with the link" (Viewer)':(extra||'โหลดรูปจาก pis ไม่ได้ (เบราว์เซอร์บล็อกหรือเข้าไม่ถึง)')}
 function imgDiag(msg){let d=document.getElementById('imgDiag');
   if(!d){const it=document.getElementById('items');if(!it)return;d=document.createElement('div');d.id='imgDiag';d.className='sub';d.style.cssText='margin:6px 0;padding:8px 10px;border-radius:10px;background:#fff4e5;color:#7a4a00;font-size:12.5px';it.parentNode.insertBefore(d,it)}
   d.textContent='รูปสินค้าโหลดไม่ได้: '+msg;console.warn('[img]',msg)}
-function intoImg(el,it){el.onerror=null;proxyImg(it).then(d=>{el.src=d}).catch(e=>{imgDiag(e.message);const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="'+esc(e.message)+'">โหลดรูปไม่ได้</span>'})}
-setInterval(()=>{document.querySelectorAll('.pic img[data-it][src]').forEach(el=>{
-  const t=+el.getAttribute('data-t')||0;if(el.complete){return}
-  if(t>=3&&!/^data:/.test(el.src)){el.setAttribute('data-t','-99');if(canProxy())markDirectBad();intoImg(el,el.getAttribute('data-it'))}else if(t>=0)el.setAttribute('data-t',t+1)})},2000);
-function hydrateImgs(){document.querySelectorAll('.pic img[data-it]:not([src])').forEach(el=>intoImg(el,el.getAttribute('data-it')))}
+function picCell(it){const u=IMG[it];
+  if(!u)return `<span class="pic"><span class="noimg" title="ไม่มีรูปในชีต ProductImages">ไม่มีรูป</span></span>`;
+  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(IMGDATA[it]||imgSrcs(u)[0])}" data-it="${esc(it)}" data-n="0" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
 function imgFail(el){const it=el.getAttribute('data-it'),u=IMG[it];if(!u)return;
   const a=imgSrcs(u),n=+el.getAttribute('data-n')||0;
   if(n+1<a.length){el.setAttribute('data-n',n+1);el.src=a[n+1];return}
-  if(canProxy())markDirectBad();intoImg(el,it)}
+  el.onerror=null;const dead=m=>{m=whyFail(u,m);imgDiag(m);const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="'+esc(m)+'">โหลดรูปไม่ได้</span>'};
+  if(driveId(u))return dead();
+  proxyImg(it).then(d=>{el.src=d}).catch(e=>dead('โหลดรูปจาก pis ตรงไม่ได้ และดึงผ่าน Apps Script ไม่ได้: '+e.message))}
+setInterval(()=>{document.querySelectorAll('.pic img[data-it]').forEach(el=>{
+  if(el.complete)return;const t=+el.getAttribute('data-t')||0;
+  if(t>=4){el.setAttribute('data-t','-99');imgFail(el)}else if(t>=0)el.setAttribute('data-t',t+1)})},2000);
 function openLb(it){const u=IMG[it];if(!u)return;
-  const im=document.getElementById('lbImg'),note=document.getElementById('lbNote'),a=imgSrcs(u);
+  const im=document.getElementById('lbImg'),note=document.getElementById('lbNote'),a=imgSrcs(u,true);
   document.getElementById('lbIt').textContent=it;document.getElementById('lbOpen').href=u;
-  im.alt=it;im.referrerPolicy='no-referrer';note.textContent='';im.style.visibility='hidden';im.removeAttribute('src');
+  im.alt=it;im.referrerPolicy='no-referrer';note.textContent='';note.style.whiteSpace='normal';
   const th=document.querySelector('.th[data-big="'+(window.CSS&&CSS.escape?CSS.escape(it):it)+'"] img');
-  let n=0;const tok=++openLb.t;
-  const fail=m=>{if(tok===openLb.t){note.textContent=m||'โหลดรูปไม่สำเร็จ';note.style.whiteSpace='normal'}};
-  const viaProxy=()=>{note.textContent='กำลังโหลดรูป...';proxyImg(it).then(d=>{if(tok===openLb.t){im.onerror=()=>fail();im.src=d}}).catch(e=>fail(e.message))};
-  const tryNext=()=>{if(tok!==openLb.t)return;if(n<a.length)im.src=a[n++];else viaProxy()};
-  im.onerror=tryNext;im.onload=()=>{if(tok===openLb.t){note.textContent='';im.style.visibility='visible'}};
-  if(a.length)setTimeout(()=>{if(tok===openLb.t&&n<=a.length&&!im.complete&&!/^data:/.test(im.src||'')){n=a.length;viaProxy()}},6000);
+  const tok=++openLb.t;let n=0,shown=false;
+  im.removeAttribute('src');im.style.visibility='hidden';
   document.getElementById('lb').hidden=false;document.getElementById('lbX').focus();
-  if(IMGDATA[it])im.src=IMGDATA[it];
-  else if(th&&th.complete&&th.naturalWidth>0)im.src=th.currentSrc||th.src;
-  else{note.textContent='กำลังโหลดรูป...';tryNext()}}
+  if(th&&th.complete&&th.naturalWidth>0){im.src=th.currentSrc||th.src;im.style.visibility='visible';shown=true} // แสดงรูปย่อทันที แล้วสลับเป็นรูปใหญ่เมื่อโหลดเสร็จ
+  else note.textContent='กำลังโหลดรูป...';
+  const load=()=>{if(tok!==openLb.t)return;
+    if(n>=a.length){if(shown)return;
+      if(driveId(u)){note.textContent=whyFail(u);return}
+      note.textContent='กำลังโหลดรูป...';
+      proxyImg(it).then(d=>{if(tok===openLb.t){im.src=d;im.style.visibility='visible';shown=true;note.textContent=''}}).catch(e=>{if(tok===openLb.t&&!shown)note.textContent=whyFail(u,'โหลดรูปจาก pis ตรงไม่ได้ และดึงผ่าน Apps Script ไม่ได้: '+e.message)});return}
+    const src=a[n++],pre=new Image();pre.referrerPolicy='no-referrer';
+    pre.onload=()=>{if(tok===openLb.t){im.src=src;im.style.visibility='visible';shown=true;note.textContent=''}};
+    pre.onerror=load;pre.src=src};
+  load();
+  setTimeout(()=>{if(tok===openLb.t&&!shown&&!note.textContent.includes('Apps Script'))note.textContent='ยังโหลดไม่เสร็จ... รอสักครู่'},8000)}
 openLb.t=0;
 function closeLb(){openLb.t++;const im=document.getElementById('lbImg');im.onerror=null;im.onload=null;document.getElementById('lb').hidden=true;im.removeAttribute('src')}
 document.getElementById('lb').addEventListener('click',e=>{if(e.target.id==='lb'||e.target.id==='lbX')closeLb()});
