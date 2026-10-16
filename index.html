@@ -346,6 +346,22 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 .palsel select{font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 28px 6px 10px;cursor:pointer}
 .str{cursor:pointer}.str:hover td{background:var(--surface)}.str .cv{display:inline-block;width:14px;color:var(--ink3);transition:transform .15s}.str[aria-expanded="true"] .cv{transform:rotate(90deg)}
 .qrow>td{background:var(--surface)!important;padding:6px 8px!important}.qrow .dt{min-width:520px;margin:0}
+.ith,.itr{grid-template-columns:34px 52px minmax(0,1.3fr) 92px minmax(150px,1.2fr) 16px}
+.pic{display:flex;align-items:center;justify-content:center}
+.pic .th{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--soft) center/cover no-repeat;padding:0;cursor:zoom-in;display:block;overflow:hidden;transition:transform .12s,box-shadow .12s}
+.pic .th:hover{transform:scale(1.06);box-shadow:0 3px 10px rgba(30,40,60,.18)}
+.pic .th img{width:100%;height:100%;object-fit:cover;display:block}
+.pic .noimg{width:44px;height:44px;border-radius:10px;border:1px dashed var(--line);background:var(--soft);color:var(--ink3);font-size:10px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+.lb{position:fixed;inset:0;z-index:1000;background:rgba(20,26,40,.62);display:flex;align-items:center;justify-content:center;padding:24px}
+.lb[hidden]{display:none}
+.lb .box{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:14px 14px 12px;max-width:min(92vw,720px);max-height:92vh;display:flex;flex-direction:column;gap:10px}
+.lb img{max-width:100%;max-height:74vh;object-fit:contain;border-radius:10px;background:var(--soft);display:block;margin:0 auto}
+.lb .cap{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:var(--ink)}
+.lb .cap .mono{font-weight:700;font-size:16px}
+.lb .cap a{color:var(--ink2);font-size:12px}
+.lb .x{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 14px;font:inherit;font-size:13px;color:var(--ink2);cursor:pointer}
+.lb .x:hover{background:var(--soft)}
+@media print{.lb{display:none!important}}
 </style>
 </head>
 <body>
@@ -440,6 +456,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 </div>
 <div id="tip"></div>
 
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="ดูรูปสินค้า"><div class="box"><img id="lbImg" alt=""><div class="cap"><span><span class="mono" id="lbIt"></span> <span id="lbNote" style="color:var(--ink3);font-size:12px"></span></span><span style="display:flex;gap:10px;align-items:center"><a id="lbOpen" target="_blank" rel="noopener noreferrer">เปิดรูปต้นฉบับ</a><button class="x" id="lbX" type="button">ปิด (Esc)</button></span></div></div></div>
 <script>
 let ROWS=[],NAMES={};
 const API_URL="https://script.google.com/macros/s/AKfycbwzLSpFo0Ln2zsdX6JaMoXqSR6vl6EAJbSx1UbBv6Y3eIvvriVl3o1vifAGl_vhrU58bA/exec"; // วาง Web App URL จาก Apps Script (ลงท้ายด้วย /exec) แล้วเว็บจะโหลดข้อมูลเองอัตโนมัติ
@@ -521,8 +538,8 @@ function bind(){
   $('refill').onclick=e=>{const r=e.target.closest('tr[data-rf]');if(!r)return;const k=r.dataset.rf;S.rfOpen.has(k)?S.rfOpen.delete(k):S.rfOpen.add(k);renderRefill()};
   $('refill').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-rf]')){e.preventDefault();e.target.click()}};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
-  $('items').onclick=e=>{const q=e.target.closest('.str[data-st]');if(q){const k=q.dataset.it+'|'+q.dataset.st;S.qOpen.has(k)?S.qOpen.delete(k):S.qOpen.add(k);renderItems();return}if(e.target.closest('.qrow'))return;const r=e.target.closest('.itr[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
-  $('items').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.str[data-st]')){e.preventDefault();e.target.click();return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('.itr[data-it]')){e.preventDefault();e.target.click()}};
+  $('items').onclick=e=>{const bg=e.target.closest('.th[data-big]');if(bg){e.stopPropagation();openLb(bg.dataset.big);return}const q=e.target.closest('.str[data-st]');if(q){const k=q.dataset.it+'|'+q.dataset.st;S.qOpen.has(k)?S.qOpen.delete(k):S.qOpen.add(k);renderItems();return}if(e.target.closest('.qrow'))return;const r=e.target.closest('.itr[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
+  $('items').onkeydown=e=>{if(e.target.closest('.th[data-big]'))return;if((e.key==='Enter'||e.key===' ')&&e.target.matches('.str[data-st]')){e.preventDefault();e.target.click();return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('.itr[data-it]')){e.preventDefault();e.target.click()}};
 }
 
 /* ---------- tooltip ---------- */
@@ -691,6 +708,34 @@ function storeTable(rows,it){
   const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
   const body=arr.map(o=>{const op=S.qOpen.has(it+'|'+o.id);return `<tr class="str" tabindex="0" role="button" aria-expanded="${op}" data-st="${esc(o.id)}" data-it="${esc(it)}"><td><span class="cv">›</span><b style="font-weight:600">${esc(stName(o))}</b>${o.ch&&o.ch!==UNS?`<small>${esc(o.ch)}</small>`:''}</td><td class="mono">${o.id===UNS?'—':esc(o.id)}</td><td class="r num">${o.n}</td><td class="r">${o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'<span style="color:var(--ink3)">—</span>'}</td><td class="num" style="color:var(--ink2)">${dLabel((last.get(o.id)||'').slice(0,10))}</td></tr>${op?`<tr class="qrow"><td colspan="5">${qtab(o.id)}</td></tr>`:''}`}).join('');
   return `<div class="dd"><h4>ร้านค้าที่ถามรุ่นนี้ <span class="sub" style="font-weight:400">${arr.filter(o=>o.id!==UNS).length} ร้าน</span></h4><div class="dd-s"><table class="dt"><thead><tr><th>ร้านค้า</th><th>CustID</th><th class="r">ถาม (ครั้ง)</th><th class="r">ไม่มี Stock</th><th>ล่าสุด</th></tr></thead><tbody>${body}</tbody></table></div></div>`}
+
+/* ---------- รูปสินค้า (แท็บ ProductImages: Item6, ImageURL, Status) ---------- */
+let IMG={};
+try{IMG=JSON.parse(localStorage.getItem('somjuk.img.v1')||'{}')||{}}catch(e){IMG={}}
+function setImages(list){ // list = [[Item6,ImageURL,...],...] (แถวแรกเป็นหัวตาราง) หรือ {Item6:url}
+  const m={};
+  if(Array.isArray(list)){list.forEach((r,i)=>{if(!Array.isArray(r))return;const k=String(r[0]||'').trim().toUpperCase(),u=String(r[1]||'').trim();
+    if(i===0&&/item/i.test(k)&&/url|image/i.test(u))return;if(k&&/^https?:\/\//i.test(u))m[k]=u})}
+  else if(list&&typeof list==='object'){Object.keys(list).forEach(k=>{if(/^https?:\/\//i.test(list[k]))m[k.toUpperCase()]=list[k]})}
+  IMG=m;try{localStorage.setItem('somjuk.img.v1',JSON.stringify(m))}catch(e){}
+  if(typeof ROWS!=='undefined'&&ROWS.length&&typeof renderItems==='function'){try{renderItems()}catch(e){}}
+}
+function imgSrcs(u){const a=[];if(/^http:/i.test(u))a.push(u.replace(/^http:/i,'https:'));a.push(u);return a}
+function picCell(it){const u=IMG[it];
+  if(!u)return `<span class="pic"><span class="noimg" title="ไม่มีรูปในชีต ProductImages">ไม่มีรูป</span></span>`;
+  const a=imgSrcs(u);
+  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(a[0])}" data-alt="${esc(a[1]||'')}" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
+function imgFail(el){const alt=el.getAttribute('data-alt');
+  if(alt&&el.src!==alt){el.removeAttribute('data-alt');el.src=alt;return}
+  const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="โหลดรูปไม่สำเร็จ">โหลดรูปไม่ได้</span>'}
+function openLb(it){const u=IMG[it];if(!u)return;const a=imgSrcs(u),im=document.getElementById('lbImg');
+  im.removeAttribute('data-alt');im.onerror=()=>{if(a[1]&&im.src!==a[1]){im.src=a[1]}else{document.getElementById('lbNote').textContent='โหลดรูปไม่สำเร็จ'}};
+  document.getElementById('lbNote').textContent='';im.alt=it;im.referrerPolicy='no-referrer';im.src=a[0];
+  document.getElementById('lbIt').textContent=it;const o=document.getElementById('lbOpen');o.href=u;
+  document.getElementById('lb').hidden=false;document.getElementById('lbX').focus()}
+function closeLb(){document.getElementById('lb').hidden=true;document.getElementById('lbImg').removeAttribute('src')}
+document.getElementById('lb').addEventListener('click',e=>{if(e.target.id==='lb'||e.target.id==='lbX')closeLb()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('lb').hidden)closeLb()});
 function renderItems(){
   const g=new Map();
   F.forEach(r=>{let o=g.get(r.it);if(!o){o={it:r.it,n:0,y:0,rows:[]};g.set(r.it,o)}o.n++;inStock(r)&&o.y++;o.rows.push(r)});
@@ -699,11 +744,12 @@ function renderItems(){
   else arr.sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it));
   arr=arr.slice(0,10);
   if(!arr.length){$('items').innerHTML='<div class="empty">ไม่มีข้อมูล</div>';return}
-  let h=`<div class="ith"><span>#</span><span>รุ่นสินค้า · Status สินค้า</span><span class="r">จำนวนครั้งที่สอบถาม</span><span class="r">สัดส่วน มี / ไม่มี Stock</span><span></span></div>`;
+  let h=`<div class="ith"><span>#</span><span>รูป</span><span>รุ่นสินค้า · Status สินค้า</span><span class="r">จำนวนครั้งที่สอบถาม</span><span class="r">สัดส่วน มี / ไม่มี Stock</span><span></span></div>`;
   arr.forEach((o,i)=>{
     const open=S.open.has(o.it),p=pct(o.no,o.n),hi=p>=50;
     h+=`<div class="itr" role="button" tabindex="0" data-it="${esc(o.it)}" aria-expanded="${open}" data-tip="${esc(o.it+'\nค้นหา '+o.n+' ครั้ง\nมี Stock '+o.y+' ('+pct(o.y,o.n)+'%)\nไม่มี Stock '+o.no+' ('+p+'%)')}">
       <span class="rk num">${i+1}</span>
+      ${picCell(o.it)}
       <span class="ic"><span class="mono" style="font-weight:600">${esc(o.it)}</span><span class="chs">${scChips(o.rows,true)}</span></span>
       <span class="cnt num">${fmt(o.n)}</span>
       <span class="pr"><span class="trk"><span class="fill" style="width:100%"><i style="flex:${o.y||0.0001};background:var(--s1)"></i><i style="flex:${o.no||0.0001};background:var(--s2)"></i></span></span><b class="num ${hi?'hi':''}">${p}%</b></span>
@@ -906,11 +952,17 @@ async function fetchSheet(ref){
   if(/^\s*<(!doctype|html)/i.test(text))throw new Error('ชีตยังไม่เปิดให้อ่านแบบสาธารณะ ตั้งค่า Share เป็น "Anyone with the link" (Viewer) หรือใช้ไฟล์ CSV แทน');
   return text;
 }
+async function fetchImagesApi(){ // แท็บ ProductImages ผ่าน ?sheet=ProductImages (ไม่บล็อกการโหลดข้อมูลหลัก)
+  try{const q=(API_URL.includes('?')?'&':'?')+'sheet=ProductImages'+(API_KEY?'&key='+encodeURIComponent(API_KEY):'');
+    const r=await fetch(API_URL+q);if(!r.ok)return;const j=await r.json();
+    if(j&&Array.isArray(j.table))setImages(j.table)}catch(e){}}
 async function loadApi(){
   let res;try{res=await fetch(API_URL+(API_KEY?(API_URL.includes('?')?'&':'?')+'key='+encodeURIComponent(API_KEY):''))}catch(e){throw new Error('เรียก Apps Script ไม่ได้ ตรวจสอบ URL และการ Deploy (Who has access = Anyone)')}
   if(!res.ok)throw new Error('Apps Script ตอบกลับผิดพลาด (HTTP '+res.status+')');
   let j;try{j=await res.json()}catch(e){throw new Error('Apps Script ไม่ได้ส่ง JSON กลับมา ตรวจสอบว่า Deploy เป็น Web app และสิทธิ์เป็น Anyone')}
   if(j.error)throw new Error('Apps Script: '+j.error);
+  if(j.images)setImages(j.images);
+  fetchImagesApi();
   return j.table;
 }
 function setMsg(t,err){const m=$('msg');m.textContent=t||'';m.className='msg'+(err?' err':'')}
@@ -937,7 +989,8 @@ function readFile(f){if(!f)return;const fr=new FileReader();
 const CACHE_KEY='somjuk.cache.v2.'+(API_URL||DEFAULT_SHEET_ID);
 function cacheGet(){try{const j=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');return j&&Array.isArray(j.table)?j:null}catch(e){return null}}
 function cacheSet(table){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),table}))}catch(e){}}
-async function fetchTable(){return API_URL?await loadApi():parseCSV(await fetchSheet(DEFAULT_SHEET_ID))}
+async function fetchImagesCsv(){try{const r=await fetch(`https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProductImages`);if(!r.ok)return;const t=await r.text();if(/^\s*<(!doctype|html)/i.test(t))return;setImages(parseCSV(t))}catch(e){}}
+async function fetchTable(){if(API_URL)return await loadApi();const t=parseCSV(await fetchSheet(DEFAULT_SHEET_ID));fetchImagesCsv();return t}
 function srcType(){return API_URL?'api':'sheet'}
 function setBusy(on){$('prog').hidden=!on;$('btnRefresh').disabled=on}
 function initKeep(table,src){ // โหลดข้อมูลใหม่ แต่คงตัวกรองที่ผู้ใช้เลือกไว้
