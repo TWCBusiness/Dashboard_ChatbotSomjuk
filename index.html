@@ -4,7 +4,7 @@
 <meta name="color-scheme" content="only light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINE Somjuk Dashboard</title>
+<title>LINE Somjuk Stock Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -382,7 +382,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
   <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
-      <div class="ttl"><h1>LINE Somjuk · Dashboard</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
+      <div class="ttl"><h1>LINE Somjuk · สรุปการเช็ค Stock</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
       <span class="acts"><label class="palsel" title="เลือกธีมสี">ธีม <select id="palsel" aria-label="เลือกธีมสี"><option value="pastel">Pastel · พาสเทล</option><option value="colorful">Colorful · สดใส</option><option value="smart">Smart · มืออาชีพ</option><option value="mint">Mint Sage · มิ้นต์</option><option value="lav">Lavender · ลาเวนเดอร์</option><option value="sand">Sand & Sky · ทราย</option><option value="ocean">Ocean Mist · ทะเล</option><option value="rose">Rose Quartz · โรส</option><option value="forest">Forest · ป่าสงบ</option><option value="slate">Slate · เทาสุขุม</option></select></label><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button></span>
     </div>
     <div class="filters">
@@ -438,10 +438,6 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
       <div class="tbl" id="stores"><div class="empty">กำลังโหลดข้อมูล...</div></div>
     </section>
 
-    <section class="card c12" id="refillCard">
-      <div class="hd"><div><h2>SKU ที่ไม่พบสต็อก</h2><div class="sub" id="refillSub"></div></div></div>
-      <div class="rf-wrap" id="refill"><div class="empty">กำลังโหลดข้อมูล...</div></div>
-    </section>
 
     <section class="card c12">
       <div class="hd"><div><h2>ช่วงเวลาที่ถามบ่อย</h2><div class="sub">วันในสัปดาห์ × ชั่วโมง · คลิกช่องสี (หรือชื่อวัน/ชั่วโมง) เพื่อดูคำถามด้านล่าง</div></div></div>
@@ -535,8 +531,8 @@ function bind(){
   $('reset').onclick=()=>{S.from=DEF.from;S.to=DEF.to;S.types.clear();S.stats.clear();S.scs.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.hm=null;update()};
   $('stores').onclick=e=>{const r=e.target.closest('.sc[data-st]');if(!r)return;const k=r.dataset.st;S.stOpen.has(k)?S.stOpen.delete(k):S.stOpen.add(k);renderStores()};
   $('stores').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.sc[data-st]')){e.preventDefault();e.target.click()}};
-  $('refill').onclick=e=>{const r=e.target.closest('tr[data-rf]');if(!r)return;const k=r.dataset.rf;S.rfOpen.has(k)?S.rfOpen.delete(k):S.rfOpen.add(k);renderRefill()};
-  $('refill').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-rf]')){e.preventDefault();e.target.click()}};
+  if($('refill'))$('refill').onclick=e=>{const r=e.target.closest('tr[data-rf]');if(!r)return;const k=r.dataset.rf;S.rfOpen.has(k)?S.rfOpen.delete(k):S.rfOpen.add(k);renderRefill()};
+  if($('refill'))$('refill').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-rf]')){e.preventDefault();e.target.click()}};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const bg=e.target.closest('.th[data-big]');if(bg){e.stopPropagation();openLb(bg.dataset.big);return}const q=e.target.closest('.str[data-st]');if(q){const k=q.dataset.it+'|'+q.dataset.st;S.qOpen.has(k)?S.qOpen.delete(k):S.qOpen.add(k);renderItems();return}if(e.target.closest('.qrow'))return;const r=e.target.closest('.itr[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if(e.target.closest('.th[data-big]'))return;if((e.key==='Enter'||e.key===' ')&&e.target.matches('.str[data-st]')){e.preventDefault();e.target.click();return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('.itr[data-it]')){e.preventDefault();e.target.click()}};
@@ -686,7 +682,7 @@ function refillList(){
   const tot=countBy(F,r=>r.sku);
   const arr=[...g.values()];arr.forEach(o=>{o.bad=o.no+o.ins;o.n=tot.get(o.sku)||o.bad;o.sc=topOf(countBy(o.rows,r=>r.sc))[0][0]});
   return arr.sort((a,b)=>b.bad-a.bad||b.no-a.no||a.sku.localeCompare(b.sku))}
-function renderRefill(){
+function renderRefill(){if(!$('refill'))return;
   const all=refillList(),arr=S.rfAll?all.slice(0,100):all.slice(0,15);
   $('refillSub').textContent='เรียงตามจำนวนครั้งที่ลูกค้าถามแล้วไม่มีของหรือมีไม่พอ · แสดง '+fmt(arr.length)+' จาก '+fmt(all.length)+' SKU';
   if(!arr.length){$('refill').innerHTML='<div class="empty">ไม่มี SKU ที่ Stock ไม่พอหรือไม่มีในช่วงที่เลือก</div>';return}
@@ -720,20 +716,42 @@ function setImages(list){ // list = [[Item6,ImageURL,...],...] (แถวแร�
   IMG=m;try{localStorage.setItem('somjuk.img.v1',JSON.stringify(m))}catch(e){}
   if(typeof ROWS!=='undefined'&&ROWS.length&&typeof renderItems==='function'){try{renderItems()}catch(e){}}
 }
-function imgSrcs(u){const a=[];if(/^http:/i.test(u))a.push(u.replace(/^http:/i,'https:'));a.push(u);return a}
+const IMGDATA={},IMGBUSY={};
+function imgSrcs(u){const a=[];if(/^http:/i.test(u)){a.push(u.replace(/^http:/i,'https:'));if(location.protocol!=='https:')a.push(u)}else a.push(u);return a}
+function canProxy(){return !!API_URL&&API_URL!=='preview'}
+function proxyImg(it){ // ขอรูปผ่าน Apps Script (ฝั่งเซิร์ฟเวอร์ดึงรูป แล้วส่ง base64 กลับมา)
+  if(IMGDATA[it])return Promise.resolve(IMGDATA[it]);
+  if(!canProxy())return Promise.reject(new Error('no proxy'));
+  if(IMGBUSY[it])return IMGBUSY[it];
+  const q=(API_URL.includes('?')?'&':'?')+'action=img&item='+encodeURIComponent(it)+(API_KEY?'&key='+encodeURIComponent(API_KEY):'');
+  return IMGBUSY[it]=fetch(API_URL+q).then(r=>r.json()).then(j=>{
+    if(!j||!j.ok||!j.b64)throw new Error((j&&j.error)||'img');
+    return IMGDATA[it]='data:'+(j.mime||'image/jpeg')+';base64,'+j.b64}).finally(()=>{delete IMGBUSY[it]})}
 function picCell(it){const u=IMG[it];
   if(!u)return `<span class="pic"><span class="noimg" title="ไม่มีรูปในชีต ProductImages">ไม่มีรูป</span></span>`;
-  const a=imgSrcs(u);
-  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(a[0])}" data-alt="${esc(a[1]||'')}" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
-function imgFail(el){const alt=el.getAttribute('data-alt');
-  if(alt&&el.src!==alt){el.removeAttribute('data-alt');el.src=alt;return}
-  const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="โหลดรูปไม่สำเร็จ">โหลดรูปไม่ได้</span>'}
-function openLb(it){const u=IMG[it];if(!u)return;const a=imgSrcs(u),im=document.getElementById('lbImg');
-  im.removeAttribute('data-alt');im.onerror=()=>{if(a[1]&&im.src!==a[1]){im.src=a[1]}else{document.getElementById('lbNote').textContent='โหลดรูปไม่สำเร็จ'}};
-  document.getElementById('lbNote').textContent='';im.alt=it;im.referrerPolicy='no-referrer';im.src=a[0];
-  document.getElementById('lbIt').textContent=it;const o=document.getElementById('lbOpen');o.href=u;
-  document.getElementById('lb').hidden=false;document.getElementById('lbX').focus()}
-function closeLb(){document.getElementById('lb').hidden=true;document.getElementById('lbImg').removeAttribute('src')}
+  const src=IMGDATA[it]||imgSrcs(u)[0];
+  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(src)}" data-it="${esc(it)}" data-n="0" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
+function imgFail(el){const it=el.getAttribute('data-it'),u=IMG[it];if(!u)return;
+  const a=imgSrcs(u),n=+el.getAttribute('data-n')||0;
+  if(n+1<a.length){el.setAttribute('data-n',n+1);el.src=a[n+1];return}
+  el.onerror=null;
+  proxyImg(it).then(d=>{el.src=d}).catch(()=>{const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="โหลดรูปไม่สำเร็จ">โหลดรูปไม่ได้</span>'})}
+function openLb(it){const u=IMG[it];if(!u)return;
+  const im=document.getElementById('lbImg'),note=document.getElementById('lbNote'),a=imgSrcs(u);
+  document.getElementById('lbIt').textContent=it;document.getElementById('lbOpen').href=u;
+  im.alt=it;im.referrerPolicy='no-referrer';note.textContent='';
+  const th=document.querySelector('.th[data-big="'+(window.CSS&&CSS.escape?CSS.escape(it):it)+'"] img');
+  let n=0,tok=++openLb.t;
+  const fail=()=>{if(tok!==openLb.t)return;note.textContent='โหลดรูปไม่สำเร็จ'};
+  const viaProxy=()=>{note.textContent='กำลังโหลดรูป...';proxyImg(it).then(d=>{if(tok===openLb.t){im.onerror=fail;im.src=d;note.textContent=''}}).catch(fail)};
+  const tryNext=()=>{if(tok!==openLb.t)return;if(n<a.length){im.src=a[n++]}else viaProxy()};
+  im.onerror=tryNext;im.onload=()=>{if(tok===openLb.t)note.textContent=''};
+  document.getElementById('lb').hidden=false;document.getElementById('lbX').focus();
+  if(IMGDATA[it]){im.src=IMGDATA[it]}                       // มีข้อมูลแล้ว แสดงทันที
+  else if(th&&th.complete&&th.naturalWidth>0){im.src=th.currentSrc||th.src}   // ใช้รูปที่โหลดแล้วในรูปย่อ แสดงทันที
+  else{note.textContent='กำลังโหลดรูป...';tryNext()}}
+openLb.t=0;
+function closeLb(){openLb.t++;const im=document.getElementById('lbImg');im.onerror=null;im.onload=null;document.getElementById('lb').hidden=true;im.removeAttribute('src')}
 document.getElementById('lb').addEventListener('click',e=>{if(e.target.id==='lb'||e.target.id==='lbX')closeLb()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('lb').hidden)closeLb()});
 function renderItems(){
@@ -832,7 +850,7 @@ function bindHeat(){
 }
 function update(){
   F=filtered();syncFilters();
-  renderKpis();renderInsight();renderDaily();renderBars();renderSc();renderItems();renderStores();renderRefill();renderHeat();
+  renderKpis();renderInsight();renderDaily();renderBars();renderSc();renderItems();renderStores();renderHeat();
 }
 
 
