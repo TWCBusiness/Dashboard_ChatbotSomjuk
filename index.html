@@ -382,7 +382,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
   <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
-      <div class="ttl"><h1>LINE Somjuk · สรุปการเช็ค Stock</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
+      <div class="ttl"><h1>LINE Somjuk · Dashboard</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
       <span class="acts"><label class="palsel" title="เลือกธีมสี">ธีม <select id="palsel" aria-label="เลือกธีมสี"><option value="pastel">Pastel · พาสเทล</option><option value="colorful">Colorful · สดใส</option><option value="smart">Smart · มืออาชีพ</option><option value="mint">Mint Sage · มิ้นต์</option><option value="lav">Lavender · ลาเวนเดอร์</option><option value="sand">Sand & Sky · ทราย</option><option value="ocean">Ocean Mist · ทะเล</option><option value="rose">Rose Quartz · โรส</option><option value="forest">Forest · ป่าสงบ</option><option value="slate">Slate · เทาสุขุม</option></select></label><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button></span>
     </div>
     <div class="filters">
@@ -716,39 +716,52 @@ function setImages(list){ // list = [[Item6,ImageURL,...],...] (แถวแร�
   IMG=m;try{localStorage.setItem('somjuk.img.v1',JSON.stringify(m))}catch(e){}
   if(typeof ROWS!=='undefined'&&ROWS.length&&typeof renderItems==='function'){try{renderItems()}catch(e){}}
 }
-const IMGDATA={},IMGBUSY={};
-function imgSrcs(u){const a=[];if(/^http:/i.test(u)){a.push(u.replace(/^http:/i,'https:'));if(location.protocol!=='https:')a.push(u)}else a.push(u);return a}
+const IMGDATA={},IMGWAIT={};let IMGQ=new Set(),IMGT=null,IMGBAD='',HYT=null;
+let DIRECT_BAD=false;try{DIRECT_BAD=Date.now()-Number(localStorage.getItem('somjuk.imgdirect')||0)<864e5}catch(e){}
+function imgSrcs(u){const a=[];if(DIRECT_BAD&&canProxy())return a;if(/^http:/i.test(u)){a.push(u.replace(/^http:/i,'https:'));if(location.protocol!=='https:')a.push(u)}else a.push(u);return a}
 function canProxy(){return !!API_URL&&API_URL!=='preview'}
-function proxyImg(it){ // ขอรูปผ่าน Apps Script (ฝั่งเซิร์ฟเวอร์ดึงรูป แล้วส่ง base64 กลับมา)
+function markDirectBad(){if(DIRECT_BAD)return;DIRECT_BAD=true;try{localStorage.setItem('somjuk.imgdirect',String(Date.now()))}catch(e){}}
+function proxyImg(it){ // ขอรูปผ่าน Apps Script แบบรวมเป็นชุดเดียว (action=imgs) ลดจำนวนครั้งที่เรียก
   if(IMGDATA[it])return Promise.resolve(IMGDATA[it]);
-  if(!canProxy())return Promise.reject(new Error('no proxy'));
-  if(IMGBUSY[it])return IMGBUSY[it];
-  const q=(API_URL.includes('?')?'&':'?')+'action=img&item='+encodeURIComponent(it)+(API_KEY?'&key='+encodeURIComponent(API_KEY):'');
-  return IMGBUSY[it]=fetch(API_URL+q).then(r=>r.json()).then(j=>{
-    if(!j||!j.ok||!j.b64)throw new Error((j&&j.error)||'img');
-    return IMGDATA[it]='data:'+(j.mime||'image/jpeg')+';base64,'+j.b64}).finally(()=>{delete IMGBUSY[it]})}
+  if(!canProxy())return Promise.reject(new Error('ไม่ได้ตั้ง API_URL'));
+  if(IMGBAD)return Promise.reject(new Error(IMGBAD));
+  if(IMGWAIT[it])return IMGWAIT[it].p;
+  let res,rej;const p=new Promise((a,b)=>{res=a;rej=b});IMGWAIT[it]={p,res,rej};IMGQ.add(it);
+  clearTimeout(IMGT);IMGT=setTimeout(flushImgs,80);return p}
+function flushImgs(){
+  const items=[...IMGQ];IMGQ=new Set();if(!items.length)return;
+  const q=(API_URL.includes('?')?'&':'?')+'action=imgs&items='+encodeURIComponent(items.join(','))+(API_KEY?'&key='+encodeURIComponent(API_KEY):'');
+  fetch(API_URL+q).then(r=>r.json()).then(j=>{
+    if(!j||j.ok!==true||!j.images)throw new Error(j&&j.error?'Apps Script: '+j.error:'Apps Script ยังเป็นเวอร์ชันเก่า (ต้องวาง Code.gs ใหม่แล้ว Deploy เวอร์ชันใหม่)');
+    items.forEach(it=>{const o=j.images[it],w=IMGWAIT[it];delete IMGWAIT[it];if(!w)return;
+      if(o&&o.ok&&o.b64){IMGDATA[it]='data:'+(o.mime||'image/jpeg')+';base64,'+o.b64;w.res(IMGDATA[it])}
+      else w.rej(new Error((o&&o.error)||'ไม่พบรูป'))})
+  }).catch(err=>{IMGBAD=err.message||'โหลดรูปผ่าน Apps Script ไม่ได้';
+    items.forEach(it=>{const w=IMGWAIT[it];delete IMGWAIT[it];if(w)w.rej(new Error(IMGBAD))})})}
 function picCell(it){const u=IMG[it];
   if(!u)return `<span class="pic"><span class="noimg" title="ไม่มีรูปในชีต ProductImages">ไม่มีรูป</span></span>`;
-  const src=IMGDATA[it]||imgSrcs(u)[0];
-  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(src)}" data-it="${esc(it)}" data-n="0" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
+  const a=imgSrcs(u),src=IMGDATA[it]||a[0]||'';
+  if(!src){clearTimeout(HYT);HYT=setTimeout(hydrateImgs,0)}
+  return `<span class="pic"><button type="button" class="th" data-big="${esc(it)}" aria-label="ดูรูปใหญ่ ${esc(it)}" title="คลิกเพื่อดูรูปใหญ่"><img ${src?`src="${esc(src)}"`:''} data-it="${esc(it)}" data-n="0" alt="${esc(it)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this)"></button></span>`}
+function intoImg(el,it){el.onerror=null;proxyImg(it).then(d=>{el.src=d}).catch(e=>{const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="'+esc(e.message)+'">โหลดรูปไม่ได้</span>'})}
+function hydrateImgs(){document.querySelectorAll('.pic img[data-it]:not([src])').forEach(el=>intoImg(el,el.getAttribute('data-it')))}
 function imgFail(el){const it=el.getAttribute('data-it'),u=IMG[it];if(!u)return;
   const a=imgSrcs(u),n=+el.getAttribute('data-n')||0;
   if(n+1<a.length){el.setAttribute('data-n',n+1);el.src=a[n+1];return}
-  el.onerror=null;
-  proxyImg(it).then(d=>{el.src=d}).catch(()=>{const b=el.closest('.pic');if(b)b.innerHTML='<span class="noimg" title="โหลดรูปไม่สำเร็จ">โหลดรูปไม่ได้</span>'})}
+  if(canProxy())markDirectBad();intoImg(el,it)}
 function openLb(it){const u=IMG[it];if(!u)return;
   const im=document.getElementById('lbImg'),note=document.getElementById('lbNote'),a=imgSrcs(u);
   document.getElementById('lbIt').textContent=it;document.getElementById('lbOpen').href=u;
-  im.alt=it;im.referrerPolicy='no-referrer';note.textContent='';
+  im.alt=it;im.referrerPolicy='no-referrer';note.textContent='';im.style.visibility='hidden';im.removeAttribute('src');
   const th=document.querySelector('.th[data-big="'+(window.CSS&&CSS.escape?CSS.escape(it):it)+'"] img');
-  let n=0,tok=++openLb.t;
-  const fail=()=>{if(tok!==openLb.t)return;note.textContent='โหลดรูปไม่สำเร็จ'};
-  const viaProxy=()=>{note.textContent='กำลังโหลดรูป...';proxyImg(it).then(d=>{if(tok===openLb.t){im.onerror=fail;im.src=d;note.textContent=''}}).catch(fail)};
-  const tryNext=()=>{if(tok!==openLb.t)return;if(n<a.length){im.src=a[n++]}else viaProxy()};
-  im.onerror=tryNext;im.onload=()=>{if(tok===openLb.t)note.textContent=''};
+  let n=0;const tok=++openLb.t;
+  const fail=m=>{if(tok===openLb.t)note.textContent=m||'โหลดรูปไม่สำเร็จ'};
+  const viaProxy=()=>{note.textContent='กำลังโหลดรูป...';proxyImg(it).then(d=>{if(tok===openLb.t){im.onerror=()=>fail();im.src=d}}).catch(e=>fail(e.message))};
+  const tryNext=()=>{if(tok!==openLb.t)return;if(n<a.length)im.src=a[n++];else viaProxy()};
+  im.onerror=tryNext;im.onload=()=>{if(tok===openLb.t){note.textContent='';im.style.visibility='visible'}};
   document.getElementById('lb').hidden=false;document.getElementById('lbX').focus();
-  if(IMGDATA[it]){im.src=IMGDATA[it]}                       // มีข้อมูลแล้ว แสดงทันที
-  else if(th&&th.complete&&th.naturalWidth>0){im.src=th.currentSrc||th.src}   // ใช้รูปที่โหลดแล้วในรูปย่อ แสดงทันที
+  if(IMGDATA[it])im.src=IMGDATA[it];
+  else if(th&&th.complete&&th.naturalWidth>0)im.src=th.currentSrc||th.src;
   else{note.textContent='กำลังโหลดรูป...';tryNext()}}
 openLb.t=0;
 function closeLb(){openLb.t++;const im=document.getElementById('lbImg');im.onerror=null;im.onload=null;document.getElementById('lb').hidden=true;im.removeAttribute('src')}
@@ -861,7 +874,7 @@ function filterText(){
   if(S.stats.size)p.push('สถานะ: '+[...S.stats].map(t=>(STATS.find(x=>x[0]===t)||[t,t])[1]).join(', '));
   SF.forEach(([k,f,l])=>{if(S.sf[k])p.push(l+': '+S.sf[k])});
   return p.join(' · ')}
-function fillPrintHdr(){$('printHdr').innerHTML='<b style="color:var(--ink);font-size:16px">LINE Somjuk · สรุปการเช็ค Stock</b><br>'+esc(filterText())+' · พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')}
+function fillPrintHdr(){$('printHdr').innerHTML='<b style="color:var(--ink);font-size:16px">LINE Somjuk · Dashboard</b><br>'+esc(filterText())+' · พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')}
 window.addEventListener('beforeprint',fillPrintHdr);
 
 /* ---------- loading ---------- */
