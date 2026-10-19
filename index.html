@@ -954,6 +954,9 @@ function buildRows(table){
     const k=c?c+'_'+cn:'(ไม่ระบุ)';
     const inf=info[c]||{},U='(ไม่ระบุ)';
     rows.push({t:p.tm,rq:g(x,I.rq)||('r'+n),k,id:c||U,nm:g(x,I.nm)||inf.nm||U,ch:g(x,I.ch)||inf.ch||U,gr:g(x,I.gr)||inf.gr||U,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s),msg:g(x,I.raw),_a:g(x,I.ab),_c:g(x,I.sc0)});
+    // แถวเก่าที่บันทึกเป็น InfoOnly แต่คำตอบเป็น 'ไม่มี Stock' ทั้งหมด -> ถือเป็น NoStock
+    const lr=rows[rows.length-1];
+    if(lr.s==='InfoOnly'&&lr._a){const rest=lr._a.replace(/ไม่มี Stock/g,'');if(/ไม่มี Stock/.test(lr._a)&&!/มี Stock|Stock\s*:\s*\d/.test(rest))lr.s='NoStock'}
   });
   // เติม prefix ที่พิมพ์ตกหล่น เช่น 3B53C4BL -> WB3B53C4BL
   const byK={};rows.forEach(r=>{if('WM'.includes(r.term[0]||'#')){const it=r.term.slice(0,6);(byK[it.slice(2,6)]=byK[it.slice(2,6)]||new Set()).add(it)}});
