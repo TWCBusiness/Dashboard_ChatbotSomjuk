@@ -915,8 +915,8 @@ const NS='ไม่ทราบ';
 function itemBlocks(t){const out=[];if(!t)return out;let it='',ver='',st='',sc='',has=false;
   const flush=()=>{if(sc&&!has)out.push({it,ver,stock:st,sc,co:'',sizes:[]});has=false};
   String(t).split(/\r?\n/).forEach(line=>{line=line.trim();
-    let m=line.match(/^([A-Za-z0-9]{4,})\s*\(([^)]*)\)\s*(ที่มี Stock|ไม่มี Stock)/);
-    if(m){flush();it=m[1].toUpperCase().slice(0,6);ver=m[2];st=m[3]==='ที่มี Stock'?'Y':'N';sc='';return}
+    let m=line.match(/^([A-Za-z0-9]{4,})\s*(?:\(([^)]*)\))?\s*(ที่มี Stock|ไม่มี Stock)/);
+    if(m){flush();it=m[1].toUpperCase().slice(0,6);ver=m[2]||'';st=m[3]==='ที่มี Stock'?'Y':'N';sc='';return}
     m=line.match(/^Status Color\s*:\s*(.+)$/i);
     if(m){flush();sc=m[1].trim().toUpperCase();return}
     m=line.match(/^Color\s+([A-Za-z0-9]{1,3})\s*:\s*Size\s+(.+)$/i);
