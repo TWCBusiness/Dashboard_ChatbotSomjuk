@@ -447,7 +447,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
     <section class="card c12" id="hmDetail" hidden></section>
   </div>
 
-  <p class="foot">คำจำกัดความ: <b>Status สินค้า (Status Color)</b> = สถานะของสินค้า เช่น REPEAT, NEW&amp;CAMP., AGING อ่านจากคำตอบของบอท (คอลัมน์ Answer Bot) หรือคอลัมน์ StatusColor ถ้ามีในชีต · รายการที่ไม่พบข้อมูลแสดงเป็น "ไม่ทราบ" ·  <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
+  <p class="foot">คำจำกัดความ: <b>Status สินค้า (Status Color)</b> = สถานะของสินค้า เช่น REPEAT, NEW&amp;CAMP., AGING อ่านจากคำตอบของบอท (คอลัมน์ Answer Bot) หรือคอลัมน์ StatusColor ถ้ามีในชีต · รายการที่ไม่พบข้อมูลแสดงเป็น "ไม่ทราบ" ·  <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound หรือ NoStock · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
   </div>
 </div>
 <div id="tip"></div>
@@ -462,12 +462,12 @@ const DEFAULT_GID=""; // เว้นว่าง = ชีตแรก
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const DOW=['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'];
 const TYPES=[['EXACT','ระบุ SKU เต็ม','Item + Size + Color','--t1'],['ITEM_SIZE','Item + Size','ไม่ระบุสี','--t2'],['ITEM','Item อย่างเดียว','ไม่ระบุ Size/สี','--t3'],['ITEM_COLOR','Item + Color','ไม่ระบุ Size','--t4']];
-const STATS=[['InfoOnly','ตอบข้อมูล Stock','มี Stock · ไม่ระบุจำนวนที่ต้องการ','--r1'],['Sufficient','Stock เพียงพอ','มี Stock พอตามจำนวนที่ถาม','--r2'],['Insufficient','Stock ไม่พอ','มี Stock แต่น้อยกว่าที่ถาม','--s4'],['NotFound','ไม่มี Stock','ไม่พบ / ไม่มี Stock','--s2']];
+const STATS=[['InfoOnly','ตอบข้อมูล Stock','มี Stock · ไม่ระบุจำนวนที่ต้องการ','--r1'],['Sufficient','Stock เพียงพอ','มี Stock พอตามจำนวนที่ถาม','--r2'],['Insufficient','Stock ไม่พอ','มี Stock แต่น้อยกว่าที่ถาม','--s4'],['NoStock','ไม่มี Stock (พบรายการ)','พบรายการ แต่ไม่มี Stock (Stock<5 / Status นอกรายการ)','--s4'],['NotFound','ไม่พบข้อมูล','ไม่พบรายการ / พิมพ์รหัสผิด','--s2']];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Math.round(n).toLocaleString('en-US');
 const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
-const inStock=r=>r.s!=='NotFound';
+const inStock=r=>r.s!=='NotFound'&&r.s!=='NoStock'; // NotFound + NoStock = ไม่มี Stock
 const dayOf=r=>r.t.slice(0,10);
 const isoToDmy=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'';
 function dmyToIso(s){const m=(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!m)return '';
@@ -665,7 +665,7 @@ const UNS='(ไม่ระบุ)';
 const stName=o=>o.id===UNS?'ไม่ระบุร้านในข้อความ':(o.nm&&o.nm!==UNS?o.nm:o.id);
 function storesOf(rows){const m=new Map();
   rows.forEach(r=>{let o=m.get(r.id);if(!o){o={id:r.id,nm:r.nm,ch:r.ch,gr:r.gr,n:0,no:0,ins:0,y:0};m.set(r.id,o)}
-    o.n++;if(r.s==='NotFound')o.no++;else{o.y++;if(r.s==='Insufficient')o.ins++}});
+    o.n++;if(!inStock(r))o.no++;else{o.y++;if(r.s==='Insufficient')o.ins++}});
   return [...m.values()].sort((a,b)=>(a.id===UNS)-(b.id===UNS)||b.n-a.n||stName(a).localeCompare(stName(b)))}
 function storePanel(rows,title,limit,badOnly){
   const arr=storesOf(rows),named=arr.filter(o=>o.id!==UNS),unk=arr.find(o=>o.id===UNS),show=named.slice(0,limit);
@@ -677,8 +677,8 @@ function storeTip(rows,n){const a=storesOf(rows).filter(o=>o.id!==UNS);return a.
 /* ---- SKU ที่ควรเติมสต็อก ---- */
 function refillList(){
   const g=new Map();
-  F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
-    r.s==='NotFound'?o.no++:o.ins++;o.st.add(r.id);o.rows.push(r);if(r.t>o.last)o.last=r.t});
+  F.forEach(r=>{if(inStock(r)&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
+    !inStock(r)?o.no++:o.ins++;o.st.add(r.id);o.rows.push(r);if(r.t>o.last)o.last=r.t});
   const tot=countBy(F,r=>r.sku);
   const arr=[...g.values()];arr.forEach(o=>{o.bad=o.no+o.ins;o.n=tot.get(o.sku)||o.bad;o.sc=topOf(countBy(o.rows,r=>r.sc))[0][0]});
   return arr.sort((a,b)=>b.bad-a.bad||b.no-a.no||a.sku.localeCompare(b.sku))}
@@ -700,7 +700,7 @@ function scChips(rows,withN){const m=countBy(rows,r=>r.sc),known=[...m].filter(x
   return known.map(([k,n])=>`<span class="sch" style="--c:${scColor(k)}">${esc(k)}${withN&&known.length>1?' '+n:''}</span>`).join('')}
 function storeTable(rows,it){
   const arr=storesOf(rows),last=new Map();rows.forEach(r=>{if(r.t>(last.get(r.id)||''))last.set(r.id,r.t)});
-  const qres=r=>r.s==='NotFound'?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
+  const qres=r=>!inStock(r)?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
   const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
   const body=arr.map(o=>{const op=S.qOpen.has(it+'|'+o.id);return `<tr class="str" tabindex="0" role="button" aria-expanded="${op}" data-st="${esc(o.id)}" data-it="${esc(it)}"><td><span class="cv">›</span><b style="font-weight:600">${esc(stName(o))}</b>${o.ch&&o.ch!==UNS?`<small>${esc(o.ch)}</small>`:''}</td><td class="mono">${o.id===UNS?'—':esc(o.id)}</td><td class="r num">${o.n}</td><td class="r">${o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'<span style="color:var(--ink3)">—</span>'}</td><td class="num" style="color:var(--ink2)">${dLabel((last.get(o.id)||'').slice(0,10))}</td></tr>${op?`<tr class="qrow"><td colspan="5">${qtab(o.id)}</td></tr>`:''}`}).join('');
   return `<div class="dd"><h4>ร้านค้าที่ถามรุ่นนี้ <span class="sub" style="font-weight:400">${arr.filter(o=>o.id!==UNS).length} ร้าน</span></h4><div class="dd-s"><table class="dt"><thead><tr><th>ร้านค้า</th><th>CustID</th><th class="r">ถาม (ครั้ง)</th><th class="r">ไม่มี Stock</th><th>ล่าสุด</th></tr></thead><tbody>${body}</tbody></table></div></div>`}
@@ -822,7 +822,7 @@ function renderStores(){
   $('stores').innerHTML=arr.map((o,i)=>{const open=S.stOpen.has(o.id),no=o.no,hi=pct(no,o.n)>=50;
     let d='';
     if(open){const rows=known.filter(r=>r.id===o.id),ig=new Map();
-      rows.forEach(r=>{let x=ig.get(r.it);if(!x){x={it:r.it,n:0,no:0};ig.set(r.it,x)}x.n++;if(r.s==='NotFound')x.no++});
+      rows.forEach(r=>{let x=ig.get(r.it);if(!x){x={it:r.it,n:0,no:0};ig.set(r.it,x)}x.n++;if(!inStock(r))x.no++});
       const li=[...ig.values()].sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it)),show=li.slice(0,10);
       d=`<div class="sc-d"><h4>รายการที่ร้านนี้ถามบ่อย <span class="sub" style="font-weight:400">${[o.ch,o.gr].filter(Boolean).map(esc).join(' · ')}</span></h4><div class="stl">`+
         show.map(x=>`<div class="sr"><span class="nm"><b class="mono">${esc(x.it)}</b></span><span class="c"><b class="num">${x.n}</b> ครั้ง</span>${x.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${x.no}</span>`:`<span class="pill" style="--c:var(--s1)">มี Stock</span>`}</div>`).join('')+
