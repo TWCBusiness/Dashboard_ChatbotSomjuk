@@ -321,6 +321,7 @@ svg text{font-family:var(--font)}
 .dd2{margin-top:6px}.qh{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:0;font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;text-align:left}
 .qh .chev2{display:inline-block;transition:transform .15s;color:var(--ink3)}.qh[aria-expanded="true"] .chev2{transform:rotate(90deg)}
 .qh .sub{font-weight:400}
+.qm.full{display:block;-webkit-line-clamp:unset;overflow:visible;max-width:none;min-width:200px;white-space:pre-wrap;word-break:break-word}.qm.ans{min-width:260px;color:var(--ink)}
 .qm{white-space:pre-line;max-width:340px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink2);font-size:12px;line-height:1.4}
 html:root:root{--t1:#a99be0;--t2:#d8a0d8;--t3:#c9a27e;--t4:#a3adbf}
 html[data-pal="colorful"]:root:root{--bg:#e6e9f5;--line:#dfe4f1;--soft:#f2f4fb;--s1:#4f8ef7;--s2:#fb8a3c;--hp:#ec5fa5;--good-bg:#e6effe;--bad-bg:#feefe4;--t1:#8b5cf6;--t2:#b45f06;--t3:#0891b2;--t4:#64748b;--ink:#1e2440;--ink2:#505a78;--r1:#5fdcb0;--r2:#1fbf8a;--s4:#facc15}
@@ -701,7 +702,7 @@ function scChips(rows,withN){const m=countBy(rows,r=>r.sc),known=[...m].filter(x
 function storeTable(rows,it){
   const arr=storesOf(rows),last=new Map();rows.forEach(r=>{if(r.t>(last.get(r.id)||''))last.set(r.id,r.t)});
   const qres=r=>!inStock(r)?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
-  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
+  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th><th>คำตอบของบอท</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm full">${esc(r.msg||'—')}</div></td><td><div class="qm full ans">${esc(r.ans||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
   const body=arr.map(o=>{const op=S.qOpen.has(it+'|'+o.id);return `<tr class="str" tabindex="0" role="button" aria-expanded="${op}" data-st="${esc(o.id)}" data-it="${esc(it)}"><td><span class="cv">›</span><b style="font-weight:600">${esc(stName(o))}</b>${o.ch&&o.ch!==UNS?`<small>${esc(o.ch)}</small>`:''}</td><td class="mono">${o.id===UNS?'—':esc(o.id)}</td><td class="r num">${o.n}</td><td class="r">${o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'<span style="color:var(--ink3)">—</span>'}</td><td class="num" style="color:var(--ink2)">${dLabel((last.get(o.id)||'').slice(0,10))}</td></tr>${op?`<tr class="qrow"><td colspan="5">${qtab(o.id)}</td></tr>`:''}`}).join('');
   return `<div class="dd"><h4>ร้านค้าที่ถามรุ่นนี้ <span class="sub" style="font-weight:400">${arr.filter(o=>o.id!==UNS).length} ร้าน</span></h4><div class="dd-s"><table class="dt"><thead><tr><th>ร้านค้า</th><th>CustID</th><th class="r">ถาม (ครั้ง)</th><th class="r">ไม่มี Stock</th><th>ล่าสุด</th></tr></thead><tbody>${body}</tbody></table></div></div>`}
 
@@ -980,7 +981,7 @@ function buildRows(table){
       else if(E.length){v=pick(E.filter(x=>x.stock==='Y').concat(E));r.scs=uq(E)}}
     if(!v&&skuSc[r.term])v=skuSc[r.term];
     if(!v){const z=itemSc[r.it];if(z&&z.size===1)v=[...z][0]}
-    r.sc=v||NS;delete r._a;delete r._b;delete r._c;delete r._i});
+    r.sc=v||NS;r.ans=r._a||'';delete r._a;delete r._b;delete r._c;delete r._i});
   const names={};rows.forEach(r=>{if(r.id!=='(ไม่ระบุ)'&&r.nm!=='(ไม่ระบุ)'&&!names[r.id])names[r.id]=r.nm});
   return {rows:rows.filter(r=>r.term),names};
 }
