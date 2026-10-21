@@ -4,7 +4,7 @@
 <meta name="color-scheme" content="only light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINE Somjuk Stock Dashboard</title>
+<title>LINE Somjuk · Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -41,7 +41,7 @@ h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
 .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .chip[aria-pressed="true"] .dot{box-shadow:0 0 0 1.5px rgba(255,255,255,.8)}
 .ctl{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;min-height:34px}
-select.ctl{max-width:1โ00%}
+select.ctl{max-width:100%}
 .reset{background:none;border:none;color:var(--ink2);cursor:pointer;padding:6px 4px;font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .dates{display:flex;gap:6px;align-items:center}
 
@@ -201,13 +201,6 @@ svg text{font-family:var(--font)}
 .mx td.e{background:transparent}
 .mxl{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--ink2)}
 .mxl i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.rf-wrap{overflow:auto}
-.rf{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
-.rf th{text-align:left;font-weight:500;color:var(--ink3);font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line)}
-.rf td{padding:8px 10px;border-bottom:1px solid var(--line)}
-.rf th.r,.rf td.r{text-align:right}
-.rf .pbar{display:block;height:8px;border-radius:999px;background:var(--soft);min-width:70px;overflow:hidden}
-.rf .pbar i{display:block;height:100%;background:var(--s2)}
 .more{margin-top:10px}
 .print-only{display:none}
 @media print{
@@ -247,9 +240,6 @@ svg text{font-family:var(--font)}
 .sc .l3 .hi{color:var(--bad-ink);font-weight:600}
 .sc-d{margin:2px 0 6px 34px;background:var(--soft);border-radius:10px;padding:12px 14px}
 .sc-d h4{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--ink2)}
-.rf tr.rfr{cursor:pointer}.rf tr.rfr:hover td{background:var(--soft)}
-.rf tr.rfd>td{background:var(--soft);padding:12px 16px}
-.rf .stn{font-size:13px}.rf .stn small{color:var(--ink3)}
 @media (max-width:700px){.stl{grid-template-columns:1fr}}
 @media print{.sc-d,.mx-wrap{break-inside:avoid}}
 
@@ -321,17 +311,9 @@ svg text{font-family:var(--font)}
 .dd2{margin-top:6px}.qh{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:0;font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;text-align:left}
 .qh .chev2{display:inline-block;transition:transform .15s;color:var(--ink3)}.qh[aria-expanded="true"] .chev2{transform:rotate(90deg)}
 .qh .sub{font-weight:400}
+.qm.full{display:block;-webkit-line-clamp:unset;overflow:visible;max-width:none;min-width:200px;white-space:pre-wrap;word-break:break-word}.qm.ans{min-width:260px;color:var(--ink)}
 .qm{white-space:pre-line;max-width:340px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink2);font-size:12px;line-height:1.4}
 html:root:root{--t1:#a99be0;--t2:#d8a0d8;--t3:#c9a27e;--t4:#a3adbf}
-html[data-pal="colorful"]:root:root{--bg:#e6e9f5;--line:#dfe4f1;--soft:#f2f4fb;--s1:#4f8ef7;--s2:#fb8a3c;--hp:#ec5fa5;--good-bg:#e6effe;--bad-bg:#feefe4;--t1:#8b5cf6;--t2:#b45f06;--t3:#0891b2;--t4:#64748b;--ink:#1e2440;--ink2:#505a78;--r1:#5fdcb0;--r2:#1fbf8a;--s4:#facc15}
-html[data-pal="smart"]:root:root{--bg:#e6eaf0;--line:#d9dfe8;--soft:#eff2f7;--s1:#3b6fb0;--s2:#e58a6a;--hp:#d8739f;--good-bg:#e4ebf4;--bad-bg:#fbefea;--t1:#5b5ea6;--t2:#a8743c;--t3:#2a9d8f;--t4:#6b7a90;--ink:#1c2740;--ink2:#47546b;--ink3:#8591a6;--r1:#8fc3b8;--r2:#3f9d8c;--s4:#e2b04e}
-html[data-pal="mint"]:root:root{--bg:#e1ebe6;--line:#d6e4dd;--soft:#eef4f1;--s1:#5fb0c8;--s2:#f0a68c;--hp:#e29bb8;--good-bg:#e9f4f7;--bad-bg:#fdf3ef;--t1:#8f9fe0;--t2:#d9a0d6;--t3:#c9a27e;--t4:#a3adbf}
-html[data-pal="lav"]:root:root{--bg:#e7e5f1;--line:#dbd8ee;--soft:#f1effa;--s1:#9a8fe0;--s2:#f4ae8c;--hp:#e48fb8;--good-bg:#f1effb;--bad-bg:#fdf4ef;--t1:#7fcfc0;--t2:#86b4e8;--t3:#c9b27a;--t4:#a3adbf}
-html[data-pal="sand"]:root:root{--bg:#eee8de;--line:#e3dac9;--soft:#f6f1e8;--s1:#86a6cc;--s2:#e8a287;--hp:#d48fb8;--good-bg:#eef3f8;--bad-bg:#fcf2ee;--t1:#a99be0;--t2:#7fcfc0;--t3:#c9b27a;--t4:#a3adbf}
-html[data-pal="ocean"]:root:root{--bg:#dfe9f1;--line:#d3e0ea;--soft:#edf3f8;--s1:#5fa3d6;--s2:#f4a995;--hp:#e590b5;--good-bg:#e9f2f9;--bad-bg:#fdf3f0;--t1:#a99be0;--t2:#c9a27e;--t3:#b5c47a;--t4:#a3adbf}
-html[data-pal="rose"]:root:root{--bg:#efe6ea;--line:#e6d8de;--soft:#f7f0f3;--s1:#c97b9d;--s2:#f0b27a;--hp:#b58fd9;--good-bg:#f7edf1;--bad-bg:#fdf4ec;--t1:#6fb7b0;--t2:#8a9be0;--t3:#c9a27e;--t4:#a3adbf}
-html[data-pal="forest"]:root:root{--bg:#e4ebe3;--line:#d7e2d5;--soft:#eff4ee;--s1:#4f9aa8;--s2:#e8a06a;--hp:#e29bb8;--good-bg:#e6f1f3;--bad-bg:#fcf2ea;--t1:#8f9fe0;--t2:#c9a27e;--t3:#7fb8d9;--t4:#a3adbf}
-html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1:#5f7a99;--s2:#e0a07a;--hp:#d48fb0;--good-bg:#e9ecf1;--bad-bg:#fbf2ec;--t1:#7a7fc0;--t2:#b08a5a;--t3:#5fa89c;--t4:#8d97a8}
 html[data-pal="colorful"]:root:root{--bg:#e6e9f5;--line:#dfe4f1;--soft:#f2f4fb;--s1:#4f8ef7;--s2:#fb8a3c;--hp:#ec5fa5;--good-bg:#e6effe;--bad-bg:#feefe4;--t1:#8b5cf6;--t2:#b45f06;--t3:#0891b2;--t4:#64748b;--ink:#1e2440;--ink2:#505a78;--r1:#5fdcb0;--r2:#1fbf8a;--s4:#facc15}
 html[data-pal="smart"]:root:root{--bg:#e6eaf0;--line:#d9dfe8;--soft:#eff2f7;--s1:#3b6fb0;--s2:#e58a6a;--hp:#d8739f;--good-bg:#e4ebf4;--bad-bg:#fbefea;--t1:#5b5ea6;--t2:#a8743c;--t3:#2a9d8f;--t4:#6b7a90;--ink:#1c2740;--ink2:#47546b;--ink3:#8591a6;--r1:#8fc3b8;--r2:#3f9d8c;--s4:#e2b04e}
 html[data-pal="mint"]:root:root{--bg:#e1ebe6;--line:#d6e4dd;--soft:#eef4f1;--s1:#5fb0c8;--s2:#f0a68c;--hp:#e29bb8;--good-bg:#e9f4f7;--bad-bg:#fdf3ef;--t1:#8f9fe0;--t2:#d9a0d6;--t3:#c9a27e;--t4:#a3adbf}
@@ -379,7 +361,6 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
   </div>
   <div class="prog" id="prog" hidden></div>
   <div id="app">
-  <div class="print-only" id="printHdr"></div>
   <div class="bar">
     <div class="bar-top">
       <div class="ttl"><h1>LINE Somjuk · Dashboard</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
@@ -447,7 +428,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
     <section class="card c12" id="hmDetail" hidden></section>
   </div>
 
-  <p class="foot">คำจำกัดความ: <b>Status สินค้า (Status Color)</b> = สถานะของสินค้า เช่น REPEAT, NEW&amp;CAMP., AGING อ่านจากคำตอบของบอท (คอลัมน์ Answer Bot) หรือคอลัมน์ StatusColor ถ้ามีในชีต · รายการที่ไม่พบข้อมูลแสดงเป็น "ไม่ทราบ" ·  <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
+  <p class="foot">คำจำกัดความ: <b>Status สินค้า (Status Color)</b> = สถานะของสินค้า เช่น REPEAT, NEW&amp;CAMP., AGING อ่านจากคำตอบของบอท (คอลัมน์ Answer Bot) หรือคอลัมน์ StatusColor ถ้ามีในชีต · รายการที่ไม่พบข้อมูลแสดงเป็น "ไม่ทราบ" ·  <b>คำถาม</b> = ข้อความที่ส่งเข้ามา (RequestID) · <b>รายการ</b> = รหัสสินค้าที่ถูกค้นหาในข้อความ (1 คำถามมีได้หลายรายการ) · <b>มี Stock</b> = Status เป็น InfoOnly, Sufficient หรือ Insufficient · <b>ไม่มี Stock</b> = Status เป็น NotFound หรือ NoStock · แถวที่ไม่มีวันที่ในชีตไม่ถูกนำมานับ · เวลาแสดงตามที่บันทึกในชีต</p>
   </div>
 </div>
 <div id="tip"></div>
@@ -462,12 +443,12 @@ const DEFAULT_GID=""; // เว้นว่าง = ชีตแรก
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const DOW=['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'];
 const TYPES=[['EXACT','ระบุ SKU เต็ม','Item + Size + Color','--t1'],['ITEM_SIZE','Item + Size','ไม่ระบุสี','--t2'],['ITEM','Item อย่างเดียว','ไม่ระบุ Size/สี','--t3'],['ITEM_COLOR','Item + Color','ไม่ระบุ Size','--t4']];
-const STATS=[['InfoOnly','ตอบข้อมูล Stock','มี Stock · ไม่ระบุจำนวนที่ต้องการ','--r1'],['Sufficient','Stock เพียงพอ','มี Stock พอตามจำนวนที่ถาม','--r2'],['Insufficient','Stock ไม่พอ','มี Stock แต่น้อยกว่าที่ถาม','--s4'],['NotFound','ไม่มี Stock','ไม่พบ / ไม่มี Stock','--s2']];
+const STATS=[['InfoOnly','ตอบข้อมูล Stock','มี Stock · ไม่ระบุจำนวนที่ต้องการ','--r1'],['Sufficient','Stock เพียงพอ','มี Stock พอตามจำนวนที่ถาม','--r2'],['Insufficient','Stock ไม่พอ','มี Stock แต่น้อยกว่าที่ถาม','--s4'],['NoStock','ไม่มี Stock (พบรายการ)','พบรายการ แต่ไม่มี Stock (Stock<5 / Status นอกรายการ)','--s4'],['NotFound','ไม่พบข้อมูล','ไม่พบรายการ / พิมพ์รหัสผิด','--s2']];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Math.round(n).toLocaleString('en-US');
 const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
-const inStock=r=>r.s!=='NotFound';
+const inStock=r=>r.s!=='NotFound'&&r.s!=='NoStock'; // NotFound + NoStock = ไม่มี Stock
 const dayOf=r=>r.t.slice(0,10);
 const isoToDmy=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'';
 function dmyToIso(s){const m=(s||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!m)return '';
@@ -531,8 +512,6 @@ function bind(){
   $('reset').onclick=()=>{S.from=DEF.from;S.to=DEF.to;S.types.clear();S.stats.clear();S.scs.clear();SF.forEach(([k])=>S.sf[k]='');S.auto.clear();S.hm=null;update()};
   $('stores').onclick=e=>{const r=e.target.closest('.sc[data-st]');if(!r)return;const k=r.dataset.st;S.stOpen.has(k)?S.stOpen.delete(k):S.stOpen.add(k);renderStores()};
   $('stores').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.sc[data-st]')){e.preventDefault();e.target.click()}};
-  if($('refill'))$('refill').onclick=e=>{const r=e.target.closest('tr[data-rf]');if(!r)return;const k=r.dataset.rf;S.rfOpen.has(k)?S.rfOpen.delete(k):S.rfOpen.add(k);renderRefill()};
-  if($('refill'))$('refill').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-rf]')){e.preventDefault();e.target.click()}};
   $('itemTabs').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tab=b.dataset.t;document.querySelectorAll('#itemTabs .tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));renderItems()};
   $('items').onclick=e=>{const bg=e.target.closest('.th[data-big]');if(bg){e.stopPropagation();openLb(bg.dataset.big);return}const q=e.target.closest('.str[data-st]');if(q){const k=q.dataset.it+'|'+q.dataset.st;S.qOpen.has(k)?S.qOpen.delete(k):S.qOpen.add(k);renderItems();return}if(e.target.closest('.qrow'))return;const r=e.target.closest('.itr[data-it]');if(!r)return;const k=r.dataset.it;S.open.has(k)?S.open.delete(k):S.open.add(k);renderItems()};
   $('items').onkeydown=e=>{if(e.target.closest('.th[data-big]'))return;if((e.key==='Enter'||e.key===' ')&&e.target.matches('.str[data-st]')){e.preventDefault();e.target.click();return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('.itr[data-it]')){e.preventDefault();e.target.click()}};
@@ -665,7 +644,7 @@ const UNS='(ไม่ระบุ)';
 const stName=o=>o.id===UNS?'ไม่ระบุร้านในข้อความ':(o.nm&&o.nm!==UNS?o.nm:o.id);
 function storesOf(rows){const m=new Map();
   rows.forEach(r=>{let o=m.get(r.id);if(!o){o={id:r.id,nm:r.nm,ch:r.ch,gr:r.gr,n:0,no:0,ins:0,y:0};m.set(r.id,o)}
-    o.n++;if(r.s==='NotFound')o.no++;else{o.y++;if(r.s==='Insufficient')o.ins++}});
+    o.n++;if(!inStock(r))o.no++;else{o.y++;if(r.s==='Insufficient')o.ins++}});
   return [...m.values()].sort((a,b)=>(a.id===UNS)-(b.id===UNS)||b.n-a.n||stName(a).localeCompare(stName(b)))}
 function storePanel(rows,title,limit,badOnly){
   const arr=storesOf(rows),named=arr.filter(o=>o.id!==UNS),unk=arr.find(o=>o.id===UNS),show=named.slice(0,limit);
@@ -674,34 +653,13 @@ function storePanel(rows,title,limit,badOnly){
   return `<div class="mx-wrap" style="margin-left:36px"><h4>${title} <span class="sub" style="font-weight:400">${named.length} ร้าน${unk?' · ไม่ระบุร้าน '+unk.n+' ครั้ง':''}</span></h4><div class="stl">${show.map(row).join('')}${named.length>limit?`<div class="more-n">และอีก ${named.length-limit} ร้าน (ดูทั้งหมดได้ในไฟล์ Export Excel)</div>`:''}</div></div>`}
 function storeTip(rows,n){const a=storesOf(rows).filter(o=>o.id!==UNS);return a.slice(0,n).map(o=>stName(o)+' ('+o.n+')').join('\n')+(a.length>n?'\n+อีก '+(a.length-n)+' ร้าน':'')}
 
-/* ---- SKU ที่ควรเติมสต็อก ---- */
-function refillList(){
-  const g=new Map();
-  F.forEach(r=>{if(r.s!=='NotFound'&&r.s!=='Insufficient')return;let o=g.get(r.sku);if(!o){o={sku:r.sku,it:r.it,sz:r.sz,co:r.co,no:0,ins:0,st:new Set(),last:'',rows:[]};g.set(r.sku,o)}
-    r.s==='NotFound'?o.no++:o.ins++;o.st.add(r.id);o.rows.push(r);if(r.t>o.last)o.last=r.t});
-  const tot=countBy(F,r=>r.sku);
-  const arr=[...g.values()];arr.forEach(o=>{o.bad=o.no+o.ins;o.n=tot.get(o.sku)||o.bad;o.sc=topOf(countBy(o.rows,r=>r.sc))[0][0]});
-  return arr.sort((a,b)=>b.bad-a.bad||b.no-a.no||a.sku.localeCompare(b.sku))}
-function renderRefill(){if(!$('refill'))return;
-  const all=refillList(),arr=S.rfAll?all.slice(0,100):all.slice(0,15);
-  $('refillSub').textContent='เรียงตามจำนวนครั้งที่ลูกค้าถามแล้วไม่มีของหรือมีไม่พอ · แสดง '+fmt(arr.length)+' จาก '+fmt(all.length)+' SKU';
-  if(!arr.length){$('refill').innerHTML='<div class="empty">ไม่มี SKU ที่ Stock ไม่พอหรือไม่มีในช่วงที่เลือก</div>';return}
-  const mx=Math.max(...arr.map(o=>o.bad),1),dash='<span style="color:var(--ink3)">—</span>';
-  const stCell=o=>{const a=storesOf(o.rows).filter(x=>x.id!==UNS);if(!a.length)return '<span style="color:var(--ink3)">ไม่ระบุร้าน</span>';
-    return `<span class="stn" data-tip="${esc(storeTip(o.rows,10))}">${esc(stName(a[0]))}${a.length>1?` <small>+${a.length-1} ร้าน</small>`:''}</span>`};
-  $('refill').innerHTML=`<table class="rf"><thead><tr><th>#</th><th>Item</th><th>Size</th><th>Color</th><th>Status Color</th><th class="r">ถามทั้งหมด</th><th>ไม่มี Stock</th><th>Stock ไม่พอ</th><th>ร้านที่ถาม</th><th style="width:13%">ความเร่งด่วน</th><th>ล่าสุด</th></tr></thead><tbody>`+
-    arr.map((o,i)=>{const open=S.rfOpen.has(o.sku);
-      return `<tr class="rfr" data-rf="${esc(o.sku)}" tabindex="0" role="button" aria-expanded="${open}"><td class="num" style="color:var(--ink3)">${i+1}</td><td class="mono" style="font-weight:600">${esc(o.it)}</td><td>${o.sz||dash}</td><td>${o.co||dash}</td><td><span class="sch" style="--c:${scColor(o.sc)}">${esc(o.sc)}</span></td><td class="r num">${o.n}</td><td>${o.no?`<span class="pill" style="--c:var(--s2)">${o.no}</span>`:dash}</td><td>${o.ins?`<span class="pill" style="--c:var(--s4)">${o.ins}</span>`:dash}</td><td>${stCell(o)}</td><td><span class="pbar" data-tip="${esc(o.sku+'\nถามแล้วไม่มีของ/ไม่พอ '+o.bad+' ครั้ง')}"><i style="width:${o.bad/mx*100}%"></i></span></td><td class="num" style="color:var(--ink2)">${dLabel(o.last.slice(0,10))}</td></tr>`+
-      (open?`<tr class="rfd"><td colspan="11">${storePanel(o.rows,'ร้านค้าที่ถามแล้วไม่มีของ/ไม่พอ ('+esc(o.sku)+')',12,true).replace('class="mx-wrap" style="margin-left:36px"','class="sc-d" style="margin:0"')}</td></tr>`:'')}).join('')+
-    `</tbody></table><div class="sub" style="margin-top:8px">คลิกแถวเพื่อดูว่าร้านไหนถามบ้าง</div>`+(all.length>15?`<button class="btn ghost more" id="rfMore" type="button">${S.rfAll?'แสดงน้อยลง':'แสดงมากขึ้น (สูงสุด 100)'}</button>`:'');
-  const b=$('rfMore');if(b)b.onclick=()=>{S.rfAll=!S.rfAll;renderRefill()}}
 function scChips(rows,withN){const m=countBy(rows,r=>r.sc),known=[...m].filter(x=>x[0]!==NS).sort((a,b)=>b[1]-a[1]);
   if(!known.length)return `<span class="sch" style="--c:${scColor(NS)}">${NS}</span>`;
   return known.map(([k,n])=>`<span class="sch" style="--c:${scColor(k)}">${esc(k)}${withN&&known.length>1?' '+n:''}</span>`).join('')}
 function storeTable(rows,it){
   const arr=storesOf(rows),last=new Map();rows.forEach(r=>{if(r.t>(last.get(r.id)||''))last.set(r.id,r.t)});
-  const qres=r=>r.s==='NotFound'?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
-  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm" title="${esc(r.msg||'')}">${esc(r.msg||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
+  const qres=r=>!inStock(r)?'<span class="pill" style="background:var(--bad-bg);color:var(--bad-ink)">ไม่มี Stock</span>':(r.s==='Insufficient'?'<span class="pill" style="background:var(--soft)">Stock ไม่พอ</span>':'<span class="pill" style="background:var(--good-bg);color:var(--ink)">มี Stock</span>');
+  const qtab=id=>{const a=rows.filter(r=>r.id===id).sort((x,y)=>(y.t>x.t)-(y.t<x.t));return `<table class="dt"><thead><tr><th>วันที่ · เวลา</th><th>รายการที่ค้นหา</th><th>Size · สี</th><th>Status Color</th><th>ผลลัพธ์</th><th>ข้อความที่ถาม</th><th>คำตอบของบอท</th></tr></thead><tbody>`+a.map(r=>`<tr><td class="num" style="color:var(--ink2);white-space:nowrap">${dLabel(r.t.slice(0,10))} ${esc(r.t.slice(11,16))}</td><td class="mono" style="font-weight:600">${esc(r.sku||r.term)}</td><td>${esc([r.sz,r.co].filter(Boolean).join(' · ')||'—')}</td><td>${(r.scs&&r.scs.length?r.scs:[r.sc]).map(v=>`<span class="sch" style="--c:${scColor(v)}">${esc(v)}</span>`).join(' ')}</td><td>${qres(r)}</td><td><div class="qm full">${esc(r.msg||'—')}</div></td><td><div class="qm full ans">${esc(r.ans||'—')}</div></td></tr>`).join('')+'</tbody></table>'};
   const body=arr.map(o=>{const op=S.qOpen.has(it+'|'+o.id);return `<tr class="str" tabindex="0" role="button" aria-expanded="${op}" data-st="${esc(o.id)}" data-it="${esc(it)}"><td><span class="cv">›</span><b style="font-weight:600">${esc(stName(o))}</b>${o.ch&&o.ch!==UNS?`<small>${esc(o.ch)}</small>`:''}</td><td class="mono">${o.id===UNS?'—':esc(o.id)}</td><td class="r num">${o.n}</td><td class="r">${o.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${o.no}</span>`:'<span style="color:var(--ink3)">—</span>'}</td><td class="num" style="color:var(--ink2)">${dLabel((last.get(o.id)||'').slice(0,10))}</td></tr>${op?`<tr class="qrow"><td colspan="5">${qtab(o.id)}</td></tr>`:''}`}).join('');
   return `<div class="dd"><h4>ร้านค้าที่ถามรุ่นนี้ <span class="sub" style="font-weight:400">${arr.filter(o=>o.id!==UNS).length} ร้าน</span></h4><div class="dd-s"><table class="dt"><thead><tr><th>ร้านค้า</th><th>CustID</th><th class="r">ถาม (ครั้ง)</th><th class="r">ไม่มี Stock</th><th>ล่าสุด</th></tr></thead><tbody>${body}</tbody></table></div></div>`}
 
@@ -822,7 +780,7 @@ function renderStores(){
   $('stores').innerHTML=arr.map((o,i)=>{const open=S.stOpen.has(o.id),no=o.no,hi=pct(no,o.n)>=50;
     let d='';
     if(open){const rows=known.filter(r=>r.id===o.id),ig=new Map();
-      rows.forEach(r=>{let x=ig.get(r.it);if(!x){x={it:r.it,n:0,no:0};ig.set(r.it,x)}x.n++;if(r.s==='NotFound')x.no++});
+      rows.forEach(r=>{let x=ig.get(r.it);if(!x){x={it:r.it,n:0,no:0};ig.set(r.it,x)}x.n++;if(!inStock(r))x.no++});
       const li=[...ig.values()].sort((a,b)=>b.n-a.n||a.it.localeCompare(b.it)),show=li.slice(0,10);
       d=`<div class="sc-d"><h4>รายการที่ร้านนี้ถามบ่อย <span class="sub" style="font-weight:400">${[o.ch,o.gr].filter(Boolean).map(esc).join(' · ')}</span></h4><div class="stl">`+
         show.map(x=>`<div class="sr"><span class="nm"><b class="mono">${esc(x.it)}</b></span><span class="c"><b class="num">${x.n}</b> ครั้ง</span>${x.no?`<span class="pill" style="--c:var(--s2)">ไม่มี ${x.no}</span>`:`<span class="pill" style="--c:var(--s1)">มี Stock</span>`}</div>`).join('')+
@@ -879,15 +837,6 @@ function update(){
 }
 
 
-/* ---------- Export Excel / PDF ---------- */
-function filterText(){
-  const p=[ 'ช่วงวันที่ '+isoToDmy(S.from)+' – '+isoToDmy(S.to) ];
-  if(S.types.size)p.push('ประเภท: '+[...S.types].map(t=>(TYPES.find(x=>x[0]===t)||[t,t])[1]).join(', '));
-  if(S.stats.size)p.push('สถานะ: '+[...S.stats].map(t=>(STATS.find(x=>x[0]===t)||[t,t])[1]).join(', '));
-  SF.forEach(([k,f,l])=>{if(S.sf[k])p.push(l+': '+S.sf[k])});
-  return p.join(' · ')}
-function fillPrintHdr(){$('printHdr').innerHTML='<b style="color:var(--ink);font-size:16px">LINE Somjuk · Dashboard</b><br>'+esc(filterText())+' · พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')}
-window.addEventListener('beforeprint',fillPrintHdr);
 
 /* ---------- loading ---------- */
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -914,8 +863,8 @@ const NS='ไม่ทราบ';
 function itemBlocks(t){const out=[];if(!t)return out;let it='',ver='',st='',sc='',has=false;
   const flush=()=>{if(sc&&!has)out.push({it,ver,stock:st,sc,co:'',sizes:[]});has=false};
   String(t).split(/\r?\n/).forEach(line=>{line=line.trim();
-    let m=line.match(/^([A-Za-z0-9]{4,})\s*\(([^)]*)\)\s*(ที่มี Stock|ไม่มี Stock)/);
-    if(m){flush();it=m[1].toUpperCase().slice(0,6);ver=m[2];st=m[3]==='ที่มี Stock'?'Y':'N';sc='';return}
+    let m=line.match(/^([A-Za-z0-9]{4,})\s*(?:\(([^)]*)\))?\s*(ที่มี Stock|ไม่มี Stock)/);
+    if(m){flush();it=m[1].toUpperCase().slice(0,6);ver=m[2]||'';st=m[3]==='ที่มี Stock'?'Y':'N';sc='';return}
     m=line.match(/^Status Color\s*:\s*(.+)$/i);
     if(m){flush();sc=m[1].trim().toUpperCase();return}
     m=line.match(/^Color\s+([A-Za-z0-9]{1,3})\s*:\s*Size\s+(.+)$/i);
@@ -954,6 +903,9 @@ function buildRows(table){
     const k=c?c+'_'+cn:'(ไม่ระบุ)';
     const inf=info[c]||{},U='(ไม่ระบุ)';
     rows.push({t:p.tm,rq:g(x,I.rq)||('r'+n),k,id:c||U,nm:g(x,I.nm)||inf.nm||U,ch:g(x,I.ch)||inf.ch||U,gr:g(x,I.gr)||inf.gr||U,term:g(x,I.term).toUpperCase(),ty:g(x,I.ty),q:+g(x,I.q)||0,m:+g(x,I.m)||0,s:g(x,I.s),msg:g(x,I.raw),_a:g(x,I.ab),_c:g(x,I.sc0)});
+    // แถวเก่าที่บันทึกเป็น InfoOnly แต่คำตอบเป็น 'ไม่มี Stock' ทั้งหมด -> ถือเป็น NoStock
+    const lr=rows[rows.length-1];
+    if(lr.s==='InfoOnly'&&lr._a){const rest=lr._a.replace(/ไม่มี Stock/g,'');if(/ไม่มี Stock/.test(lr._a)&&!/มี Stock|Stock\s*:\s*\d/.test(rest))lr.s='NoStock'}
   });
   // เติม prefix ที่พิมพ์ตกหล่น เช่น 3B53C4BL -> WB3B53C4BL
   const byK={};rows.forEach(r=>{if('WM'.includes(r.term[0]||'#')){const it=r.term.slice(0,6);(byK[it.slice(2,6)]=byK[it.slice(2,6)]||new Set()).add(it)}});
@@ -977,7 +929,7 @@ function buildRows(table){
       else if(E.length){v=pick(E.filter(x=>x.stock==='Y').concat(E));r.scs=uq(E)}}
     if(!v&&skuSc[r.term])v=skuSc[r.term];
     if(!v){const z=itemSc[r.it];if(z&&z.size===1)v=[...z][0]}
-    r.sc=v||NS;delete r._a;delete r._b;delete r._c;delete r._i});
+    r.sc=v||NS;r.ans=r._a||'';delete r._a;delete r._b;delete r._c;delete r._i});
   const names={};rows.forEach(r=>{if(r.id!=='(ไม่ระบุ)'&&r.nm!=='(ไม่ระบุ)'&&!names[r.id])names[r.id]=r.nm});
   return {rows:rows.filter(r=>r.term),names};
 }
