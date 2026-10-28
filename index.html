@@ -352,6 +352,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 .deny{margin:12vh auto 0;max-width:520px;text-align:center;padding:32px 28px}
 .deny h2{margin:0 0 10px;font-size:20px}
 .deny .msg{color:var(--ink2);line-height:1.7}
+.deny a{color:var(--s1);font-weight:600;text-decoration:underline}
 .deny code{background:var(--soft);padding:1px 7px;border-radius:6px;font-family:var(--mono);font-size:13px}
 </style>
 </head>
@@ -457,7 +458,7 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
   if(ok){window.EMP_ID=raw;$('usrId').textContent=raw;$('usr').hidden=false;return}
   window.EMP_ID='';
   $('app').hidden=true;$('gate').hidden=true;$('deny').hidden=false;
-  $('denyMsg').innerHTML=(raw?'รหัสพนักงาน (<code>emp_id</code>) ในลิงก์ไม่ถูกต้อง':'ลิงก์นี้ไม่มีรหัสพนักงาน (<code>emp_id</code>)')+'<br>กรุณาเปิดผ่านลิงก์ที่ระบบส่งให้ เช่น <code>?emp_id=รหัสพนักงาน</code>';
+  $('denyMsg').innerHTML='กรุณาเปิดผ่านลิงก์ใหม่ <a href="https://twcapp.wacoal.co.th/PerformanceByStore" rel="noopener noreferrer">ที่นี่</a>';
   document.title='ไม่สามารถเข้าใช้งานได้ · LINE Somjuk';
 })();
 </script>
