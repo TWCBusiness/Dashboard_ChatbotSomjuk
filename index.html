@@ -525,13 +525,31 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="ดูรูปสินค้า"><div class="box"><img id="lbImg" alt=""><div class="cap"><span><span class="mono" id="lbIt"></span> <span id="lbNote" style="color:var(--ink3);font-size:12px"></span></span><span style="display:flex;gap:10px;align-items:center"><a id="lbOpen" target="_blank" rel="noopener noreferrer">เปิดรูปต้นฉบับ</a><button class="x" id="lbX" type="button">ปิด (Esc)</button></span></div></div></div>
 <script>
-/* ตรวจ emp_id จาก URL (เช่น ...?emp_id=12345) ถ้าไม่มีหรือรูปแบบไม่ถูกต้อง จะไม่โหลดข้อมูลและเข้าใช้งานไม่ได้ */
+/* ตรวจ emp_id จาก URL (เช่น ...?emp_id=12345) ถ้าไม่มีหรือรูปแบบไม่ถูกต้อง จะไม่โหลดข้อมูลและเข้าใช้งานไม่ได้
+   เมื่อผ่านแล้วจะซ่อน emp_id ออกจากแถบที่อยู่ และจำค่าไว้ในแท็บนี้ (sessionStorage) เพื่อให้กดรีเฟรชได้ */
 (function(){
-  var raw='';
-  try{var q=new URLSearchParams(location.search);q.forEach(function(v,k){if(!raw&&String(k).toLowerCase()==='emp_id')raw=String(v).trim()})}catch(e){}
-  var ok=/^[A-Za-z0-9_.-]{1,20}$/.test(raw);
+  var KEY='somjukEmpId',RE=/^[A-Za-z0-9_.-]{1,20}$/;
+  var raw='',found=false,q=null;
+  try{q=new URLSearchParams(location.search);q.forEach(function(v,k){if(!found&&String(k).toLowerCase()==='emp_id'){found=true;raw=String(v).trim()}})}catch(e){}
+  var fromUrl=found;
+  if(!found||!RE.test(raw)){ /* ไม่มีใน URL: ใช้ค่าที่จำไว้ในแท็บนี้ (กรณีรีเฟรชหลังซ่อน emp_id) */
+    var s='';try{s=sessionStorage.getItem(KEY)||''}catch(e){}
+    if(!found&&RE.test(s))raw=s;
+  }
+  var ok=RE.test(raw);
   var $=function(id){return document.getElementById(id)};
-  if(ok){window.EMP_ID=raw;$('usrId').textContent=raw;$('usr').hidden=false;return}
+  if(ok){
+    window.EMP_ID=raw;$('usrId').textContent=raw;$('usr').hidden=false;
+    if(fromUrl){
+      var saved=false;try{sessionStorage.setItem(KEY,raw);saved=sessionStorage.getItem(KEY)===raw}catch(e){}
+      if(saved){ /* ซ่อน emp_id ออกจาก URL เฉพาะเมื่อจำค่าไว้ได้ ไม่งั้นรีเฟรชแล้วจะเข้าไม่ได้ */
+        try{var p=new URLSearchParams(location.search),del=[];p.forEach(function(v,k){if(String(k).toLowerCase()==='emp_id')del.push(k)});del.forEach(function(k){p.delete(k)});
+          var qs=p.toString();history.replaceState(history.state,'',location.pathname+(qs?'?'+qs:'')+location.hash)}catch(e){}
+      }
+    }
+    return;
+  }
+  try{sessionStorage.removeItem(KEY)}catch(e){}
   window.EMP_ID='';
   $('app').hidden=true;$('gate').hidden=true;$('deny').hidden=false;
   $('denyMsg').innerHTML='กรุณาเปิดผ่านลิงก์ใหม่ <a href="https://twcapp.wacoal.co.th/PerformanceByStore" rel="noopener noreferrer">ที่นี่</a>';
