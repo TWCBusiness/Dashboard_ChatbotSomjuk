@@ -354,6 +354,78 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
 .deny .msg{color:var(--ink2);line-height:1.7}
 .deny a{color:var(--s1);font-weight:600;text-decoration:underline}
 .deny code{background:var(--soft);padding:1px 7px;border-radius:6px;font-family:var(--mono);font-size:13px}
+
+/* ===== v8: ตัวกรองแบบกะทัดรัด (PC แถวเดียว / มือถือพับเก็บได้) + Top 10 Item บนมือถือ ===== */
+.filters{display:block;padding:10px 14px;border-radius:14px}
+.fbar{display:flex;align-items:flex-end;gap:10px;min-width:0}
+.fx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;align-items:end;margin-top:8px}
+.fx .cbrow{display:contents}
+.fx .cbw,.fx .f{min-width:0}
+.filters .lbl,.filters .cbw>label{display:block;font-size:11px;line-height:1.2;margin:0 0 3px;color:var(--ink3);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.filters .ctl{min-height:32px;padding:4px 9px;font-size:13.5px;border-radius:9px}
+.filters .ms-btn{min-width:0;width:100%;font-size:13.5px}
+.filters .ms-btn .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filters .dinp .ctl{width:118px;padding-right:30px}
+.filters .dates{gap:5px}
+.filters .reset{justify-self:start;align-self:end;padding:6px 2px;white-space:nowrap}
+.opts{min-width:240px}
+.fxbtn{display:none}
+.pcr .ms-pop{left:auto;right:0}
+@media (min-width:1200px){
+  .filters{display:flex;align-items:flex-end;gap:12px}
+  .fbar{flex:none}
+  .fx{flex:1;min-width:0;margin-top:0;grid-template-columns:repeat(7,minmax(0,1fr)) auto}
+}
+@media (max-width:700px){
+  .wrap{padding-inline:12px}
+  .bar{padding-block:10px 8px}
+  .bar-top{flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .bar-top .ttl{flex:1 1 100%}
+  h1{font-size:18px}
+  .bar-top .meta{font-size:11.5px}
+  .bar-top .meta #chk{display:none}
+  .bar-top .acts{margin-left:0;flex:1 1 100%;flex-wrap:nowrap;gap:6px}
+  .bar-top .acts .palsel{flex:1;min-width:0;font-size:0;gap:0}
+  .bar-top .acts .palsel select{width:100%;min-width:0;font-size:13px;padding:5px 24px 5px 9px}
+  .bar-top .acts .btn.ghost{padding:5px 10px;font-size:12.5px;white-space:nowrap}
+  .usr{padding:3px 10px 3px 7px}.usr>span{display:none}
+  .filters{padding:8px 10px}
+  .fbar{gap:8px}
+  .fbar .fdate{flex:1;min-width:0}
+  .filters .dates{width:100%}
+  .filters .dinp{flex:1;min-width:0}
+  .filters .dates{gap:4px}
+  .filters .dinp .ctl{width:100%;padding-left:7px;padding-right:22px;font-size:12.5px;letter-spacing:-.01em}
+  .filters .dinp .cal{right:0;padding:3px}
+  .filters .dinp .cal svg{width:14px;height:14px}
+  .fxbtn{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink2);font-size:13px;cursor:pointer;white-space:nowrap;flex:none}
+  .fxbtn .n{min-width:18px;height:18px;border-radius:9px;background:var(--s1);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 5px}
+  .fxbtn .chv{display:none}
+  .filters.open .fxbtn{border-color:var(--s1);background:var(--good-bg)}
+  .fx{display:none;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .filters.open .fx{display:grid}
+  .fx .reset{grid-column:1/-1;justify-self:end}
+  .pcr .ms-pop{left:0;right:auto}
+  .rt .opts,.rt .ms-pop,.pcr.rt .ms-pop{left:auto;right:0}
+  .opts,.ms-pop{min-width:min(260px,calc(100vw - 40px))}
+  .kpis{gap:10px}
+}
+/* Top 10 Item บนมือถือ: จัดเป็นการ์ดต่อรุ่น ไม่ให้ล้นขอบ */
+@media (max-width:640px){
+  .ith{display:none}
+  .itr{grid-template-columns:22px 44px auto minmax(0,1fr) 14px;grid-template-areas:"rk pic ic ic chev" "rk pic cnt pr chev";gap:4px 8px;align-items:center;padding:10px 2px}
+  .itr .rk{grid-area:rk;align-self:start;padding-top:4px;font-size:12px}
+  .itr .pic{grid-area:pic;grid-row:1/3;align-self:start}
+  .itr .ic{grid-area:ic;gap:4px 8px}
+  .itr .cnt{grid-area:cnt;text-align:left;font-size:14px;white-space:nowrap;min-width:66px}
+  .itr .cnt::after{content:" ครั้ง";font-weight:400;font-size:12px;color:var(--ink3)}
+  .itr .pr{grid-area:pr;min-width:0}
+  .itr .pr .trk{min-width:36px}
+  .itr .pr b{min-width:38px;font-size:12.5px}
+  .itr .chev{grid-area:chev;align-self:center;grid-row:1/3}
+  .dd{margin-left:0;padding:8px 10px}
+  .card{overflow:hidden}
+}
 </style>
 </head>
 <body>
@@ -380,19 +452,23 @@ html[data-pal="slate"]:root:root{--bg:#e8eaed;--line:#dcdfe4;--soft:#f1f2f5;--s1
       <div class="ttl"><h1>LINE Somjuk · Dashboard</h1><div class="meta"><span class="asof" id="asof"></span><span class="asof" id="chk"></span></div></div>
       <span class="acts"><label class="palsel" title="เลือกธีมสี">ธีม <select id="palsel" aria-label="เลือกธีมสี"><option value="pastel">Pastel · พาสเทล</option><option value="colorful">Colorful · สดใส</option><option value="smart">Smart · มืออาชีพ</option><option value="mint">Mint Sage · มิ้นต์</option><option value="lav">Lavender · ลาเวนเดอร์</option><option value="sand">Sand & Sky · ทราย</option><option value="ocean">Ocean Mist · ทะเล</option><option value="rose">Rose Quartz · โรส</option><option value="forest">Forest · ป่าสงบ</option><option value="slate">Slate · เทาสุขุม</option></select></label><button class="btn ghost" id="btnRefresh" type="button" hidden>รีเฟรชข้อมูล</button><span class="usr" id="usr" title="ผู้ใช้งานที่เข้าสู่ระบบ" hidden><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="7" r="3.4"/><path d="M3.5 17c.6-3.2 3.2-5 6.5-5s5.9 1.8 6.5 5" stroke-linecap="round"/></svg><span>ผู้ใช้งาน</span><b id="usrId"></b></span></span>
     </div>
-    <div class="filters">
-      <div class="f"><span class="lbl">ช่วงเวลา</span>
+    <div class="filters" id="filters">
+      <div class="fbar"><div class="f fdate"><span class="lbl">ช่วงเวลา</span>
         <div class="dates">
           <div class="dinp"><input class="ctl" type="text" id="dFrom" inputmode="numeric" maxlength="10" placeholder="dd/MM/yyyy" autocomplete="off" aria-label="ตั้งแต่วันที่ (dd/MM/yyyy)"><button class="cal" type="button" data-pick="pFrom" aria-label="เลือกวันที่จากปฏิทิน"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4"/></svg></button><input class="hid" type="date" id="pFrom" tabindex="-1" aria-hidden="true"></div>
           <span style="color:var(--ink3)">–</span>
           <div class="dinp"><input class="ctl" type="text" id="dTo" inputmode="numeric" maxlength="10" placeholder="dd/MM/yyyy" autocomplete="off" aria-label="ถึงวันที่ (dd/MM/yyyy)"><button class="cal" type="button" data-pick="pTo" aria-label="เลือกวันที่จากปฏิทิน"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4"/></svg></button><input class="hid" type="date" id="pTo" tabindex="-1" aria-hidden="true"></div>
         </div>
       </div>
+      <button class="fxbtn" id="fxBtn" type="button" aria-expanded="false" aria-controls="fx"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5h12M4.5 8h7M7 12.5h2" stroke-linecap="round"/></svg><span>ตัวกรอง</span><b class="n" id="fxN" hidden></b><i class="chv" aria-hidden="true">▾</i></button>
+      </div>
+      <div class="fx" id="fx">
       <div class="f cbrow" id="cbrow"></div>
-      <div class="f"><span class="lbl">ประเภทการค้นหา</span><div class="ms" id="msType"></div></div>
-      <div class="f"><span class="lbl">ผลลัพธ์การค้นหา</span><div class="ms" id="msStat"></div></div>
-      <div class="f"><span class="lbl">Status สินค้า</span><div class="ms" id="msSc"></div></div>
+      <div class="f pcr"><span class="lbl">ประเภทการค้นหา</span><div class="ms" id="msType"></div></div>
+      <div class="f pcr rt"><span class="lbl">ผลลัพธ์การค้นหา</span><div class="ms" id="msStat"></div></div>
+      <div class="f pcr"><span class="lbl">Status สินค้า</span><div class="ms" id="msSc"></div></div>
       <button class="reset" id="reset" type="button">ล้างตัวกรอง</button>
+      </div>
     </div>
   </div>
 
@@ -508,7 +584,11 @@ const MSD=[{id:'msType',dim:'ty',set:()=>S.types,opts:()=>TYPES.map(t=>({v:t[0],
 function buildMs(){MSD.forEach(d=>{d.o=d.opts();const el=$(d.id);
   el.innerHTML=`<button type="button" class="ctl ms-btn" aria-haspopup="listbox" aria-expanded="false"><span class="t">ทั้งหมด</span><span class="arr">▾</span></button>
   <div class="ms-pop" role="listbox" hidden>${d.o.map(o=>`<label class="ms-o"><input type="checkbox" value="${esc(o.v)}"><i class="d" style="background:${o.c}"></i><span>${esc(o.l)}${o.sub?`<small>${esc(o.sub)}</small>`:''}</span><span class="n"></span></label>`).join('')}<div class="ms-ft"><button type="button" class="ms-clear">ล้างที่เลือก</button></div></div>`})}
-function syncMs(){MSD.forEach(d=>{const el=$(d.id),set=d.set(),cnt=countBy(filtered(d.dim),r=>r[d.dim]);
+function fxCount(){const n=SF.filter(([k])=>S.sf[k]).length+(S.types.size?1:0)+(S.stats.size?1:0)+(S.scs.size?1:0);
+  const b=document.getElementById('fxN');if(b){b.textContent=n;b.hidden=!n}}
+function bindFx(){const b=document.getElementById('fxBtn'),f=document.getElementById('filters');if(!b||b.__b)return;b.__b=1;
+  b.onclick=()=>{const o=!f.classList.contains('open');f.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o))}}
+function syncMs(){fxCount();MSD.forEach(d=>{const el=$(d.id),set=d.set(),cnt=countBy(filtered(d.dim),r=>r[d.dim]);
   el.querySelectorAll('.ms-o').forEach((lb,i)=>{const o=d.o[i];lb.querySelector('input').checked=set.has(o.v);lb.querySelector('.n').textContent=fmt(cnt.get(o.v)||0)});
   const sel=d.o.filter(o=>set.has(o.v)),b=el.querySelector('.ms-btn');
   b.querySelector('.t').textContent=!sel.length?'ทั้งหมด':sel.length===1?sel[0].l:sel[0].l+' +'+(sel.length-1);b.classList.toggle('on',sel.length>0)})}
@@ -568,7 +648,7 @@ function setSf(k,v){
   update();
 }
 function buildCombos(){
-  $('cbrow').innerHTML=SF.map(([k,label,hint])=>`<div class="cbw" data-k="${k}"><label class="lbl" style="font-size:12px;color:var(--ink3);font-weight:500" for="cb_${k}">${label} <span style="font-weight:400">· ${hint}</span></label>
+  $('cbrow').innerHTML=SF.map(([k,label,hint])=>`<div class="cbw${(k==='gr'||k==='id')?' rt':''}" data-k="${k}"><label class="lbl" for="cb_${k}" title="${label}">${hint}</label>
     <div class="cb"><input class="ctl" id="cb_${k}" type="text" role="combobox" aria-expanded="false" aria-controls="ol_${k}" autocomplete="off" spellcheck="false"><button class="cbx" type="button" aria-label="ล้าง ${label}" hidden>×</button><ul class="opts" id="ol_${k}" role="listbox" hidden></ul></div></div>`).join('');
   SF.forEach(([k])=>{
     const w=document.querySelector(`.cbw[data-k="${k}"]`),inp=w.querySelector('input'),ul=w.querySelector('.opts'),x=w.querySelector('.cbx');let act=-1,items=[];
@@ -590,7 +670,7 @@ function buildCombos(){
     x.addEventListener('click',()=>{setSf(k,'')});
   });
 }
-function renderCombos(){SF.forEach(([k])=>{const inp=$('cb_'+k);if(!inp)return;const n=sfOptions(k).length;
+function renderCombos(){fxCount();SF.forEach(([k])=>{const inp=$('cb_'+k);if(!inp)return;const n=sfOptions(k).length;
   if(document.activeElement!==inp)inp.value=S.sf[k]||'';
   inp.placeholder='ทั้งหมด ('+n+')';inp.classList.toggle('auto',S.auto.has(k));inp.title=S.auto.has(k)?'เติมอัตโนมัติจากตัวกรองอื่น':'';
   document.querySelector(`.cbw[data-k="${k}"] .cbx`).hidden=!S.sf[k]})}
@@ -1064,7 +1144,7 @@ function bindLoader(){
   ['dragleave','drop'].forEach(n=>d.addEventListener(n,e=>{e.preventDefault();d.classList.remove('over')}));
   d.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
 }
-bind();bindHeat();bindLoader();
+bind();bindHeat();bindLoader();bindFx();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(ROWS.length)renderDaily()},80)}).observe($('daily'));
 window.__repaint=function(){try{if(ROWS.length){update();buildMs();syncMs()}}catch(e){}};
 autoLoad();
